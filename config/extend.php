@@ -28,7 +28,7 @@ return [
     'api_auth_key'				=> '9b12d0f61a382e19ffa87ed306ff3c3b',
     //项目开发必须在本地
     'apidoc_project_id'         =>'7',
-    'apidoc_project_url'        =>'http://dev.basecode5.com/',
+    'apidoc_project_url'        =>'http://dev.shuyouzhuangong.com/',
     'apidoc_url'                =>'http://apidoc.php.xnrcms.cn/',
     //站点配置
     'xnrcms_name'               =>'数有专攻',

@@ -301,26 +301,6 @@ if (!function_exists('wr'))
 	}
 }
 
-if (!function_exists('lottery_truetime'))
-{
-	//数据库写入，快捷调试
-	function lottery_truetime($lottery_id,$time = '',$term_number = '')
-	{	
-		$dbModel 		= db('lottery_truetime');
-		if (!empty($time)) {
-			$dbModel->where('id','=',$lottery_id)->update(['true_time'=>$time,'term_number'=>$term_number]);
-		}else{
-			$info 				= $dbModel->where('id','=',$lottery_id)->field('true_time,term_number')->find();
-			if (!empty($info)) {
-				$time 				= $info['true_time'];
-				$term_number 		= $info['term_number'];
-			}
-		}
-
-		return [$time,$term_number];
-	}
-}
-
 if (!function_exists('dblog'))
 {
 	//数据库写入，快捷调试
@@ -673,6 +653,22 @@ if(!function_exists('convertUnderline'))
 	}
 }
 
+
+if(!function_exists('lineToHump'))
+{
+	/**
+	 * 下划线转驼峰
+	 * @param  string $str 待转字符串
+	 * @return string      已转字符串
+	 */
+	function lineToHump($str ='',$delimiter='_')
+	{
+
+		$str = $delimiter. str_replace($delimiter, " ", strtolower($str));
+        return ltrim(str_replace(" ", "", ucwords($str)), $delimiter );
+	}
+}
+
 if(!function_exists('humpToLine'))
 {
 	/**
@@ -680,12 +676,9 @@ if(!function_exists('humpToLine'))
 	 * @param  string $str 待转字符串
 	 * @return string      已转字符串
 	 */
-	function humpToLine($str)
+	function humpToLine($str,$delimiter='_')
 	{
-	    $str = preg_replace_callback('/([A-Z]{1})/',function($matches){
-	        return '_'.strtolower($matches[0]);
-	    },$str);
-	    return !empty($str) ? trim($str,'_') : '';
+		return strtolower(preg_replace('/([a-z])([A-Z])/', "$1" . $delimiter . "$2", $str));
 	}
 }
 

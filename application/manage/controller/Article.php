@@ -33,6 +33,7 @@ class Article extends Base
         $this->apiUrl['edit_save']    = 'api/Article/saveData';
         $this->apiUrl['quickedit']    = 'api/Article/quickEditData';
         $this->apiUrl['del']          = 'api/Article/delData';
+        $this->apiUrl['category']     = 'api/ArticleCategory/listData';
     }
 
 	//列表页面
@@ -43,7 +44,7 @@ class Article extends Base
 
         //初始化模板
         $tag        = ''; //默认当前路由为唯一标识，自己可以自定义标识
-        $tpl_title  = ''; //初始化列表模板的名称，为空时不初始化
+        $tpl_title  = '资讯文章列表'; //初始化列表模板的名称，为空时不初始化
         $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,0);
         $listNode   = $this->tpl->showTpl($tplid);
         $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
@@ -98,9 +99,12 @@ class Article extends Base
 
         //页面头信息设置
         $pageData['isback']             = 0;
-        $pageData['title1']             = '';
-        $pageData['title2']             = '';
-        $pageData['notice']             = [];
+        $pageData['title1']             = '文章管理';
+        $pageData['title2']             = '文章添加、编辑、删除等操作';
+        $pageData['notice']             = [
+            '列表只是展示部分字段信息，详情请点击编辑查看.',
+            '列表上可以对部分字段信息进行快速编辑'
+        ];
 
         //渲染数据到页面模板上
         $assignData['isTree']           = $isTree;
@@ -138,10 +142,11 @@ class Article extends Base
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
         $tag        = request()->module().'/'.request()->controller() . '/addedit';
-        $tpl_title  = ''; //初始化列表模板的名称，为空时不初始化
+        $tpl_title  = '新增/编辑文章表单'; //初始化列表模板的名称，为空时不初始化
         $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
         $formNode   = $this->tpl->showTpl($tplid);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail(0);
@@ -157,7 +162,7 @@ class Article extends Base
 
         //渲染数据到页面模板上
         $assignData['formId']           = $formId;
-        $assignData['formFieldList']    = $formNode['list'];
+        $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['pageData']         = $pageData;
@@ -178,13 +183,15 @@ class Article extends Base
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
         $tag        = request()->module().'/'.request()->controller() . '/addedit';
-        $tpl_title  = ''; //初始化列表模板的名称，为空时不初始化
+        $tpl_title  = '新增/编辑文章表单'; //初始化列表模板的名称，为空时不初始化
         $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
         $formNode   = $this->tpl->showTpl($tplid);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail($id);
+        $info['attribute']              = json_decode($info['attribute'],true);
 
         //页面头信息设置
         $pageData['isback']             = 0;
@@ -197,7 +204,7 @@ class Article extends Base
 
         //渲染数据到页面模板上
         $assignData['formId']           = $formId;
-        $assignData['formFieldList']    = $formNode['list'];
+        $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['pageData']         = $pageData;
@@ -258,23 +265,13 @@ class Article extends Base
         $tplid                   = $this->tpl->checkTpl(intval($postData['formId']),1);
         if($tplid <= 0) $this->error('表单模板数据不存在');
 
-        //定义允许提交的字段
-        $allowData               = [];
+        //接口数据
+        $signData                   = $this->tpl->getFormTplData($tplid,$postData);
 
-        //过滤允许提交的数据
-        $signData                = [];
-        foreach ($postData as $key => $value)
-        {
-            if (in_array($key,$allowData))
-            {
-                $signData[$key]     = $value;
-            }
-        }
-
-        //用户信息
+        $signData['attribute']      = !empty($signData['attribute']) ? json_encode($signData['attribute']) : '';
         $signData['uid']            = $this->uid;
         $signData['hashid']         = $this->hashid;
-        
+
         //请求数据
         if (!isset($this->apiUrl[request()->action().'_save'])||empty($this->apiUrl[request()->action().'_save'])) 
         $this->error('未设置接口地址');
@@ -316,9 +313,44 @@ class Article extends Base
     //扩展枚举，布尔，单选，复选等数据选项
     protected function getDefaultParameData()
     {
-        $defaultData['parame']   = [];
-
+        $defaultData['getArticleCategoryList']   = $this->getArticleCategoryList();
         return $defaultData;
+    }
+
+    private function getArticleCategoryList()
+    {
+        //获取列表数据
+        $parame             = [];
+        $parame['uid']      = $this->uid;
+        $parame['hashid']   = $this->hashid;
+        $parame['page']     = 1;
+        $parame['search']   = '' ;
+
+        //请求数据
+        $res                = $this->apiData($parame,$this->apiUrl['category']);
+        $data               = $this->getApiData();
+        $listData           = [];
+        $selectData         = [];
+
+        if ($res && isset($data['lists']) && !empty($data['lists']))
+        {
+            $listData      = $data['lists'];
+            $Tree          = new \xnrcms\DataTree($listData);
+            $listData      = $Tree->toFormatTree();
+        }
+
+        if (!empty($listData))
+        {
+            foreach ($listData as $key => $value)
+            {
+                if ($value['status'] === '启用')
+                {
+                    $selectData[$value['id']]   = $value['title_show'];
+                }
+            }
+        }
+
+        return $selectData;
     }
 }
 ?>

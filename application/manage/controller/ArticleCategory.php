@@ -97,9 +97,12 @@ class ArticleCategory extends Base
 
         //页面头信息设置
         $pageData['isback']             = 0;
-        $pageData['title1']             = '资讯';
-        $pageData['title2']             = '栏目管理';
-        $pageData['notice']             = [];
+        $pageData['title1']             = '分类管理';
+        $pageData['title2']             = '文章分类添加、编辑、删除等操作';
+        $pageData['notice']             = [
+            '列表只是展示部分字段信息，详情请点击编辑查看.',
+            '列表上可以对部分字段信息进行快速编辑'
+        ];
 
         //渲染数据到页面模板上
         $assignData['isTree']           = $isTree;
@@ -141,6 +144,7 @@ class ArticleCategory extends Base
         $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
         $formNode   = $this->tpl->showTpl($tplid);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail(0);
@@ -157,7 +161,7 @@ class ArticleCategory extends Base
 
         //渲染数据到页面模板上
         $assignData['formId']           = $formId;
-        $assignData['formFieldList']    = $formNode['list'];
+        $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['pageData']         = $pageData;
@@ -182,6 +186,7 @@ class ArticleCategory extends Base
         $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
         $formNode   = $this->tpl->showTpl($tplid);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail($id);
@@ -197,7 +202,7 @@ class ArticleCategory extends Base
 
         //渲染数据到页面模板上
         $assignData['formId']           = $formId;
-        $assignData['formFieldList']    = $formNode['list'];
+        $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['pageData']         = $pageData;

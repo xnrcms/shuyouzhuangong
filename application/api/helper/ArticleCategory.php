@@ -115,11 +115,13 @@ class ArticleCategory extends Base
 		//数据格式化
 		$data 						= (isset($lists['lists']) && !empty($lists['lists'])) ? $lists['lists'] : [];
 
-    	if (!empty($data)) {
-
+    	if (!empty($data))
+        {
             $status                 = ['未知','启用','禁用'];
+            
             //自行定义格式化数据输出
-            foreach($data as $k=>$v){
+            foreach($data as $k=>$v)
+            {
                 $data[$k]['status']         = $status[$v['status']];
                 $data[$k]['create_time']    = date('Y-m-d H:i:s',$v['create_time']);
                 $data[$k]['update_time']    = date('Y-m-d H:i:s',$v['update_time']);

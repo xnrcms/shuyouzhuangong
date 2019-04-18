@@ -9,15 +9,15 @@
  * 采用TP5助手函数可实现单字母函数M D U等,也可db::name方式,可双向兼容
  * ============================================================================
  * Author: XNRCMS<562909771@qq.com>
- * Date: 2019-04-15
- * Description:文章分类
+ * Date: 2019-04-18
+ * Description:课程分类
  */
 
 namespace app\manage\controller;
 
 use app\manage\controller\Base;
 
-class ArticleCategory extends Base
+class CourseCategory extends Base
 {
     private $apiUrl         = [];
     private $tpl            = null;
@@ -25,14 +25,14 @@ class ArticleCategory extends Base
     public function __construct()
     {
         parent::__construct();
-        
+
         $this->tpl                    = new \xnrcms\DevTpl();
-        $this->apiUrl['index']        = 'api/ArticleCategory/listData';
-        $this->apiUrl['edit']         = 'api/ArticleCategory/detailData';
-        $this->apiUrl['add_save']     = 'api/ArticleCategory/saveData';
-        $this->apiUrl['edit_save']    = 'api/ArticleCategory/saveData';
-        $this->apiUrl['quickedit']    = 'api/ArticleCategory/quickEditData';
-        $this->apiUrl['del']          = 'api/ArticleCategory/delData';
+        $this->apiUrl['index']        = 'api/CourseCategory/listData';
+        $this->apiUrl['edit']         = 'api/CourseCategory/detailData';
+        $this->apiUrl['add_save']     = 'api/CourseCategory/saveData';
+        $this->apiUrl['edit_save']    = 'api/CourseCategory/saveData';
+        $this->apiUrl['quickedit']    = 'api/CourseCategory/quickEditData';
+        $this->apiUrl['del']          = 'api/CourseCategory/delData';
     }
 
 	//列表页面
@@ -43,7 +43,7 @@ class ArticleCategory extends Base
 
         //初始化模板
         $tag        = ''; //默认当前路由为唯一标识，自己可以自定义标识
-        $tpl_title  = '文章分类列表'; //初始化列表模板的名称，为空时不初始化
+        $tpl_title  = '课程分类列表'; //初始化列表模板的名称，为空时不初始化
         $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,0);
         $listNode   = $this->tpl->showTpl($tplid);
         $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
@@ -75,12 +75,12 @@ class ArticleCategory extends Base
         $p 					= '';
         $listData 			= [];
 
-        if ($res){
-
+        if ($res)
+        {
             //分页信息
             $page           = new \xnrcms\Page($data['total'], $data['limit']);
-            if($data['total']>=1){
-
+            if($data['total']>=1)
+            {
                 $page->setConfig('theme','%FIRST% %UP_PAGE% %LINK_PAGE% %DOWN_PAGE% %END% %HEADER%');
                 $page->setConfig('header','');
             }
@@ -90,15 +90,16 @@ class ArticleCategory extends Base
             $listData   	= $data['lists'];
         }
 
-        if ($isTree === 1) {
+        if ($isTree === 1)
+        {
             $Tree          = new \xnrcms\DataTree($listData);
             $listData      = $Tree->toFormatTree();
         }
 
         //页面头信息设置
         $pageData['isback']             = 0;
-        $pageData['title1']             = '文章分类管理';
-        $pageData['title2']             = '文章分类添加、编辑、删除等操作';
+        $pageData['title1']             = '课程分类管理';
+        $pageData['title2']             = '课程分类添加、编辑、删除等操作';
         $pageData['notice']             = [
             '列表只是展示部分字段信息，详情请点击编辑查看.',
             '列表上可以对部分字段信息进行快速编辑'
@@ -140,7 +141,7 @@ class ArticleCategory extends Base
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
         $tag        = request()->module().'/'.request()->controller() . '/addedit';
-        $tpl_title  = '新增/编辑文章分类表单'; //初始化列表模板的名称，为空时不初始化
+        $tpl_title  = '新增/编辑课程分类表单'; //初始化列表模板的名称，为空时不初始化
         $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
         $formNode   = $this->tpl->showTpl($tplid);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
@@ -182,7 +183,7 @@ class ArticleCategory extends Base
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
         $tag        = request()->module().'/'.request()->controller() . '/addedit';
-        $tpl_title  = '新增/编辑文章分类表单'; //初始化列表模板的名称，为空时不初始化
+        $tpl_title  = '新增/编辑课程分类表单'; //初始化列表模板的名称，为空时不初始化
         $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
         $formNode   = $this->tpl->showTpl($tplid);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
@@ -259,37 +260,24 @@ class ArticleCategory extends Base
     private function update()
     {
         //表单数据
-        $postData                = request()->param();
-        $tplid                   = $this->tpl->checkTpl(intval($postData['formId']),1);
+        $postData                   = request()->param();
+
+        //表单模板
+        $tplid                      = $this->tpl->checkTpl(intval($postData['formId']),1);
         if($tplid <= 0) $this->error('表单模板数据不存在');
 
-        //定义允许提交的字段
-        $allowData               = [
-            'id','title','pid','sorts','seo_title','seo_keyword','seo_description','status',
-        ];
-
-        //过滤允许提交的数据
-        $signData                = [];
-
-        foreach ($postData as $key => $value) 
-        {
-            if (in_array($key,$allowData)) 
-            {
-                $signData[$key]     = $value;
-            }
-        }
-
-        //用户信息
+        //接口数据
+        $signData                   = $this->tpl->getFormTplData($tplid,$postData);
         $signData['uid']            = $this->uid;
         $signData['hashid']         = $this->hashid;
-
+        
         //请求数据
         if (!isset($this->apiUrl[request()->action().'_save'])||empty($this->apiUrl[request()->action().'_save'])) 
         $this->error('未设置接口地址');
 
         $res       = $this->apiData($signData,$this->apiUrl[request()->action().'_save']) ;
         $data      = $this->getApiData() ;
-        
+
         if($res){
 
             $this->success($signData['id']  > 0 ? '更新成功' : '新增成功',Cookie('__forward__')) ;
@@ -324,11 +312,11 @@ class ArticleCategory extends Base
     //扩展枚举，布尔，单选，复选等数据选项
     protected function getDefaultParameData()
     {
-        $defaultData['getArticleCategoryList']   = $this->getArticleCategoryList();
+        $defaultData['getCourseCategoryList']   = $this->getCourseCategoryList();
         return $defaultData;
     }
 
-    private function getArticleCategoryList()
+    private function getCourseCategoryList()
     {
         //获取列表数据
         $parame             = [];

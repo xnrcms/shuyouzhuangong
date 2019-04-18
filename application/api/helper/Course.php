@@ -10,15 +10,15 @@
  * Helper只要处理业务逻辑，默认会初始化数据列表接口、数据详情接口、数据更新接口、数据删除接口、数据快捷编辑接口
  * 如需其他接口自行扩展，默认接口如实在无需要可以自行删除
  */
-namespace app\{ModelNameTPL}\helper;
+namespace app\api\helper;
 
 use app\common\helper\Base;
 use think\facade\Lang;
 
-class {HelperNameTPL} extends Base
+class Course extends Base
 {
 	private $dataValidate 		= null;
-    private $mainTable          = '';
+    private $mainTable          = 'course';
 	
 	public function __construct($parame=[],$className='',$methodName='',$modelName='')
     {
@@ -81,8 +81,19 @@ class {HelperNameTPL} extends Base
 
 		//定义关联查询表信息，默认是空数组，为空时为单表查询,格式必须为一下格式
 		//Rtype :`INNER`、`LEFT`、`RIGHT`、`FULL`，不区分大小写，默认为`INNER`。
-		$RelationTab				= [];
-		//$RelationTab['member']		= array('Ralias'=>'me','Ron'=>'me.uid=main.uid','Rtype'=>'LEFT','Rfield'=>array('nickname'));
+		$RelationTab				      = [];
+		$RelationTab['course_category']	  = [
+            'Ralias'    =>'cc',
+            'Ron'       =>'cc.id=main.category_id',
+            'Rtype'     =>'LEFT',
+            'Rfield'    =>['title AS category_name']
+        ];
+        $RelationTab['user_detail']       = [
+            'Ralias'    =>'ud',
+            'Ron'       =>'ud.uid=main.uid',
+            'Rtype'     =>'LEFT',
+            'Rfield'    =>['nickname AS uname']
+        ];
 
 		$modelParame['RelationTab']	= $RelationTab;
 
@@ -112,12 +123,14 @@ class {HelperNameTPL} extends Base
 
     	if (!empty($data))
         {
+            $status                 = ['未知','已发布','未发布'];
             //自行定义格式化数据输出
-    		/*foreach($data as $k=>$v)
-            {
-
-    		}*/
-    	}
+            foreach($data as $k=>$v){
+                $data[$k]['status']         = $status[$v['status']];
+                $data[$k]['update_time']    = date('Y-m-d H:i:s',$v['update_time']);
+                $data[$k]['create_time']    = date('Y-m-d H:i:s',$v['create_time']);
+            }
+        }
 
     	$lists['lists'] 			= $data;
 
@@ -139,6 +152,14 @@ class {HelperNameTPL} extends Base
 
         //自行定义入库数据 为了防止参数未定义报错，先采用isset()判断一下
         $saveData                   = [];
+        $saveData['title']          = isset($parame['title']) ? trim($parame['title']) : '';
+        $saveData['category_id']    = isset($parame['category_id']) ? (int)$parame['category_id'] : 0;
+        $saveData['thumb']          = isset($parame['thumb']) ? trim($parame['thumb']) : '';
+        $saveData['intro']          = isset($parame['intro']) ? trim($parame['intro']) : '';
+        $saveData['status']         = isset($parame['status']) ? (int)($parame['status']) : '';
+        $saveData['price']          = isset($parame['price']) ? (int)$parame['price'] : 0;
+        $saveData['sorts']          = isset($parame['sorts']) ? (int)$parame['sorts'] : 1;
+        $saveData['updata_time']    = time();
         //$saveData['parame']         = isset($parame['parame']) ? $parame['parame'] : '';
 
         //规避遗漏定义入库数据
@@ -149,7 +170,8 @@ class {HelperNameTPL} extends Base
 		
         //通过ID判断数据是新增还是更新 定义新增条件下数据
     	if ($id <= 0) {
-            //$saveData['parame']         = isset($parame['parame']) ? $parame['parame'] : '';
+            $saveData['create_time']        = time();
+            $saveData['uid']                = $parame['uid'];
     	}
 
     	$info                                       = $dbModel->saveData($id,$saveData);

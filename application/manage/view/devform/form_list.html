@@ -10,8 +10,8 @@
           <ul>
             <li><a onClick="layer_show('表单模板编辑','{:url('Devform/edit',array('id'=>$vo['id']))}',600,550);" href="javascript:;">编辑表单</a></li>
             <li><a onClick="layer_show('克隆表单','{:url('Devform/cloneForm',array('id'=>$vo['id']))}',1100,550);" href="javascript:;">克隆表单</a></li>
-            <li><a onClick="delfun(this,'确认发布菜单吗？')" href="javascript:;" data-url="{:url('Devform/release',array('ids'=>$vo['id']))}">发布表单</a></li>
-            <li><a onClick="delfun(this,'确认删除菜单吗？')" href="javascript:;" data-url="{:url('Devform/del',array('ids'=>$vo['id']))}">删除表单</a></li>
+            <li><a onClick="delfun(this,'确认发布表单模板吗？',1)" href="javascript:;" data-url="{:url('Devform/release',array('ids'=>$vo['id']))}">发布表单</a></li>
+            <li><a onClick="delfun(this,'确认删除表单模板吗？',0)" href="javascript:;" data-url="{:url('Devform/del',array('ids'=>$vo['id']))}">删除表单</a></li>
           </ul>
           </span>
         </div>

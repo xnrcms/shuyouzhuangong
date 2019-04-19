@@ -15,14 +15,14 @@
         </dd>
       </dl>
       
-      <dl class="row" id="id_cname" data-msg="请输入控制器名称">
+      <dl class="row" id="id_cname" data-msg="请输入调用标识">
         <dt class="tit">
           <label for="t_mane"><em>*</em>调用标识</label>
         </dt>
         <dd class="opt">
-          <input type="text" placeholder="请输入控制器名称" class="input-txt" name="cname" value="{notempty name="info.cname"}{$info.cname}{/notempty}">
+          <input type="text" placeholder="请输入表单调用标识" class="input-txt" name="cname" value="{notempty name="info.cname"}{$info.cname}{/notempty}">
           <span class="err" id="err_cname" style="color:#F00; display:none;"></span>
-          <p class="notic">表单调用标识默认可以用控制器名称去除（Controller.class.php）部分，严格区分大小写，如果一个控制器用有多个表单可以采用当前控制器名称+自定义名称加以区分</p>
+          <p class="notic">表单调用标识唯一,命名格式必须是[<font color="red">model/controller/action</font>],不能出现特殊字符，不区分大小写</p>
         </dd>
       </dl>
   
@@ -37,7 +37,7 @@
             <input id="menu_status1" name="status" value="1" type="radio" {if condition="isset($info.status) && $info.status eq 1"} checked="checked"{/if}>
             <input id="menu_status2" name="status" value="2" type="radio" {if condition="isset($info.status) && $info.status eq 2"} checked="checked"{/if}>
           </div>
-          <p class="notic">选择`是`表单将对外不可用</p>
+          <p class="notic">选择`禁用`表单将对外不可用</p>
         </dd>        
       </dl>    
                         

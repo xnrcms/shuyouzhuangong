@@ -27,8 +27,9 @@ class Config extends Base
     {
         parent::__construct();
 
-        $this->apiUrl['config_list']    = 'api/Config/detailData';
-        $this->apiUrl['config_save']    = 'api/Config/saveData';
+        $this->tpl                     = new \xnrcms\DevTpl();
+        $this->apiUrl['config_list']   = 'api/Config/detailData';
+        $this->apiUrl['config_save']   = 'api/Config/saveData';
     }
 
     //系统设置
@@ -38,6 +39,7 @@ class Config extends Base
         //页面头信息设置
         $pageData                       = [];
         $pageData['isback']             = 0;
+        $pageData['tpl_title']          = '系统配置表单';
         $pageData['title1']             = '设置';
         $pageData['title2']             = '系统基本选项设置';
         $pageData['notice']             = ['系统基本选项设置，配置系统用到的常规配置，请谨慎修改各选项值。',];
@@ -51,6 +53,7 @@ class Config extends Base
         //页面头信息设置
         $pageData                       = [];
         $pageData['isback']             = 0;
+        $pageData['tpl_title']          = '邮箱配置表单';
         $pageData['title1']             = '设置';
         $pageData['title2']             = '邮箱基本选项设置';
         $pageData['notice']             = ['邮箱基本选项设置，需要如实填写正确的邮箱账号和邮件服务器，具体请参看各STMP服务商的设置说明。',];
@@ -65,6 +68,7 @@ class Config extends Base
         //页面头信息设置
         $pageData                       = [];
         $pageData['isback']             = 0;
+        $pageData['tpl_title']          = '上传配置表单';
         $pageData['title1']             = '设置';
         $pageData['title2']             = '上传基本选项设置';
         $pageData['notice']             = ['上传基本选项设置分基础配置和三方配置，如果选择三方配置请正确填写三方信息。',];
@@ -78,6 +82,7 @@ class Config extends Base
         //页面头信息设置
         $pageData                       = [];
         $pageData['isback']             = 0;
+        $pageData['tpl_title']          = '短信配置表单';
         $pageData['title1']             = '设置';
         $pageData['title2']             = '短信基本选项设置';
         $pageData['notice']             = ['短信基本选项设置分基础配置和三方配置，如果选择三方配置请正确填写三方信息。',];
@@ -90,11 +95,16 @@ class Config extends Base
         //数据提交
         if (request()->isPost()) $this->update();
 
-        //记录当前列表页的cookie
-        cookie('__forward__',$_SERVER['REQUEST_URI']);
+        //参数数据接收
+        $param      = request()->param();
 
-        //表单模板
-        $formData                       = $this->getFormFields(request()->action(),0) ;
+        //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
+        $tag        = '';
+        $tpl_title  = $pageData['tpl_title']; //初始化列表模板的名称，为空时不初始化
+        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
+        $formNode   = $this->tpl->showTpl($tplid);
+        $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail(0);
@@ -103,8 +113,8 @@ class Config extends Base
         cookie('__forward__',$_SERVER['REQUEST_URI']);
 
         //渲染数据到页面模板上
-        $assignData['formId']           = isset($formData['info']['id']) ? intval($formData['info']['id']) : 0;
-        $assignData['formFieldList']    = $formData['list'];
+        $assignData['formId']           = $formId;
+        $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['pageData']         = $pageData;
@@ -117,13 +127,10 @@ class Config extends Base
     //配置更新
     private function update()
     {
-        $formid                     = intval(input('formId'));
-        $formInfo                   = cache('DevformDetails'.$formid);
-        if(empty($formInfo)) $this->error('表单模板数据不存在');
-
-        //表单数据
-        $postData                   = input('post.');
-
+        $postData                = request()->param();
+        $tplid                   = $this->tpl->checkTpl(intval($postData['formId']),1);
+        if($tplid <= 0) $this->error('表单模板数据不存在');
+        
         //表单中不允许提交至接口的参数
         $notAllow                   = ['formId'];
 

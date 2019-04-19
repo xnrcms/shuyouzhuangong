@@ -101,9 +101,9 @@ function changeColoeLine(){
   });
   
 }
-function delfun(obj) {
+function delfun(obj,msg,type) {
   // 删除按钮
-  layer.confirm('确认删除？', { btn: ['确定', '取消']}, function () {
+  layer.confirm(msg, { btn: ['确定', '取消']}, function () {
     $.ajax({
       type: 'post',
       url: $(obj).attr('data-url'),
@@ -113,7 +113,9 @@ function delfun(obj) {
         layer.closeAll();
         if (data.code == 1) {
             layer.alert(data.msg, {icon: 1});
-            $(obj).parent().parent().parent().parent().parent().parent().remove();
+            if (type == 0) {
+              $(obj).parent().parent().parent().parent().parent().parent().remove();
+            }
         } else {
             layer.alert(data.msg, {icon: 2});
         }

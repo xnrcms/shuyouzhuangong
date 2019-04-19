@@ -136,29 +136,30 @@ class Devform extends Base
 
         //自行定义入库数据 为了防止参数未定义报错，先采用isset()判断一下
         $saveData                   = [];
-        //$saveData['parame']       = isset($parame['parame']) ? $parame['parame'] : '';
         $saveData['title']          = isset($parame['title']) ? $parame['title'] : '';
         $saveData['status']         = isset($parame['status']) ? $parame['status'] : 2;
         $saveData['tag']            = isset($parame['tag']) ? $parame['tag'] : '';
-        $saveData['cname']          = isset($parame['cname']) ? $parame['cname'] : '';
+        $saveData['cname']          = isset($parame['cname']) ? strtolower($parame['cname']) : '';
         $saveData['sort']           = isset($parame['sort']) ? $parame['sort'] : 1;
         $saveData['pid']            = isset($parame['pid']) ? $parame['pid'] : 0;
         $saveData['config']         = isset($parame['config']) ? $parame['config'] : '';
         $saveData['update_time']    = time();
+        //$saveData['parame']       = isset($parame['parame']) ? $parame['parame'] : '';
 
-        //数据校验
-        if ($dbModel->checkValue($saveData['title'],$id,'title')) return ['Code' =>'200001','Msg'=>lang('200001')];
+        if ($saveData['pid'] <= 0)
+        {
+            $cname              = explode('/', $saveData['cname']);
+            $saveData['tag']    = implode('_', $cname);
 
-        if ($dbModel->checkValue($saveData['tag'],$id,'tag')) return ['Code' =>'200012','Msg'=>lang('200012')];
+            if (count($cname) !== 3)  return ['Code' => '200013', 'Msg'=>lang('200013')];
+            if ($dbModel->checkFieldExist($saveData['tag'],$id,'tag')) return ['Code' =>'200012','Msg'=>lang('200012')];
+        }else
+        {
+            $formtpl            = $dbModel->getOneById($saveData['pid']);
+            if (empty($formtpl))  return ['Code' => '200014', 'Msg'=>lang('200014')];
 
-        if ($saveData['pid'] <= 0) {
-
-            if (empty($saveData['title'])) return ['Code' => '200003', 'Msg'=>lang('200003')];
-            if (empty($saveData['cname'])) return ['Code' => '200004', 'Msg'=>lang('200004')];
-        }else{
-
-            if (empty($saveData['title'])) return ['Code' => '200005', 'Msg'=>lang('200005')];
-            if (empty($saveData['tag'])) return ['Code' => '200006', 'Msg'=>lang('200006')];
+            $saveData['cname']  = $formtpl['cname'] . '_' . $saveData['tag'];
+            if ($dbModel->checkFieldExist($saveData['cname'],$id,'cname')) return ['Code' =>'200015','Msg'=>lang('200015')];
         }
 
         //规避遗漏定义入库数据
@@ -168,25 +169,17 @@ class Devform extends Base
         //...
 		
         //通过ID判断数据是新增还是更新
-    	if ($id <= 0) {
-
+    	if ($id <= 0)
+        {
             $saveData['create_time']                = time();
-
-            //执行新增
-    		$info 									= $dbModel->addData($saveData);
-    	}else{
-
-            //执行更新
-    		$info 									= $dbModel->updateById($id,$saveData);
     	}
 
-    	if (!empty($info)) {
+        $info                                       = $dbModel->saveData($id,$saveData);
 
-    		return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$info->toArray()];
-    	}else{
+        //保存后发布数据
+        $this->releaseData(['id'=>!empty($info) ? ($info['pid'] > 0 ? $info['pid'] : $info['id']) : 0]);
 
-    		return ['Code' => '100015', 'Msg'=>lang('100015')];
-    	}
+        return !empty($info) ? ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$info] : ['Code' => '100015', 'Msg'=>lang('100015')];
     }
 
     /**
@@ -420,12 +413,42 @@ class Devform extends Base
         //主表数据库模型
         $dbModel                = model($this->mainTable);
 
-        //自行书写业务逻辑代码
-        wr($parame);
-        //需要返回的数据体
-        $Data                   = ['TEST'];
+        //数据ID
+        $id                 = isset($parame['id']) ? intval($parame['id']) : 0;
+        if ($id <= 0) return ['Code' => '120023', 'Msg'=>lang('120023')];
 
-        return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$Data];
+        //自行书写业务逻辑代码
+        $info               = $dbModel->getOneById($id);
+        $info               = !empty($info) ? $info->toArray() : [];
+
+        if (!empty($info))
+        {
+            $cname          = isset($info['cname']) ? $info['cname'] : '';
+            if (empty($cname)) return ['Code' => '200004', 'Msg'=>lang('200004')];
+
+            $cname          = explode('/', $cname);
+            if (count($cname) !== 3)  return ['Code' => '200013', 'Msg'=>lang('200013')];
+
+            $data           = $dbModel->getReleaseFormTplList($id);
+            $releaseCount   = count($data);
+
+            if ($releaseCount <= 0) return ['Code' => '200014', 'Msg'=>lang('200014')];
+
+            //开始生产静态数据
+            $dataStr                    = urlencode(serialize($data));
+            $fieldName                  = 'form'.md5(strtolower($info['cname']));
+            $paramePath                 = \Env::get('APP_PATH') . 'common/parame/' . $fieldName.'.php';
+
+            //先删除原有的参数文件
+            if ( file_exists($paramePath)) unlink($paramePath);
+
+            //保存数据
+            file_put_contents($paramePath,$dataStr);
+
+            return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$releaseCount]];
+        }
+
+        return ['Code' => '200014', 'Msg'=>lang('200014')];
     }
 
     /*api:9a75399e1b0d44e644387af123875a99*/

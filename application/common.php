@@ -39,8 +39,7 @@ if (!function_exists('get_devtpl_tag'))
 {
 	function get_devtpl_tag($tag='')
 	{
-		$rote 		= request()->module().'/'.request()->controller() . '#';
-		return $rote . (!empty($tag) ?  $tag  : request()->action());
+		return request()->module().'/'.request()->controller() . '/' . (!empty($tag) ?  $tag  : request()->action());
 	}
 }
 

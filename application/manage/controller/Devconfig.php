@@ -39,6 +39,7 @@ class Devconfig extends Base
         //页面头信息设置
         $pageData                       = [];
         $pageData['isback']             = 0;
+        $pageData['tpl_title']          = '开发配置表单';
         $pageData['title1']             = '设置';
         $pageData['title2']             = '开发基本设置';
         $pageData['notice']             = ['开发基本设置，配置系统用到的常规配置，请谨慎修改各选项值。',];
@@ -56,7 +57,7 @@ class Devconfig extends Base
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
         $tag        = $this->configType;
-        $tpl_title  = $pageData['title2'] . '表单'; //初始化列表模板的名称，为空时不初始化
+        $tpl_title  = $pageData['tpl_title']; //初始化列表模板的名称，为空时不初始化
         $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
         $formNode   = $this->tpl->showTpl($tplid);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;

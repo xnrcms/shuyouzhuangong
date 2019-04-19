@@ -252,7 +252,7 @@ class DevTpl
       $this->model    = $this->tplType == 0 ? model('devlist') : model('devform');
 
       $title      = !empty($title) ? $title : $cname;
-      $cname      = md5(strtolower($cname));
+      $cname      = strtolower($cname);
       $id         = $this->checkCname($cname);
 
       //如果模板数据存在直接返回模板ID
@@ -318,7 +318,7 @@ class DevTpl
       $cdata['group']       = $group;
       $cdata['require']     = $require;
       $cdata['group']       = $group;
-      $cdata['notice']       = $notice;
+      $cdata['notice']      = $notice;
     }else{
       $cdata['edit']        = (isset($param['fdone'][1]) && $param['fdone'][1] ==1) ? 1 : 0;
       $cdata['search']      = (isset($param['fdone'][2]) && $param['fdone'][2] ==2) ? 1 : 0;

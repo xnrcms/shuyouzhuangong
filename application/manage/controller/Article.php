@@ -141,7 +141,7 @@ class Article extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $tag        = request()->module().'/'.request()->controller() . '/addedit';
+        $tag        = 'addedit';
         $tpl_title  = '新增/编辑文章表单'; //初始化列表模板的名称，为空时不初始化
         $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
         $formNode   = $this->tpl->showTpl($tplid);
@@ -182,7 +182,7 @@ class Article extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $tag        = request()->module().'/'.request()->controller() . '/addedit';
+        $tag        = 'addedit';
         $tpl_title  = '新增/编辑文章表单'; //初始化列表模板的名称，为空时不初始化
         $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
         $formNode   = $this->tpl->showTpl($tplid);

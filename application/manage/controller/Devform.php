@@ -189,31 +189,64 @@ class Devform extends Base
 	//提交表单
 	protected function update()
 	{
-		if (request()->isPost())
-		{	
-			$param 				= request()->param();
-			$tpl 				= new \xnrcms\DevTpl(1);
-    		$res 				= $tpl->saveTplData($param);
-    		$msg 				= $res == 1 ? '设置成功' : '新增成功';
+		//提交安全过滤
+		if (!request()->isPost()) $this->error('非法提交！');
 
-    		$devform 			= $tpl->getTplById($tpl->getTplId());
+        //表单数据
+        $postData                = request()->param();
 
-    		if(!empty($devform)){
-    			$devform['ac']  	= $res == 1 ? 1 : 0;
+        //接口数据
+        $signData                   = [];
+        $signData['uid']            = $this->uid;
+        $signData['hashid']         = $this->hashid;
+        $signData['title']			= isset($postData['title']) ? trim($postData['title']) : '';
+        $signData['status'] 		= isset($postData['status']) ? (int)$postData['status'] : 2;
+        $signData['sort'] 			= isset($postData['sort']) ? (int)$postData['sort'] : 1;
+        $signData['tag']			= isset($postData['tag']) ? trim($postData['tag']) : '';
+        $signData['cname']			= isset($postData['cname']) ? trim($postData['cname']) : '';
+        $signData['id'] 			= isset($postData['id']) ? (int)$postData['id'] : 0;
+        $signData['pid'] 			= isset($postData['pid']) ? (int)$postData['pid'] : 0;
 
-				//数据返回
-				$html = $this->getHtmls($devform);
+        $config 				 	= [];
 
-				$this->success( $msg,'', array_merge($devform,['htmls'=>$html]));
-			}
-			else
-			{
-				$error = $this->getApiError();
-				$this->error(empty($error) ? '未知错误！' : $error);
-			}
+        if($signData['pid'] > 0)
+        {    	
+            $config['title']        = $signData['title'];
+            $config['tag']          = $signData['tag'];
+            $config['type']         = isset($postData['type']) ? trim($postData['type']) : '';
+            $config['group']        = isset($postData['group']) ? trim($postData['group']) : '';
+            $config['require']      = isset($postData['require']) ? (int)$postData['require'] : 0;
+            $config['add']          = isset($postData['add']) ? (int)$postData['add'] : 0;
+            $config['edit']         = isset($postData['edit']) ? (int)$postData['edit'] : 0;
+            $config['notice']       = isset($postData['notice']) ? (int)$postData['notice'] : 0;
+            $config['default']      = isset($postData['default']) ? trim($postData['default']) : '';
+        	$config['field_value']	= isset($postData['field_value']) ? trim($postData['field_value']) : '';
+        	$config['attr']	  		= isset($postData['attr']) ? trim(str_replace(["\r\n","\r","\n"], " ",$postData['attr'])) : '';
+        }
+
+		$signData['config']			= !empty($config) ? json_encode($config) : '';
+
+		//请求数据
+        $res       = $this->apiData($signData,$this->apiUrl[request()->action().'_save']) ;
+        $devform   = $this->getApiData() ;
+
+		if($res && !empty($devform))
+		{
+			$devform['ac']  	= $signData['id'] > 0 ? 1 : 0;
+			$devform['title'] 	= $signData['title'];
+			$devform['pid'] 	= $signData['pid'];
+			$devform['status'] 	= $signData['status'];
+
+			//数据返回
+			$html 				= $this->getHtmls($devform);
+
+			$this->success($signData['id'] >0 ? '更新成功' : '新增成功','', array_merge($devform,['htmls'=>$html]));
 		}
-
-		$this->error('非法提交！');
+		else
+		{
+			$error = $this->getApiError();
+			$this->error(empty($error) ? '未知错误！' : $error);
+		}
 	}
 
 	public function release()
@@ -304,18 +337,21 @@ class Devform extends Base
 	{	
 		if ($data['ac'] == 1) return '';
 
-		$editUrl 		= url('Devform/edit',array('id'=>$data['id']));
-		$delUrl 		= url('Devform/edit',array('id'=>$data['id']));
-		$quickEditUrl 	= url('Devform/quickEdit');
-		$showId			= $data['pid'] == 0 ? '(<font color="red">'.$data['id'].'</font>)&nbsp;&nbsp;' : '';
+		$editUrl 		= url('Devform/edit',['id'=>$data['id']]);
+		$delUrl 		= url('Devform/edit',['id'=>$data['id']]);
+		$quickEditUrl 	= url('Devform/quickEdit',['id'=>$data['id']]);
+		$cloneFormUrl 	= url('Devform/cloneForm',['ids'=>$data['id']]);
+		$releaseUrl 	= url('Devform/release',['ids'=>$data['id']]);
 
 		$htmls = '<tr id="devform_id_'.$data['id'].'" data-id ="'.$data['id'].'" data-pid ="'.$data['pid'].'" >
                 <td align="left" class="handle" width="70%">
                   <div>
-                    <span class="btn"><em><i class="fa fa-cog"></i>'.$data['title'].$showId.'<i class="arrow"></i></em>
+                    <span class="btn"><em><i class="fa fa-cog"></i>'.$data['title'].'<i class="arrow"></i></em>
                     <ul>
-                      <li><a onClick="return layer_show(\'表单模板编辑\',\''.$editUrl.'\',500,350);" href="javascript:;">编辑</a></li>                
-                      <li><a onClick="delfun(this)" href="javascript:;" data-url="'.$delUrl.'">删除</a></li>
+                      <li><a onClick="return layer_show(\'表单模板编辑\',\''.$editUrl.'\',500,350);" href="javascript:;">编辑</a></li>
+                      <li><a onClick="layer_show(\'克隆表单\',\''.$cloneFormUrl.'\',1100,550);" href="javascript:;">克隆表单</a></li>
+                      <li><a onClick="delfun(this,\'确认发布表单模板吗？\',1)" href="javascript:;" data-url="'.$releaseUrl.'">发布表单</a></li>
+                      <li><a onClick="delfun(this,\'确认删除表单模板吗？\')" href="javascript:;" data-url="'.$delUrl.'">删除</a></li>
                     </ul>
                     </span>
                   </div>
@@ -416,85 +452,65 @@ class Devform extends Base
 	//提交表单
 	protected function set_form_update()
 	{
-		if (request()->isPost())
+		//提交安全过滤
+		if (!request()->isPost()) $this->error('非法提交！');
+
+        //表单数据
+        $postData                = request()->param();
+
+        //接口数据
+        $signData                   = [];
+        $signData['uid']            = $this->uid;
+        $signData['hashid']         = $this->hashid;
+        $signData['title']			= isset($postData['title']) ? trim($postData['title']) : '';
+        $signData['status'] 		= isset($postData['status']) ? (int)$postData['status'] : 2;
+        $signData['sort'] 			= isset($postData['sort']) ? (int)$postData['sort'] : 1;
+        $signData['tag']			= isset($postData['tag']) ? trim($postData['tag']) : '';
+        $signData['cname']			= isset($postData['cname']) ? trim($postData['cname']) : '';
+        $signData['id'] 			= isset($postData['id']) ? (int)$postData['id'] : 0;
+        $signData['pid'] 			= isset($postData['pid']) ? (int)$postData['pid'] : 0;
+
+        if ($signData['pid'] <= 0) $this->error('表单模板数据不存在！');
+
+        if ($signData['id'] > 0)
+        {
+        	$info 				= cache(md5("admin/Devform/detailData".$signData['id']));
+        	if (empty($info)) $this->error('表单模板数据不存在');
+
+        	$config 				= (isset($info['config']) && !empty($info['config'])) ? json_decode($info['config'],true) : [];
+        	$postData['default'] 	= isset($config['default']) ? $config['default'] : '';
+        	$postData['notice'] 	= isset($config['notice']) ? $config['notice'] : '';
+        	$postData['attr'] 		= isset($config['attr']) ? $config['attr'] : '';
+        }
+
+        $config 				= [];
+        $config['title']        = $signData['title'];
+        $config['tag']          = $signData['tag'];
+        $config['type']         = isset($postData['type']) ? trim($postData['type']) : '';
+        $config['group']        = isset($postData['group']) ? trim($postData['group']) : '';
+        $config['require']      = isset($postData['require']) ? (int)$postData['require'] : 0;
+        $config['add']          = isset($postData['add']) ? (int)$postData['add'] : 0;
+        $config['edit']         = isset($postData['edit']) ? (int)$postData['edit'] : 0;
+        $config['notice']       = isset($postData['notice']) ? (int)$postData['notice'] : 0;
+        $config['default']      = isset($postData['default']) ? trim($postData['default']) : '';
+    	$config['field_value']	= isset($postData['field_value']) ? trim($postData['field_value']) : '';
+    	$config['attr']	  		= isset($postData['attr']) ? trim(str_replace(["\r\n","\r","\n"], " ",$postData['attr'])) : '';
+        	
+		$signData['config']		= json_encode($config);
+
+		//请求数据
+        $res       			= $this->apiData($signData,$this->apiUrl['edit_save']) ;
+        $devform   			= $this->getApiData() ;
+
+		if($res && !empty($devform))
 		{
-			$parame 			= [];
-			$parame['uid']		= $this->uid;
-	        $parame['hashid']	= $this->hashid;
-	        
-	        $default       		= '';
-	        $attr           	= '';
-	        $notice 			= '';
-	        $cname 				= '';
-	        $pid 				= intval(input('post.pid'));
-	        if ($pid <= 0) $this->error('非法数据！');
-	        
-	        $id 				= intval(input('post.id'));
-	        $config 			= [];
-
-	        if ($id > 0 ) {
-	        	$info 				= cache(md5("admin/Devform/detailData".$id));
-
-	        	if (empty($info) ) $this->error('表单模板数据不存在');
-
-	        	$config 			= !empty($info['config']) ? json_decode($info['config'],true) : [];
-	        	$default 			= isset($config['default']) ? $config['default'] : '';
-	        	$notice 			= isset($config['notice']) ? $config['notice'] : '';
-	        	$attr 				= isset($config['attr']) ? $config['attr'] : '';
-	        	$cname 				= isset($info['cname']) ? $info['cname'] : '';
-	        }
-	        
-	        $title 				= trim(input('post.title',''));
-	        $status 			= intval(input('post.status'));
-	        $sort 				= intval(input('post.sort',1));
-	        $tag 				= trim(input('post.tag',''));
-	        $type 				= trim(input('post.type','string'));
-	        $group 				= input('post.group','') ;
-	        $edit 				= input('post.edit',0);
-	        $add 				= input('post.add',0);
-	        $require        	= input('post.require',0) ;
-
-	        if (empty($title)) $this->error('字段名称不能为空');
-	        if (empty($tag)) $this->error('字段标识不能为空');
-
-            $config['title']          = $title ;
-            $config['tag']            = $tag ;
-            $config['type']           = $type ;
-            $config['group']          = $group;
-            $config['require']        = $require;
-            $config['add']         	  = $add ;
-            $config['edit']           = $edit;
-            $config['notice']         = $notice ;
-            $config['default']        = $default ;
-            $config['attr']           = $attr ;
-            $config 				  = json_encode($config);
-
-	        $parame['title']	= $title;
-	        $parame['status'] 	= $status == 1 ? 1 : 2;
-	        $parame['sort'] 	= $sort  <= 0 ? 1 : $sort;
-	        $parame['tag']		= $tag;
-	        $parame['cname']    = $cname;
-			$parame['id']		= $id;
-			$parame['pid']		= $pid;
-			$parame['config']	= $config;
-
-	        //请求数据
-	        $res       			= $this->apiData($parame,$this->apiUrl['edit_save']) ;
-	        $devform   			= $this->getApiData() ;
-
-			if(false !== $res && !empty($devform)){
-				
-				cache(md5('tpl_tplType=1_pid='.$pid),null);
-				$this->success(  $id >0 ? '更新成功' : '新增成功', Cookie('__forward__'));
-			}
-			else
-			{
-				$error = $this->getApiError();
-				$this->error(empty($error) ? '未知错误！' : $error);
-			}
+			$this->success($signData['id'] >0 ? '更新成功' : '新增成功', Cookie('__forward__'));
 		}
-
-		$this->error('非法提交！');
+		else
+		{
+			$error = $this->getApiError();
+			$this->error(empty($error) ? '未知错误！' : $error);
+		}
 	}
 
 	public function cloneForm($id =0)

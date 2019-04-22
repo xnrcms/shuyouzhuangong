@@ -218,6 +218,7 @@ class {ControllerName} extends Base
         $ids     = is_array($ids) ? implode($ids,',') : '';
 
         //请求参数
+        $parame                 = [];
         $parame['uid']          = $this->uid;
         $parame['hashid']       = $this->hashid;
         $parame['id']           = $ids ;

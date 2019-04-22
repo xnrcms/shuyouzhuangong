@@ -30,11 +30,10 @@ class Devlist extends Base
 
         $this->apiUrl['index']        = 'admin/Devlist/listData';
         $this->apiUrl['edit']         = 'admin/Devlist/detailData';
-        $this->apiUrl['add_save']     = 'admin/Devlist/saveData';
-        $this->apiUrl['edit_save']    = 'admin/Devlist/saveData';
+        $this->apiUrl['save_data']    = 'admin/Devlist/saveData';
         $this->apiUrl['quickedit']    = 'admin/Devlist/quickEditData';
         $this->apiUrl['del']          = 'admin/Devlist/delData';
-        $this->apiUrl['release']      = 'admin/Devform/releaseData';
+        $this->apiUrl['release']      = 'admin/Devlist/releaseData';
     }
 
 	/**
@@ -189,82 +188,66 @@ class Devlist extends Base
 	//提交表单
 	protected function update()
 	{
-		if (request()->isPost())
+		//提交安全过滤
+		if (!request()->isPost()) $this->error('非法提交！');
+
+        //表单数据
+        $postData                = request()->param();
+
+        //接口数据
+        $signData                   = [];
+        $signData['uid']            = $this->uid;
+        $signData['hashid']         = $this->hashid;
+        $signData['title']			= isset($postData['title']) ? trim($postData['title']) : '';
+        $signData['status'] 		= isset($postData['status']) ? (int)$postData['status'] : 2;
+        $signData['sort'] 			= isset($postData['sort']) ? (int)$postData['sort'] : 1;
+        $signData['tag']			= isset($postData['tag']) ? trim($postData['tag']) : '';
+        $signData['cname']			= isset($postData['cname']) ? trim($postData['cname']) : '';
+        $signData['id'] 			= isset($postData['id']) ? (int)$postData['id'] : 0;
+        $signData['pid'] 			= isset($postData['pid']) ? (int)$postData['pid'] : 0;
+        $signData['width'] 			= isset($postData['width']) ? (int)$postData['width'] : 10;
+
+        $config 				 	= [];
+
+        if($signData['pid'] > 0)
+        {    	
+            $config['title']        = $signData['title'];
+            $config['tag']          = $signData['tag'];
+            $config['type']         = isset($postData['type']) ? trim($postData['type']) : '';
+            $config['edit']         = isset($postData['edit']) ? (int)$postData['edit'] : 0;
+            $config['search']       = isset($postData['search']) ? (int)$postData['search'] : 0;
+            $config['default']      = isset($postData['default']) ? trim($postData['default']) : '';
+        	$config['attr']	  		= isset($postData['attr']) ? trim(str_replace(["\r\n","\r","\n"], " ",$postData['attr'])) : '';
+            $config['width']        = $signData['width'];
+        }
+
+		$signData['config']			= !empty($config) ? json_encode($config) : '';
+
+		if (!isset($this->apiUrl['save_data']) || empty($this->apiUrl['save_data']))
+		$this->error('未设置接口地址');
+
+        //请求数据
+        $res       = $this->apiData($signData,$this->apiUrl['save_data']) ;
+        $devlist   = $this->getApiData() ;
+
+		if($res && !empty($devlist))
 		{
-			if (!isset($this->apiUrl[request()->action().'_save']) || empty($this->apiUrl[request()->action().'_save'])) $this->error('未设置接口地址');
+			$devlist['ac']  	= $signData['id'] > 0 ? 1 : 0;
+			$devlist['title'] 	= $signData['title'];
+			$devlist['pid'] 	= $signData['pid'];
+			$devlist['status'] 	= $signData['status'];
+			$devlist['width'] 	= $signData['width'];
 
-			$parame 			= [];
-			$parame['uid']		= $this->uid;
-	        $parame['hashid']	= $this->hashid;
+			//数据返回
+			$html = $this->getHtmls($devlist);
 
-	        $id 				= intval(input('post.id'));
-	        $pid 				= intval(input('post.pid'));
-	        $title 				= trim(input('post.title'));
-	        $status 			= intval(input('post.status'));
-	        $sort 				= intval(input('post.sort'));
-	        $tag 				= trim(input('post.tag',''));
-	        $cname 				= trim(input('post.cname',''));
-	        $width 				= input('post.width','10') ;
-	        $config 			= '';
-
-	        if ($pid <= 0) {
-
-	        	if (empty($title)) $this->error('列表名称不能为空');
-	        	if (empty($cname)) $this->error('控制器名称不能为空');
-	        }else{
-
-	        	if (empty($title)) $this->error('字段名称不能为空');
-	        	if (empty($tag)) $this->error('字段标识不能为空');
-	        }
-
-	        if($pid > 0){
-
-	            $data['title']          = $title ;
-	            $data['tag']            = $tag ;
-	            $data['type']           = input('post.type') ;
-	            $data['width']          = $width;
-	            $data['edit']           = input('post.edit',0) ;
-	            $data['search']         = input('post.search',0) ;
-	            $data['default']        = input('post.default','') ;
-	            $data['attr']           = !empty(input('post.attr')) ? str_replace(array("\r\n", "\r", "\n"), " ", input('post.attr')) : '' ;
-	            $config 				= json_encode($data);
-	        }
-
-	        $parame['title']	= $title;
-	        $parame['status'] 	= $status == 1 ? 1 : 2;
-	        $parame['sort'] 	= $sort <= 0 ? 1 : $sort;
-	        $parame['tag']		= $tag;
-	        $parame['cname']    = $cname;
-			$parame['id']		= $id;
-			$parame['pid']		= $pid;
-			$parame['config']	= $config;
-			$parame['width']	= $width;
-
-	        //请求数据
-	        $res       = $this->apiData($parame,$this->apiUrl[request()->action().'_save']) ;
-	        $devlist   = $this->getApiData() ;
-
-			if($res && !empty($devlist)){
-
-				$devlist['ac']  	= $id > 0 ? 1 : 0;
-				$devlist['title'] 	= $title;
-				$devlist['pid'] 	= $pid;
-				$devlist['status'] 	= $status;
-				$devlist['width'] 	= $width;
-
-				//数据返回
-				$html = $this->getHtmls($devlist);
-
-				$this->success(  $id >0 ? '更新成功' : '新增成功','', array_merge($devlist,['htmls'=>$html]));
-			}
-			else
-			{
-				$error = $this->getApiError();
-				$this->error(empty($error) ? '未知错误！' : $error);
-			}
+			$this->success($signData['id'] >0 ? '更新成功' : '新增成功','', array_merge($devlist,['htmls'=>$html]));
 		}
-
-		$this->error('非法提交！');
+		else
+		{
+			$error = $this->getApiError();
+			$this->error(empty($error) ? '未知错误！' : $error);
+		}
 	}
 
 	public function release()
@@ -289,8 +272,8 @@ class Devlist extends Base
         $res       = $this->apiData($parame,$this->apiUrl[request()->action()]) ;
         $data      = $this->getApiData() ;
 
-		if($res){
-
+		if($res)
+		{
 			//数据返回
 			$this->success('发布成功',Cookie('__forward__'));
 		} else {
@@ -311,7 +294,8 @@ class Devlist extends Base
 
 		$firstid 	= 0;
 		$firstpid 	= $id;
-		if (!empty($fieldList)) {
+		if (!empty($fieldList))
+		{
 			$firstid	= $fieldList[0]['id'];
 			$firstpid	= $fieldList[0]['pid'];
 		}
@@ -325,8 +309,8 @@ class Devlist extends Base
 		$id 		= intval(input('post.id'));
 		$fieldInfo 	= ['id'=>$id,'pid'=>$pid,'status'=>1,'require'=>0];
 
-		if ($id >0) {
-
+		if ($id >0)
+		{
 			$parame 			= [];
 			$parame['uid']		= $this->uid;
 	        $parame['hashid']	= $this->hashid;
@@ -336,12 +320,10 @@ class Devlist extends Base
 			$fieldInfo			= $res  ? $this->getApiData() : [];
 
 			//数据格式化
-            if($res && $fieldInfo['pid'] > 0){
-
+            if($res && $fieldInfo['pid'] > 0)
+            {
                 $field 			= json_decode($fieldInfo['config'] , true) ;
-
                 $field['attr'] 	= !empty($field['attr']) ? str_replace(' ',"\r", $field['attr']): '' ;
-
                 $fieldInfo 		= array_merge($fieldInfo,$field) ;
             }
 		}
@@ -363,12 +345,11 @@ class Devlist extends Base
 		$editUrl 		= url('Devlist/edit',array('id'=>$data['id']));
 		$delUrl 		= url('Devlist/edit',array('id'=>$data['id']));
 		$quickEditUrl 	= url('Devlist/quickEdit');
-		$showId			= $data['pid'] == 0 ? '(<font color="red">'.$data['id'].'</font>)&nbsp;&nbsp;' : '';
 
 		$htmls = '<tr id="devform_id_'.$data['id'].'" data-id ="'.$data['id'].'" data-pid ="'.$data['pid'].'" >
-                <td align="left" class="handle" width="70%">
+                <td align="left" class="handle" width="78%">
                   <div>
-                    <span class="btn"><em><i class="fa fa-cog"></i>'.$data['title'].$showId.'<i class="arrow"></i></em>
+                    <span class="btn"><em><i class="fa fa-cog"></i>'.$data['title'].'<i class="arrow"></i></em>
                     <ul>
                       <li><a onClick="return layer_show(\'列表模板编辑\',\''.$editUrl.'\',500,350);" href="javascript:;">编辑</a></li>                
                       <li><a onClick="delfun(this)" href="javascript:;" data-url="'.$delUrl.'">删除</a></li>
@@ -376,14 +357,8 @@ class Devlist extends Base
                     </span>
                   </div>
                 </td>';
-		if ($data['pid'] > 0) {
 
-			$htmls .= '<td align="center" class="" width="20%">
-	          <div style="text-align: center ;">'.$data['width'].'</div>
-	        </td>';
-		}
-
-        $htmls .= '<td align="center" class="" width="30%">
+        $htmls .= '<td align="center" class="" width="22%">
                   <div data-yes="启用" data-no="禁用">';
         if ($data['status'] == 1) {
 
@@ -447,15 +422,16 @@ class Devlist extends Base
         $allDevlist         = $this->getApiData() ;
 
         $devlist 			= (!empty($allDevlist) && isset($allDevlist['lists'])) ? $allDevlist['lists'] : [];
-
 		$fieldList 			= $res ? $devlist : [];
 
-		if(!empty($fieldList)){
-			foreach ($fieldList as $key => $value) {
-
-				foreach ($value as $kk => $vv) {
-					
-					if ($kk == 'config') {
+		if(!empty($fieldList))
+		{
+			foreach ($fieldList as $key => $value)
+			{
+				foreach ($value as $kk => $vv)
+				{
+					if ($kk == 'config')
+					{
 						$fieldList[$key][$kk] 	= json_decode($vv,true);
 					}
 				}
@@ -479,80 +455,63 @@ class Devlist extends Base
 	//提交表单
 	protected function set_list_update()
 	{
-		if (request()->isPost())
+		//提交安全过滤
+		if (!request()->isPost()) $this->error('非法提交！');
+
+        //表单数据
+        $postData                = request()->param();
+
+        //接口数据
+        $signData                   = [];
+        $signData['uid']            = $this->uid;
+        $signData['hashid']         = $this->hashid;
+        $signData['title']			= isset($postData['title']) ? trim($postData['title']) : '';
+        $signData['status'] 		= isset($postData['status']) ? (int)$postData['status'] : 2;
+        $signData['sort'] 			= isset($postData['sort']) ? (int)$postData['sort'] : 1;
+        $signData['tag']			= isset($postData['tag']) ? trim($postData['tag']) : '';
+        $signData['cname']			= isset($postData['cname']) ? trim($postData['cname']) : '';
+        $signData['id'] 			= isset($postData['id']) ? (int)$postData['id'] : 0;
+        $signData['pid'] 			= isset($postData['pid']) ? (int)$postData['pid'] : 0;
+        $signData['width'] 			= isset($postData['width']) ? (int)$postData['width'] : 10;
+        
+        if ($signData['pid'] <= 0) $this->error('列表模板数据不存在！');
+
+        if ($signData['id'] > 0)
+        {
+        	$info 				= cache(md5("admin/Devlist/detailData".$signData['id']));
+        	if (empty($info)) $this->error('列表模板数据不存在');
+
+        	$config 				= (isset($info['config']) && !empty($info['config'])) ? json_decode($info['config'],true) : [];
+        	$postData['default'] 	= isset($config['default']) ? $config['default'] : '';
+        	$postData['notice'] 	= isset($config['notice']) ? $config['notice'] : '';
+        	$postData['attr'] 		= isset($config['attr']) ? $config['attr'] : '';
+        }
+
+        $config 				= [];
+        $config['title']        = $signData['title'];
+        $config['tag']          = $signData['tag'];
+        $config['type']         = isset($postData['type']) ? trim($postData['type']) : '';
+        $config['width']        = $signData['width'];
+        $config['edit']         = isset($postData['edit']) ? (int)$postData['edit'] : 0;
+        $config['search']       = isset($postData['search']) ? (int)$postData['search'] : 0;
+        $config['default']      = isset($postData['default']) ? trim($postData['default']) : '';
+    	$config['attr']	  		= isset($postData['attr']) ? trim(str_replace(["\r\n","\r","\n"], " ",$postData['attr'])) : '';
+        	
+		$signData['config']		= json_encode($config);
+
+		//请求数据
+        $res       			= $this->apiData($signData,$this->apiUrl['save_data']) ;
+        $devlist   			= $this->getApiData() ;
+
+        if($res && !empty($devlist))
 		{
-			$parame 			= [];
-			$parame['uid']		= $this->uid;
-	        $parame['hashid']	= $this->hashid;
-	        
-	        $default       		= '' ;
-	        $attr           	= '' ;
-	        $cname           	= '' ;
-	        $pid 				= intval(input('pid'));
-	        if ($pid <= 0) $this->error('非法数据！');
-	        
-	        $id 				= intval(input('id'));
-	        $config 			= [];
-
-	        if ($id > 0 ) {
-	        	$info 				= cache(md5("admin/Devlist/detailData".$id));
-
-	        	if (empty($info) ) $this->error('列表模板数据不存在');
-
-	        	$config 			= !empty($info['config']) ? json_decode($info['config'],true) : [];
-	        	$default 			= isset($config['default']) ? $config['default'] : '';
-	        	$attr 				= isset($config['attr']) ? $config['attr'] : '';
-	        	$cname 				= isset($info['cname']) ? $info['cname'] : '';
-	        }
-	        
-	        $title 				= trim(input('title',''));
-	        $status 			= intval(input('status'));
-	        $sort 				= intval(input('sort',1));
-	        $tag 				= trim(input('tag',''));
-	        $type 				= trim(input('type','string'));
-	        $width 				= input('width','10') ;
-	        $edit 				= input('edit',0);
-	        $search 			= input('search',0);
-
-	        if (empty($title)) $this->error('表头名称不能为空');
-	        if (empty($tag)) $this->error('数据标识不能为空');
-
-            $config['title']          = $title ;
-            $config['tag']            = $tag ;
-            $config['type']           = $type ;
-            $config['width']          = $width;
-            $config['edit']           = $edit;
-            $config['search']         = $search ;
-            $config['default']        = $default ;
-            $config['attr']           = $attr ;
-            $config 				  = json_encode($config);
-
-	        $parame['title']	= $title;
-	        $parame['status'] 	= $status == 1 ? 1 : 2;
-	        $parame['sort'] 	= $sort;
-	        $parame['tag']		= $tag;
-	        $parame['cname']    = $cname;
-			$parame['id']		= $id;
-			$parame['pid']		= $pid;
-			$parame['config']	= $config;
-			$parame['width']	= $width;
-			wr($parame);
-	        //请求数据
-	        $res       			= $this->apiData($parame,$this->apiUrl['edit_save']) ;
-	        $devlist   			= $this->getApiData() ;
-
-			if(false !== $res && !empty($devlist)){
-				cache(md5('tpl_tplType=0_pid='.$pid),null);
-				$this->success(  $id >0 ? '更新成功' : '新增成功', Cookie('__forward__'));
-			}
-			else
-			{
-				$error = $this->getApiError();
-				$this->error(empty($error) ? '未知错误！' : $error);
-			}
+			$this->success($signData['id'] >0 ? '更新成功' : '新增成功', Cookie('__forward__'));
 		}
-
-		$this->error('非法提交！');
+		else
+		{
+			$error = $this->getApiError();
+			$this->error(empty($error) ? '未知错误！' : $error);
+		}
 	}
 
 	public function cloneList($id =0)
@@ -575,12 +534,14 @@ class Devlist extends Base
 
 		$fieldList 			= $res ? $devlist : [];
 
-		if(!empty($fieldList)){
-			foreach ($fieldList as $key => $value) {
-
-				foreach ($value as $kk => $vv) {
-					
-					if ($kk == 'config') {
+		if(!empty($fieldList))
+		{
+			foreach ($fieldList as $key => $value)
+			{
+				foreach ($value as $kk => $vv)
+				{
+					if ($kk == 'config')
+					{
 						$fieldList[$key][$kk] 	= json_decode($vv,true);
 					}
 				}
@@ -620,8 +581,8 @@ class Devlist extends Base
 	        $parame['cloneData']	= json_encode($clone);
 
 	        $res 					= $this->apiData($parame,'admin/Devlist/saveClone');
-	        if($res){
-
+	        if($res)
+	        {
 				$this->success( '克隆成功', Cookie('__forward__'));
 			}
 			else
@@ -639,8 +600,8 @@ class Devlist extends Base
     {
         $info           = [];
 
-        if ($id > 0) {
-            
+        if ($id > 0)
+        {    
             //请求参数
             $parame             = [];
             $parame['uid']      = $this->uid;
@@ -678,8 +639,8 @@ class Devlist extends Base
 	        $this->success( $msg, Cookie('__forward__'));
     	}
 
-    	if ($id<= 0) {
-
+    	if ($id<= 0)
+    	{
     		$info['id'] 	= 0;
     		$info['pid'] 	= $param['pid'];
     		$info['edit'] 	= 0;

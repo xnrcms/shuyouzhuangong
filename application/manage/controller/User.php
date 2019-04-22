@@ -24,6 +24,7 @@ class User extends Base
     public function __construct()
     {
         parent::__construct();
+
         $this->tpl                                  = new \xnrcms\DevTpl();
         $this->apiUrl['index']                      = 'api/User/listData';
         $this->apiUrl['edit']                       = 'api/User/userDetail';
@@ -38,7 +39,7 @@ class User extends Base
     //所有用户，不按用户组划分
     public function alluser()
     {
-        $arr['listid']             = 'user/index';
+        $arr['listid']             = 'index';
         $arr['gid']                = 0;
         $arr['isback']             = 0;
         $arr['title1']             = '用户-用户管理';
@@ -51,7 +52,7 @@ class User extends Base
     //管理员
     public function adminuser()
     {
-        $arr['listid']             = 'user/index';
+        $arr['listid']             = 'index';
         $arr['gid']                = 1;
         $arr['isback']             = 0;
         $arr['title1']             = '用户-管理员管理';
@@ -64,7 +65,7 @@ class User extends Base
     //会员列表
     public function homeuser()
     {
-        $arr['listid']             = 'user/index';
+        $arr['listid']             = 'index';
         $arr['gid']                = 2;
         $arr['isback']             = 0;
         $arr['title1']             = '用户-会员管理';
@@ -77,7 +78,7 @@ class User extends Base
     //代理列表
     public function agentuser()
     {
-        $arr['listid']             = 'user/index';
+        $arr['listid']             = 'index';
         $arr['gid']                = 3;
         $arr['isback']             = 0;
         $arr['title1']             = '用户-代理管理';
@@ -113,6 +114,7 @@ class User extends Base
         $search['group_id'] = $arr['gid'];
 
         //获取列表数据
+        $parame             = [];
         $parame['uid']      = $this->uid;
         $parame['hashid']   = $this->hashid;
         $parame['page']     = $page;
@@ -143,9 +145,6 @@ class User extends Base
             $total 			= $data['total'];
             $listData   	= $data['lists'];
         }
-        
-        //缓存数据
-        cache('user_list_for_gid',$arr['gid']);
 
         //页面头信息设置
         $pageData['isback']             = $arr['isback'];
@@ -184,9 +183,16 @@ class User extends Base
 		//数据提交
         if (request()->isPost()) $this->update();
 
-        //表单模板
-        $tags                           = strtolower(request()->controller() . '/' . request()->action());
-        $formData                       = $this->getFormFields($tags,0) ;
+        //参数数据接收
+        $param      = request()->param();
+
+        //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
+        $tag        = 'addedit';
+        $tpl_title  = '新增/编辑用户表单'; //初始化列表模板的名称，为空时不初始化
+        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
+        $formNode   = $this->tpl->showTpl($tplid);
+        $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail(0);
@@ -201,8 +207,8 @@ class User extends Base
         cookie('__forward__',$_SERVER['REQUEST_URI']);
 
         //渲染数据到页面模板上
-        $assignData['formId']           = isset($formData['info']['id']) ? intval($formData['info']['id']) : 0;
-        $assignData['formFieldList']    = $formData['list'];
+        $assignData['formId']           = $formId;
+        $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['pageData']         = $pageData;
@@ -218,9 +224,16 @@ class User extends Base
 		//数据提交
         if (request()->isPost()) $this->update();
 
-		//表单模板
-        $tags                           = strtolower(request()->controller() . '/' . request()->action());
-        $formData                       = $this->getFormFields($tags,1);
+        //参数数据接收
+        $param      = request()->param();
+
+        //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
+        $tag        = 'addedit';
+        $tpl_title  = '新增/编辑用户表单'; //初始化列表模板的名称，为空时不初始化
+        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
+        $formNode   = $this->tpl->showTpl($tplid);
+        $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail($id);
@@ -235,8 +248,8 @@ class User extends Base
         cookie('__forward__',$_SERVER['REQUEST_URI']);
 
         //渲染数据到页面模板上
-        $assignData['formId']           = isset($formData['info']['id']) ? intval($formData['info']['id']) : 0;
-        $assignData['formFieldList']    = $formData['list'];
+        $assignData['formId']           = $formId;
+        $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['pageData']         = $pageData;
@@ -249,11 +262,13 @@ class User extends Base
     //数据删除
     public function del()
     {
-        $ids     = request()->param();
-        $ids     = (isset($ids['ids']) && !empty($ids['ids'])) ? $ids['ids'] : $this->error('请选择要操作的数据');;
+        //参数数据接收
+        $param   = request()->param();
+        $ids     = (isset($param['ids']) && !empty($param['ids'])) ? $param['ids'] : $this->error('请选择要操作的数据');;
         $ids     = is_array($ids) ? implode($ids,',') : '';
 
         //请求参数
+        $parame                 = [];
         $parame['uid']          = $this->uid;
         $parame['hashid']       = $this->hashid;
         $parame['id']           = $ids ;
@@ -291,39 +306,28 @@ class User extends Base
     //处理提交新增或编辑的数据
     private function update()
     {
-        $formid                     = intval(input('formId'));
-        $formInfo                   = cache('DevformDetails'.$formid);
-        if(empty($formInfo)) $this->error('表单模板数据不存在');
-
         //表单数据
-        $postData                   = input('post.');
+        $postData                   = request()->param();
 
-        //用户信息
-        $postData['uid']            = $this->uid;
-        $postData['hashid']         = $this->hashid;
+        //表单模板
+        $tplid                      = $this->tpl->checkTpl(intval($postData['formId']),1);
+        if($tplid <= 0) $this->error('表单模板数据不存在');
 
-        $gid                        = cache('user_list_for_gid');
-        $postData['gid']            = !empty($gid) ? intval($gid) : 0;
-
-        //表单中不允许提交至接口的参数
-        $notAllow                   = ['formId'];
-
-        //过滤不允许字段
-        if(!empty($notAllow)){
-
-            foreach ($notAllow as $key => $value) unset($postData[$value]);
-        }
-        
+        //接口数据
+        $signData                   = $this->tpl->getFormTplData($tplid,$postData);
+        $signData['uid']            = $this->uid;
+        $signData['hashid']         = $this->hashid;
+    
         //请求数据
         if (!isset($this->apiUrl[request()->action().'_save'])||empty($this->apiUrl[request()->action().'_save'])) 
         $this->error('未设置接口地址');
 
-        $res       = $this->apiData($postData,$this->apiUrl[request()->action().'_save']) ;
+        $res       = $this->apiData($signData,$this->apiUrl[request()->action().'_save']) ;
         $data      = $this->getApiData() ;
 
         if($res){
 
-            $this->success($postData['id']  > 0 ? '更新成功' : '新增成功',Cookie('__forward__')) ;
+            $this->success($signData['id']  > 0 ? '更新成功' : '新增成功',Cookie('__forward__')) ;
         }else{
 
             $this->error($this->getApiError()) ;

@@ -94,7 +94,8 @@ class UserGroupAccess extends Base
 
     public function saveData($uid = 0,$gid = 0)
     {
-      if ($uid > 0 && $gid > 0) {
+      if ($uid > 0 && $gid > 0)
+      {
         $info     = $this->where('uid','=',$uid)->value('uid');
         $data     = ['uid'=>$uid,'group_id'=>$gid];
 

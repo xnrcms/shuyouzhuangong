@@ -59,6 +59,7 @@ class CourseCategory extends Base
         $rightMenu  = formatMenuByPidAndPos($menuid,3, $this->menu);
 
         //获取列表数据
+        $parame             = [];
         $parame['uid']      = $this->uid;
         $parame['hashid']   = $this->hashid;
         $parame['page']     = $page;

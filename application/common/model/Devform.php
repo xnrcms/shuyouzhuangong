@@ -51,7 +51,7 @@ class Devform extends Base
     {
         $info   = $this->getOneById($id);
         $pid    = empty($info) ? 0 : $info['pid'];
-    	$res    = $this->where('id','not in',[$id])->where('pid','=',$pid)->where($field,'eq',$value)->value($field);
+    	$res    = $this->where('id','<>',$id)->where('pid','=',$pid)->where($field,'eq',$value)->value($field);
 
     	return !empty($res) ? true : false;
     }

@@ -133,7 +133,6 @@ class User extends Base
 
         //数据ID
         $id                         = isset($parame['id']) ? intval($parame['id']) : 0;
-        $gid                        = isset($parame['gid']) ? intval($parame['gid']) : 0;
 
         //验证两次密码输入是否一致
         if (!empty($parame['password']) && md5($parame['password']) !== md5($parame['repeatpwd']))
@@ -158,10 +157,6 @@ class User extends Base
         if ($uid >0) {
 
             $data['id']                 = intval($uid);
-
-            //如果是新增，入库用户ID和分组ID
-            if ($id <= 0 && $gid > 0)
-            model('user_group_access')->saveData($uid,$gid);
 
             return ['Code' => '000000', 'Msg'=>lang('200020'),'Data'=>$data];
         }

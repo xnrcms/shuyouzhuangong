@@ -20,13 +20,15 @@ use app\manage\controller\Base;
 class Logs extends Base
 {
     private $apiUrl         = [];
+    private $tpl            = null;
 
     public function __construct()
     {
         parent::__construct();
 
-        $this->apiUrl['done_logs']        = 'api/Logs/listData';
-        $this->apiUrl['clear_logs']       = 'api/Logs/clearLogs';
+        $this->tpl                    = new \xnrcms\DevTpl();
+        $this->apiUrl['done_logs']    = 'api/Logs/listData';
+        $this->apiUrl['clear_logs']   = 'api/Logs/clearLogs';
     }
     public function done_logs()
     {
@@ -43,17 +45,25 @@ class Logs extends Base
 	//列表页面
 	public function index($arr = [])
     {
-		$menuid     = input('menuid',0) ;
-		$search 	= $arr['search'];
-        $page       = input('page',1);
+        //参数数据接收
+        $param      = request()->param();
+
+        //初始化模板
+        $tag        = ''; //默认当前路由为唯一标识，自己可以自定义标识
+        $tpl_title  = '操作日志列表'; //初始化列表模板的名称，为空时不初始化
+        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,0);
+        $listNode   = $this->tpl->showTpl($tplid);
+        $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
+
+        //参数定义
+        $menuid     = isset($param['menuid']) ? $param['menuid'] : 0;
+        $page       = isset($param['page']) ? $param['page'] : 1;
+        $search     = $this->getSearchParame($param);
+        $isTree     = 0;
 
         //页面操作功能菜单
         $topMenu    = formatMenuByPidAndPos($menuid,2, $this->menu);
         $rightMenu  = formatMenuByPidAndPos($menuid,3, $this->menu);
-
-        //获取表头以及搜索数据
-        $tags       = strtolower(request()->controller() . '/' . request()->action());
-        $listNode   = $this->getListNote($tags) ;
 
         //获取列表数据
         $parame             = [];
@@ -95,11 +105,12 @@ class Logs extends Base
         $pageData['notice']             = $arr['notice'];
 
         //渲染数据到页面模板上
+        $assignData['isTree']           = $isTree;
         $assignData['_page']            = $p;
         $assignData['_total']           = $total;
         $assignData['topMenu']          = $topMenu;
         $assignData['rightMenu']        = $rightMenu;
-        $assignData['listId']           = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
+        $assignData['listId']           = $listId;
         $assignData['listNode']         = $listNode;
         $assignData['listData']         = $listData;
         $assignData['pageData']         = $pageData;
@@ -109,8 +120,8 @@ class Logs extends Base
         Cookie('__forward__',$_SERVER['REQUEST_URI']);
 
         //异步请求处理
-        if(request()->isAjax()){
-
+        if(request()->isAjax())
+        {
             echo json_encode(['listData'=>$this->fetch('public/list/listData'),'listPage'=>$p]);exit();
         }
 
@@ -121,7 +132,6 @@ class Logs extends Base
     //清除日志
 	public function clear_logs()
     {
-
         //请求参数
         $parame                 = [];
         $parame['uid']          = $this->uid;

@@ -153,7 +153,8 @@ class Devform extends Base
 
             if (count($cname) !== 3)  return ['Code' => '200013', 'Msg'=>lang('200013')];
             if ($dbModel->checkFieldExist($saveData['tag'],$id,'tag')) return ['Code' =>'200012','Msg'=>lang('200012')];
-        }else
+        }
+        else
         {
             $formtpl            = $dbModel->getOneById($saveData['pid']);
             if (empty($formtpl))  return ['Code' => '200014', 'Msg'=>lang('200014')];

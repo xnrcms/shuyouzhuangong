@@ -20,11 +20,13 @@ use app\manage\controller\Base;
 class Usergroup extends Base
 {
     private $apiUrl         = [];
+    private $tpl            = null;
 
     public function __construct()
     {
         parent::__construct();
 
+        $this->tpl                    = new \xnrcms\DevTpl();
         $this->apiUrl['index']        = 'api/UserGroup/listData';
         $this->apiUrl['edit']         = 'api/UserGroup/detailData';
         $this->apiUrl['add_save']     = 'api/UserGroup/saveData';
@@ -36,19 +38,28 @@ class Usergroup extends Base
 	//列表页面
 	public function index()
     {
-		$menuid     = input('menuid',0) ;
-		$search 	= input('search','');
-        $page       = input('page',1);
+        //参数数据接收
+        $param      = request()->param();
+
+        //初始化模板
+        $tag        = ''; //默认当前路由为唯一标识，自己可以自定义标识
+        $tpl_title  = '用户组列表'; //初始化列表模板的名称，为空时不初始化
+        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,0);
+        $listNode   = $this->tpl->showTpl($tplid);
+        $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
+
+        //参数定义
+        $menuid     = isset($param['menuid']) ? $param['menuid'] : 0;
+        $page       = isset($param['page']) ? $param['page'] : 1;
+        $search     = $this->getSearchParame($param);
+        $isTree     = 0;
 
         //页面操作功能菜单
         $topMenu    = formatMenuByPidAndPos($menuid,2, $this->menu);
         $rightMenu  = formatMenuByPidAndPos($menuid,3, $this->menu);
 
-        //获取表头以及搜索数据
-        $tags       = strtolower(request()->controller() . '/' . request()->action());
-        $listNode   = $this->getListNote($tags) ;
-
         //获取列表数据
+        $parame             = [];
         $parame['uid']      = $this->uid;
         $parame['hashid']   = $this->hashid;
         $parame['page']     = $page;
@@ -87,11 +98,12 @@ class Usergroup extends Base
         $pageData['notice']             = ['网站系统用户组, 由平台设置管理.',];
 
         //渲染数据到页面模板上
+        $assignData['isTree']           = $isTree;
         $assignData['_page']            = $p;
         $assignData['_total']           = $total;
         $assignData['topMenu']          = $topMenu;
         $assignData['rightMenu']        = $rightMenu;
-        $assignData['listId']           = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
+        $assignData['listId']           = $listId;
         $assignData['listNode']         = $listNode;
         $assignData['listData']         = $listData;
         $assignData['pageData']         = $pageData;
@@ -101,8 +113,8 @@ class Usergroup extends Base
         Cookie('__forward__',$_SERVER['REQUEST_URI']);
 
         //异步请求处理
-        if(request()->isAjax()){
-
+        if(request()->isAjax())
+        {
             echo json_encode(['listData'=>$this->fetch('public/list/listData'),'listPage'=>$p]);exit();
         }
 
@@ -113,12 +125,19 @@ class Usergroup extends Base
 	//新增页面
 	public function add()
     {
-		//数据提交
+        //数据提交
         if (request()->isPost()) $this->update();
 
-        //表单模板
-        $tags                           = strtolower(request()->controller() . '/addedit');
-        $formData                       = $this->getFormFields($tags,0) ;
+        //参数数据接收
+        $param      = request()->param();
+
+        //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
+        $tag        = 'addedit';
+        $tpl_title  = '新增/编辑用户组表单'; //初始化列表模板的名称，为空时不初始化
+        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
+        $formNode   = $this->tpl->showTpl($tplid);
+        $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail(0);
@@ -133,8 +152,8 @@ class Usergroup extends Base
         cookie('__forward__',$_SERVER['REQUEST_URI']);
 
         //渲染数据到页面模板上
-        $assignData['formId']           = isset($formData['info']['id']) ? intval($formData['info']['id']) : 0;
-        $assignData['formFieldList']    = $formData['list'];
+        $assignData['formId']           = $formId;
+        $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['pageData']         = $pageData;
@@ -150,9 +169,16 @@ class Usergroup extends Base
 		//数据提交
         if (request()->isPost()) $this->update();
 
-		//表单模板
-        $tags                           = strtolower(request()->controller() . '/addedit');
-        $formData                       = $this->getFormFields($tags,1);
+        //参数数据接收
+        $param      = request()->param();
+
+        //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
+        $tag        = 'addedit';
+        $tpl_title  = '新增/编辑用户组表单'; //初始化列表模板的名称，为空时不初始化
+        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
+        $formNode   = $this->tpl->showTpl($tplid);
+        $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail($id);
@@ -167,8 +193,8 @@ class Usergroup extends Base
         cookie('__forward__',$_SERVER['REQUEST_URI']);
 
         //渲染数据到页面模板上
-        $assignData['formId']           = isset($formData['info']['id']) ? intval($formData['info']['id']) : 0;
-        $assignData['formFieldList']    = $formData['list'];
+        $assignData['formId']           = $formId;
+        $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['pageData']         = $pageData;
@@ -181,11 +207,13 @@ class Usergroup extends Base
     //数据删除
     public function del()
     {
-        $ids     = request()->param();
-        $ids     = (isset($ids['ids']) && !empty($ids['ids'])) ? $ids['ids'] : $this->error('请选择要操作的数据');;
+        //参数数据接收
+        $param   = request()->param();
+        $ids     = (isset($param['ids']) && !empty($param['ids'])) ? $param['ids'] : $this->error('请选择要操作的数据');;
         $ids     = is_array($ids) ? implode($ids,',') : '';
-$this->error('未设置接口地址1');
+
         //请求参数
+        $parame                 = [];
         $parame['uid']          = $this->uid;
         $parame['hashid']       = $this->hashid;
         $parame['id']           = $ids ;
@@ -223,36 +251,28 @@ $this->error('未设置接口地址1');
     //处理提交新增或编辑的数据
     private function update()
     {
-        $formid                     = intval(input('formId'));
-        $formInfo                   = cache('DevformDetails'.$formid);
-        if(empty($formInfo)) $this->error('表单模板数据不存在');
-
         //表单数据
-        $postData                   = input('post.');
+        $postData                   = request()->param();
 
-        //用户信息
-        $postData['uid']            = $this->uid;
-        $postData['hashid']         = $this->hashid;
+        //表单模板
+        $tplid                      = $this->tpl->checkTpl(intval($postData['formId']),1);
+        if($tplid <= 0) $this->error('表单模板数据不存在');
 
-        //表单中不允许提交至接口的参数
-        $notAllow                   = ['formId'];
-
-        //过滤不允许字段
-        if(!empty($notAllow)){
-
-            foreach ($notAllow as $key => $value) unset($postData[$value]);
-        }
+        //接口数据
+        $signData                   = $this->tpl->getFormTplData($tplid,$postData);
+        $signData['uid']            = $this->uid;
+        $signData['hashid']         = $this->hashid;
         
         //请求数据
         if (!isset($this->apiUrl[request()->action().'_save'])||empty($this->apiUrl[request()->action().'_save'])) 
         $this->error('未设置接口地址');
 
-        $res       = $this->apiData($postData,$this->apiUrl[request()->action().'_save']) ;
+        $res       = $this->apiData($signData,$this->apiUrl[request()->action().'_save']) ;
         $data      = $this->getApiData() ;
 
         if($res){
 
-            $this->success($postData['id']  > 0 ? '更新成功' : '新增成功',Cookie('__forward__')) ;
+            $this->success($signData['id']  > 0 ? '更新成功' : '新增成功',Cookie('__forward__')) ;
         }else{
 
             $this->error($this->getApiError()) ;
@@ -289,11 +309,13 @@ $this->error('未设置接口地址1');
         return $defaultData;
     }
 
-    public function auth($id = 0){
-
+    public function auth($id = 0)
+    {
         if(request()->isPost())
         {   
-            $postData       = input('post.');
+            //表单数据
+            $postData       = request()->param();
+
             $value          = isset($postData['rules']) ? $postData['rules'] : [];
             if ($id <= 0) $this->error('更新失败！');
 
@@ -312,6 +334,7 @@ $this->error('未设置接口地址1');
         /**请求接口查询用户拥有的权限*/
         
         //请求参数
+        $parame             = [];
         $parame['uid']      = $this->uid;
         $parame['hashid']   = $this->hashid;
         $parame['id']       = $id ;
@@ -333,17 +356,20 @@ $this->error('未设置接口地址1');
 
         if (!empty($menuList)) {
             
-            foreach ($menuList as $key => $value) {
-                
-                if (($key+3)%3 == 0) {
+            foreach ($menuList as $key => $value)
+            {    
+                if (($key+3)%3 == 0)
+                {
                     $authList['left'][]     = $value;
                 }
 
-                if (($key+3)%3 == 1) {
+                if (($key+3)%3 == 1)
+                {
                     $authList['middle'][]   = $value;
                 }
 
-                if (($key+3)%3 == 2) {
+                if (($key+3)%3 == 2)
+                {
                     $authList['right'][]    = $value;
                 }
             }

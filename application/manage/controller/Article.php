@@ -60,6 +60,7 @@ class Article extends Base
         $rightMenu  = formatMenuByPidAndPos($menuid,3, $this->menu);
 
         //获取列表数据
+        $parame             = [];
         $parame['uid']      = $this->uid;
         $parame['hashid']   = $this->hashid;
         $parame['page']     = $page;
@@ -223,6 +224,7 @@ class Article extends Base
         $ids     = is_array($ids) ? implode($ids,',') : '';
 
         //请求参数
+        $parame                 = [];
         $parame['uid']          = $this->uid;
         $parame['hashid']       = $this->hashid;
         $parame['id']           = $ids ;

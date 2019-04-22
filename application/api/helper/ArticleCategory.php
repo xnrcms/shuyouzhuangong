@@ -232,7 +232,7 @@ class ArticleCategory extends Base
         //...
         
         //执行删除操作
-    	$delCount				= $dbModel->delData($id);
+    	$delCount				= $dbModel->deleteData($id);
 
     	return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
     }

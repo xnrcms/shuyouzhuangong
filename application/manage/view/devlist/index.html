@@ -125,13 +125,13 @@ function delfun(obj,msg,type) {
       layer.closeAll();
   });
 }
-function setLists(data,typeid){
-
-  if (data.ac == 1) {
+function setLists(data,typeid)
+{
+  if (data.ac == 1)
+  {
       //编辑
       var obj       = $("#devform_id_"+data.id);
-      var showId    = data.pid == 0 ?  '(<font color="red">'+data.id+'</font>)&nbsp;&nbsp;' : '';
-      obj.find('td').eq(0).find('span>em').html('<i class="fa fa-cog"></i>'+data.title+showId+'<i class="arrow"></i>');
+      obj.find('td').eq(0).find('span>em').html('<i class="fa fa-cog"></i>'+data.title+'<i class="arrow"></i>');
       //编辑
       var index     = 1;
       if (data.status == 1) {

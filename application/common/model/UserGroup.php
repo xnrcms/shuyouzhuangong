@@ -42,6 +42,61 @@ class UserGroup extends Base
         return $model;
     }
 
+    public function getRow($id = 0)
+    {
+      $info       = $this->getOneById($id);
+      $info       = !empty($info) ? $info->toArray() : [];
+
+      //自定义扩展
+      //.......
+
+      return $info;
+    }
+
+    public function getList($parame)
+    {
+      $ckey       = (isset($parame['cacheKey']) && !empty($parame['cacheKey'])) ? json_encode($parame['cacheKey']) : '';
+      $ctag       = 'table_' . $this->name . '_getList';
+      $data       = $this->getCache($ckey);
+
+      //自定义扩展
+      //.......
+      
+      if (empty($data))
+      {
+          $data   = $this->getPageList($parame);
+
+          $this->setCache($ckey,$data,$ctag);
+      }
+
+      return $data;
+    }
+
+    public function saveData($id = 0,$parame = [])
+    {
+        $info      = $id <= 0 ? $this->addData($parame) : $this->updateById($id,$parame);
+        $info      = !empty($info) ? $info->toArray() : [];
+
+        //自定义扩展
+        //.......
+        
+        $this->clearCache(['ctag'=>'table_' . $this->name . '_getList']);
+
+        return $info;
+    }
+
+    public function deleteData($id = 0)
+    {
+      $delCount     = $this->delData($id);
+
+      //自定义扩展
+      //.......
+      
+      $this->clearCache(['ctag'=>'table_' . $this->name . '_getList']);
+
+      return $delCount;
+    }
+    
     /**
      * 通过用户ID获取用户组列表
      * @param  number $uid 用户ID
@@ -51,7 +106,8 @@ class UserGroup extends Base
     {
       if (empty($id))  return [];
 
-      if (is_numeric($id)) {
+      if (is_numeric($id))
+      {
         $id   = [$id];
       }
 
@@ -60,8 +116,8 @@ class UserGroup extends Base
       return $lists;
     }
 
-    public function checkValue($value,$id,$field){
-
+    public function checkValue($value,$id,$field)
+    {
         $res    = $this->where('id','not in',[$id])->where($field,'eq',$value)->value($field);
 
         return !empty($res) ? true : false;
@@ -70,16 +126,17 @@ class UserGroup extends Base
     public function getAllUserGorupTitle()
     {
         $ckey                       = md5('getAllUserGorupTitle');
-        $ctag                       = 'user_group_list';
+        $ctag                       = 'table_' . $this->name . '_getList';
         $data                       = $this->getCache($ckey);
-        if (empty($data)){
-
+        if (empty($data))
+        {
             $data                   = $this->where('status','=',1)->field('id,title')->select()->toArray();
             $this->setCache($ckey,$data,$ctag);
         }
 
         return $data;
     }
+
     //自行扩展更多
     //...
 }

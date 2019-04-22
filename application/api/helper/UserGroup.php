@@ -100,24 +100,22 @@ class UserGroup extends Base
 		//数据分页页数定义
 		$modelParame['page']		= (isset($parame['page']) && $parame['page'] > 0) ? $parame['page'] : 1;
 
-		//数据缓存是时间，默认0 不缓存 ,单位秒
-		$modelParame['cacheTime']	= 0;
+		//定义缓存KEY
+        $modelParame['cacheKey']    = [
+            isset($parame['search']) ? $parame['search'] : '',
+            $modelParame['limit'],
+            $modelParame['order'],
+            $modelParame['page'],
+        ];
 
-        $ckey                       = md5(serialize($modelParame));
-        $ctag                       = 'user_group_list';
-        $data                       = $dbModel->getCache($ckey);
+        //列表数据
+        $lists                      = $dbModel->getList($modelParame);
 
-        if (empty($data)) {
-            $lists                  = $dbModel->getPageList($modelParame);
-            $data                   = (isset($lists['lists']) && !empty($lists['lists'])) ? $lists['lists'] : [];
+        //数据格式化
+        $data                       = (isset($lists['lists']) && !empty($lists['lists'])) ? $lists['lists'] : [];
 
-            $dbModel->setCache($ckey,$data,$ctag);
-        }
-
-        $title      = $dbModel->getAllUserGorupTitle();
-
-    	if (!empty($data)) {
-
+    	if (!empty($data))
+        {
             //自行定义格式化数据输出
     		//foreach($data as $k=>$v){
 
@@ -144,6 +142,7 @@ class UserGroup extends Base
         $saveData['title']          = isset($parame['title']) ? $parame['title'] : '';
         $saveData['description']    = isset($parame['description']) ?  $parame['description'] : '';
         $saveData['status']         = isset($parame['status']) ? $parame['status'] : 0;
+        $saveData['status']         = $saveData['status'] == 1 ? 1 : 2;
         $saveData['rules']          = isset($parame['rules'])  ? $parame['rules'] : '';
         $saveData['update_time']    = time();
 
@@ -151,47 +150,26 @@ class UserGroup extends Base
         $id                         = isset($parame['id']) ? intval($parame['id']) : 0;
 
         //检测分组名称是否存在
-        if ($dbModel->checkValue($saveData['title'],$id,'title')) {
-
+        if ($dbModel->checkValue($saveData['title'],$id,'title'))
+        {
             return ['Code' => '700002', 'Msg'=>lang('700002')];
         }
-
-        $saveData                   = [];
-        //$saveData['parame']         = isset($parame['parame']) ? $parame['parame'] : '';
 
         //规避遗漏定义入库数据
         if (empty($saveData)) return ['Code' => '120021', 'Msg'=>lang('120021')];
 
         //自行处理数据入库条件
         //...
-		
-        //通过ID判断数据是新增还是更新
-        if ($id <= 0) {
 
-            //新增
-            $saveData['create_time']                = time();
-            $saveData['status']                     = 1;
-
-            $info                                   = $dbModel->addData($saveData);
-
-        }else{
-
-            //编辑
-            $saveData['status']                     = $saveData['status'] == 1 ? 1 : 2;
-            $saveData['update_time']                = time();
-
-            $info                                   = $dbModel->updateById($id,$saveData);
+        //通过ID判断数据是新增还是更新 定义新增条件下数据
+        if ($id <= 0)
+        {
+            $saveData['create_time']        = time();
         }
 
-        if (!empty($info)) {
+        $info    = $dbModel->saveData($id,$saveData);
 
-            $dbModel->clearCache(['ctag'=>'user_group_list']);
-
-            return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$info];
-        }else{
-
-            return ['Code' => '100015', 'Msg'=>lang('100015')];
-        }
+        return !empty($info) ? ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$info] : ['Code' => '100015', 'Msg'=>lang('100015')];
     }
 
     /**
@@ -211,8 +189,8 @@ class UserGroup extends Base
         //数据详情
     	$info 				= $dbModel->getOneById($id);
 
-    	if (!empty($info)) {
-    		
+    	if (!empty($info))
+        {	
             //格式为数组
             $info                   = $info->toArray();
 
@@ -241,17 +219,9 @@ class UserGroup extends Base
         if ($id <= 0) return ['Code' => '120023', 'Msg'=>lang('120023')];
 
         //根据ID更新数据
-    	$info 				= $dbModel->updateById($id,[$parame['fieldName']=>$parame['updata']]);
+        $info               = $dbModel->saveData($id,[$parame['fieldName']=>$parame['updata']]);
 
-    	if (!empty($info)) {
-
-            $dbModel->clearCache(['ctag'=>'user_group_list']);
-
-    		return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['id'=>$id]];
-    	}else{
-
-    		return ['Code' => '100015', 'Msg'=>lang('100015')];
-    	}
+        return !empty($info) ? ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$info] : ['Code' => '100015', 'Msg'=>lang('100015')];
     }
 
     /**
@@ -272,11 +242,9 @@ class UserGroup extends Base
         //...
         
         //执行删除操作
-    	$delCount				= $dbModel->delData($id);
+        $delCount               = $dbModel->deleteData($id);
 
-        $dbModel->clearCache(['ctag'=>'user_group_list']);
-
-    	return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
+        return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
     }
 
     /*api:5d336bd00991bd597d9cd8a913e33b81*/

@@ -30,8 +30,7 @@ class Devform extends Base
 
         $this->apiUrl['index']        = 'admin/Devform/listData';
         $this->apiUrl['edit']         = 'admin/Devform/detailData';
-        $this->apiUrl['add_save']     = 'admin/Devform/saveData';
-        $this->apiUrl['edit_save']    = 'admin/Devform/saveData';
+        $this->apiUrl['save_data']    = 'admin/Devform/saveData';
         $this->apiUrl['quickedit']    = 'admin/Devform/quickEditData';
         $this->apiUrl['del']          = 'admin/Devform/delData';
         $this->apiUrl['release']      = 'admin/Devform/releaseData';
@@ -226,8 +225,11 @@ class Devform extends Base
 
 		$signData['config']			= !empty($config) ? json_encode($config) : '';
 
+		if (!isset($this->apiUrl['save_data']) || empty($this->apiUrl['save_data']))
+		$this->error('未设置接口地址');
+
 		//请求数据
-        $res       = $this->apiData($signData,$this->apiUrl[request()->action().'_save']) ;
+        $res       = $this->apiData($signData,$this->apiUrl['save_data']) ;
         $devform   = $this->getApiData() ;
 
 		if($res && !empty($devform))
@@ -271,8 +273,8 @@ class Devform extends Base
         $res       = $this->apiData($parame,$this->apiUrl[request()->action()]) ;
         $data      = $this->getApiData() ;
 
-		if($res){
-
+		if($res)
+		{
 			//数据返回
 			$this->success('发布成功',Cookie('__forward__'));
 		} else {
@@ -293,7 +295,8 @@ class Devform extends Base
 
 		$firstid 	= 0;
 		$firstpid 	= $id;
-		if (!empty($fieldList)) {
+		if (!empty($fieldList))
+		{
 			$firstid	= $fieldList[0]['id'];
 			$firstpid	= $fieldList[0]['pid'];
 		}
@@ -311,14 +314,14 @@ class Devform extends Base
 		if ($pid <=0 && $id <= 0) $fieldInfo 	= [];
 
 		$fieldInfo 	= ['id'=>$id,'pid'=>$pid,'status'=>1,'require'=>0,'type'=>'string','edit'=>0,'search'=>0];
-		if ($id >0) {
-
+		if ($id >0)
+		{
 			$tpl 			= new \xnrcms\DevTpl(1);
     		$fieldInfo 		= $tpl->getTplById($id);
 
 			//数据格式化
-            if($fieldInfo['pid'] > 0){
-
+            if($fieldInfo['pid'] > 0)
+            {
                 $field 			= json_decode($fieldInfo['config'] , true);
                 $field['attr'] 	= !empty($field['attr']) ? str_replace(' ',"\r", $field['attr']): '' ;
                 $fieldInfo 		= array_merge($fieldInfo,$field) ;
@@ -344,7 +347,7 @@ class Devform extends Base
 		$releaseUrl 	= url('Devform/release',['ids'=>$data['id']]);
 
 		$htmls = '<tr id="devform_id_'.$data['id'].'" data-id ="'.$data['id'].'" data-pid ="'.$data['pid'].'" >
-                <td align="left" class="handle" width="70%">
+                <td align="left" class="handle" width="78%">
                   <div>
                     <span class="btn"><em><i class="fa fa-cog"></i>'.$data['title'].'<i class="arrow"></i></em>
                     <ul>
@@ -357,7 +360,7 @@ class Devform extends Base
                   </div>
                 </td>
 
-                <td align="center" class="" width="30%">
+                <td align="center" class="" width="22%">
                   <div data-yes="启用" data-no="禁用">';
         if ($data['status'] == 1) {
 
@@ -420,15 +423,16 @@ class Devform extends Base
         $allDevform         = $this->getApiData() ;
 
         $devfrom 			= (!empty($allDevform) && isset($allDevform['lists'])) ? $allDevform['lists'] : [];
-
 		$fieldList 			= $res ? $devfrom : [];
 
-		if(!empty($fieldList)){
-			foreach ($fieldList as $key => $value) {
-
-				foreach ($value as $kk => $vv) {
-					
-					if ($kk == 'config') {
+		if(!empty($fieldList))
+		{
+			foreach ($fieldList as $key => $value)
+			{
+				foreach ($value as $kk => $vv)
+				{
+					if ($kk == 'config')
+					{
 						$fieldList[$key][$kk] 	= json_decode($vv,true);
 					}
 				}
@@ -499,7 +503,7 @@ class Devform extends Base
 		$signData['config']		= json_encode($config);
 
 		//请求数据
-        $res       			= $this->apiData($signData,$this->apiUrl['edit_save']) ;
+        $res       			= $this->apiData($signData,$this->apiUrl['save_data']) ;
         $devform   			= $this->getApiData() ;
 
 		if($res && !empty($devform))
@@ -532,12 +536,14 @@ class Devform extends Base
 
 		$fieldList 			= $res ? $devfrom : [];
 
-		if(!empty($fieldList)){
-			foreach ($fieldList as $key => $value) {
-
-				foreach ($value as $kk => $vv) {
-					
-					if ($kk == 'config') {
+		if(!empty($fieldList))
+		{
+			foreach ($fieldList as $key => $value)
+			{
+				foreach ($value as $kk => $vv)
+				{
+					if ($kk == 'config')
+					{
 						$fieldList[$key][$kk] 	= json_decode($vv,true);
 					}
 				}
@@ -577,8 +583,8 @@ class Devform extends Base
 	        $parame['cloneData']	= json_encode($clone);
 
 	        $res 					= $this->apiData($parame,'admin/Devform/saveClone');
-	        if($res){
-
+	        if($res)
+	        {
 				$this->success( '克隆成功', Cookie('__forward__'));
 			}
 			else
@@ -596,8 +602,8 @@ class Devform extends Base
     {
         $info           = [];
 
-        if ($id > 0) {
-            
+        if ($id > 0)
+        {    
             //请求参数
             $parame             = [];
             $parame['uid']      = $this->uid;
@@ -624,8 +630,8 @@ class Devform extends Base
 	        $this->success( $msg, Cookie('__forward__'));
     	}
 
-    	if ($id<= 0) {
-
+    	if ($id<= 0)
+    	{
     		$info['id'] 	= 0;
     		$info['pid'] 	= $param['pid'];
     		$info['edit'] 	= 0;
@@ -640,7 +646,8 @@ class Devform extends Base
     	$config 	= !empty($config) ? json_decode($config,true) : [];
     	$info 		= !empty($info) ? array_merge($info,$config) : [];
 
-    	if (!empty($info)) {
+    	if (!empty($info))
+    	{
     		$info['fdone'] 	= [$info['add'] == 1 ? 1 : 0,$info['edit'] == 1 ? 2 : 0];
     	}
 

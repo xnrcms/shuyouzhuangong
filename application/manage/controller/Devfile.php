@@ -22,18 +22,14 @@ use app\manage\controller\Base;
  */
 class Devfile extends Base
 {
-	//预定义
-    private $listId         = [];
-    private $formId         = [];
     private $apiUrl         = [];
+    private $tpl            = null;
 
     public function __construct()
     {
         parent::__construct();
 
-        $this->listId['index']        = 90;
-        $this->formId['add']          = 178;
-        $this->formId['edit']         = 178;
+        $this->tpl                    = new \xnrcms\DevTpl();
     }
 
 	/**
@@ -42,28 +38,38 @@ class Devfile extends Base
 	 */
 	public function index()
 	{
-		$menuid     = input('menuid') ;
-        $search     = input('search','');
+		//参数数据接收
+        $param      = request()->param();
+
+        //初始化模板
+        $tag        = ''; //默认当前路由为唯一标识，自己可以自定义标识
+        $tpl_title  = '脚本文件列表'; //初始化列表模板的名称，为空时不初始化
+        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,0);
+        $listNode   = $this->tpl->showTpl($tplid);
+        $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
+
+        //参数定义
+        $menuid     = isset($param['menuid']) ? $param['menuid'] : 0;
+        $page       = isset($param['page']) ? $param['page'] : 1;
+        $search     = $this->getSearchParame($param);
+        $isTree     = 0;
 
         $topMenu    = formatMenuByPidAndPos($menuid,2, $this->menu);
         $rightMenu  = formatMenuByPidAndPos($menuid,3, $this->menu);
 
-        //获取表头以及搜索数据
-        $listNode   = $this->getListNote(request()->controller()) ;
-
 		$allFile        = glob ( \Env::get('APP_PATH') . 'manage/Controller/' . '*' );
 		$hideFile 		= ['Devfile','Devform','Devlist','Devmenu','Base','Devapi','Devproject','Devconfig'];
 
-        if (!empty($allFile)) {
-
-            foreach ($allFile as $key => $file) {
-
+        if (!empty($allFile))
+        {
+            foreach ($allFile as $key => $file)
+            {
             	$finfo 				= pathinfo($file);
             	$basename 			= $finfo['basename'];
             	$cname 				= str_replace('.php','',$basename);
 
-            	if ($finfo['extension'] != 'php' || in_array($cname,$hideFile)) {
-
+            	if ($finfo['extension'] != 'php' || in_array($cname,$hideFile))
+            	{
             		unset($allFile[$key]);continue;
             	}
 
@@ -86,13 +92,14 @@ class Devfile extends Base
 		cookie('__forward__',$_SERVER['REQUEST_URI']);
 		
         //渲染数据到页面模板上
+        $assignData['isTree']           = $isTree;
 		$assignData['_page'] 			= '';
 		$assignData['_total'] 			= count($allFile);
 		$assignData['topMenu'] 			= $topMenu;
 		$assignData['rightMenu'] 		= $rightMenu;
 		$assignData['pageData'] 		= $pageData;
-		$assignData['listId'] 			= isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
-		$assignData['listNode'] 		= $listNode;
+        $assignData['listId']           = $listId;
+        $assignData['listNode']         = $listNode;
 		$assignData['listData'] 		= $fname;
 		$this->assignData($assignData);
 
@@ -108,8 +115,16 @@ class Devfile extends Base
 		//数据提交
 		if (request()->isPost()) $this->update();
 
-		//表单模板数据
-		$formData           			= $this->getFormFields(request()->controller(),0) ;
+        //参数数据接收
+        $param      = request()->param();
+
+        //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
+        $tag        = 'addedit';
+        $tpl_title  = '新增脚本文件表单'; //初始化列表模板的名称，为空时不初始化
+        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
+        $formNode   = $this->tpl->showTpl($tplid);
+        $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
 		$info               			= [];
         //页面数据
@@ -123,8 +138,8 @@ class Devfile extends Base
 		cookie('__forward__',$_SERVER['REQUEST_URI']);
 
         //渲染数据到页面模板上
-		$assignData['formId'] 			= isset($formData['info']['id']) ? intval($formData['info']['id']) : 0;
-		$assignData['formFieldList'] 	= $formData['list'];
+        $assignData['formId']           = $formId;
+        $assignData['formFieldList']    = $formList;
 		$assignData['info'] 			= $info;
 		$assignData['defaultData'] 		= $this->getDefaultParameData();
 		$assignData['pageData'] 		= $pageData;

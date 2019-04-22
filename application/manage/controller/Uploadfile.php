@@ -43,6 +43,7 @@ class Uploadfile extends Base
 
         $search['tags']     = $tags;
 
+        $parame             = [];
         $parame['uid']      = $this->uid;
         $parame['hashid']   = $this->hashid;
         $parame['page']     = $page;

@@ -41,11 +41,9 @@ class Devproject extends Base
         $param      = request()->param();
 
         //初始化列表模板 默认当前路由为唯一标识，自己可以自定义标识
-        $tag        = '';
-        $tpl_title  = '项目列表'; //初始化列表模板的名称，为空时不初始化
-        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,0);
-        $listNode   = $this->tpl->showTpl($tplid);
+        $listNode   = $this->tpl->showListTpl($this->getTplData('','项目列表','list'));
         $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
+        $listTag    = isset($listNode['tags']) ? $listNode['tags'] : '';
 
         //参数定义
         $menuid     = isset($param['menuid']) ? $param['menuid'] : 0;
@@ -106,7 +104,8 @@ class Devproject extends Base
         $this->assignData($assignData);
 
         //记录当前列表页的cookie
-        Cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__listtag__',$listTag);
 
         //异步请求处理
         if(request()->isAjax()){
@@ -128,11 +127,10 @@ class Devproject extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $tag        = request()->module().'/'.request()->controller() . '/addedit';
-        $tpl_title  = '新增/编辑项目表单'; //初始化列表模板的名称，为空时不初始化
-        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
-        $formNode   = $this->tpl->showTpl($tplid);
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','新增/编辑项目表单','form'),0);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail(0);
@@ -145,10 +143,12 @@ class Devproject extends Base
         
         //记录当前列表页的cookie
         cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__formtag__',$formTag);
 
         //渲染数据到页面模板上
         $assignData['formId']           = $formId;
-        $assignData['formFieldList']    = $formNode['list'];
+        $assignData['formTag']          = $formTag;
+        $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['pageData']         = $pageData;
@@ -168,11 +168,10 @@ class Devproject extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $tag        = request()->module().'/'.request()->controller() . '/addedit';
-        $tpl_title  = '新增/编辑项目表单'; //初始化列表模板的名称，为空时不初始化
-        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
-        $formNode   = $this->tpl->showTpl($tplid);
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','新增/编辑项目表单','form'),1);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail($id);
@@ -186,10 +185,11 @@ class Devproject extends Base
         
         //记录当前列表页的cookie
         cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__formtag__',$formTag);
 
         //渲染数据到页面模板上
         $assignData['formId']           = $formId;
-        $assignData['formFieldList']    = $formNode['list'];
+        $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['pageData']         = $pageData;
@@ -247,8 +247,9 @@ class Devproject extends Base
     {
         //表单数据
         $postData                = request()->param();
-        $tplid                   = $this->tpl->checkTpl(intval($postData['formId']),1);
-        if($tplid <= 0) $this->error('表单模板数据不存在');
+
+        //表单模板
+        if(!$this->tpl->checkFormTpl($postData)) $this->error('表单模板数据不存在');
 
         $allowData               = ['id','title','description','web_url'];
         $signData                = [];

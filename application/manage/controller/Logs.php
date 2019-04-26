@@ -49,11 +49,9 @@ class Logs extends Base
         $param      = request()->param();
 
         //初始化模板
-        $tag        = ''; //默认当前路由为唯一标识，自己可以自定义标识
-        $tpl_title  = '操作日志列表'; //初始化列表模板的名称，为空时不初始化
-        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,0);
-        $listNode   = $this->tpl->showTpl($tplid);
+        $listNode   = $this->tpl->showListTpl($this->getTplData('','操作日志列表','list'));
         $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
+        $listTag    = isset($listNode['tags']) ? $listNode['tags'] : '';
 
         //参数定义
         $menuid     = isset($param['menuid']) ? $param['menuid'] : 0;
@@ -117,7 +115,8 @@ class Logs extends Base
         $this->assignData($assignData);
 
         //记录当前列表页的cookie
-        Cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__listtag__',$listTag);
 
         //异步请求处理
         if(request()->isAjax())

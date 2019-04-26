@@ -106,5 +106,20 @@ class Devlist extends Base
 
     /*api:f7cbd4d84eec5b63f3edb55034775e00*/
 
+    /*api:3fe5b175000c2be3c357b421ec984081*/
+    /**
+     * 列表模板初始化接口
+     * @access public
+     * @param  [array] $parame 扩展参数
+     * @return [json]          接口数据输出
+    */
+    public function initListData($parame = []){
+
+        //执行接口调用
+        return $this->execApi($parame);
+    }
+
+    /*api:3fe5b175000c2be3c357b421ec984081*/
+
     /*接口扩展*/
 }

@@ -67,6 +67,11 @@ class Devlist extends Base
     {
         if ((int)$id <= 0) return [];
 
-        return $this->where('id|pid','eq',$id)->select()->toArray();
+        return $this->where('id|pid','eq',$id)->order('sort DESC')->select()->toArray();
+    }
+
+    public function getTplIdByCname($cname = '')
+    {
+        return $this->where('cname','=',$cname)->value('id');
     }
 }

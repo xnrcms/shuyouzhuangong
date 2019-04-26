@@ -1,9 +1,3 @@
-{if is_dev() && isset($listNode["info"]["id"])}
-<a href="javascript:;" onClick="return CommonJs.JsAddEdit('字段设置','{:url("Devlist/setListField","id=0&pid=".$listNode["info"]["id"]."&type=0")}',670,850);" 
-style="position:relative;left:-15px;top:30px;">
-<i class="fa fa-plus"></i>
-</a>
-{/if}
 <div class="hDiv">
     <div class="hDivBox">
         <table cellspacing="0" cellpadding="0" width="100%">
@@ -21,9 +15,9 @@ style="position:relative;left:-15px;top:30px;">
                         <div>{$vo.title}
                         {if is_dev()}
                         <a href="javascript:;">
-                        <i class="fa fa-pencil-square-o" onClick="return CommonJs.JsAddEdit('【{$vo.title}】字段设置','{:url("Devlist/setListField","id=".$vo["id"]."&pid=".$listNode["info"]["id"]."&type=0")}',670,850);"></i></a>
+                        <i class="fa fa-pencil-square-o" onClick="return CommonJs.JsAddEdit('【{$vo.title}】字段设置','{:url("Devlist/setListField","id=".$vo["id"]."&pid=".$listNode["info"]["id"]."&type=0")}',800,650);"></i></a>
                         <a href="javascript:;">
-                        <i class="fa fa-trash-o" onClick="CommonJs.JsStatus('{$vo['id']}','{:url("Devlist/delListField")}','【{$vo.title}】字段')"></i>
+                        <i class="fa fa-trash-o" onClick="CommonJs.JsStatus('{$vo['id']}','{:url("Devlist/del")}','删除【{$vo.title}】字段')"></i>
                         </a>
                         {/if}</div>
                         </th>

@@ -47,6 +47,59 @@ class DevTpl
     return $this->tplid;
   }
 
+  //显示表单模板
+  public function showFormTpl($tplData = [],$isEdit = 1)
+  {
+    $data     = $this->tplData($tplData);
+
+    return $this->formatFormTplData($data['list'],$data['info'],$data['tags'],$isEdit);
+  }
+
+  //显示列表模板
+  public function showListTpl($tplData = [])
+  {
+    $data     = $this->tplData($tplData);
+
+    return $this->formatListTplData($data['list'],$data['info'],$data['tags']);
+  }
+
+  private function tplData($tplData = [])
+  {
+    $data['tags']   = '';
+    $data['info']   = [];
+    $data['list']   = [];
+
+    if (empty($tplData)) return $data;
+
+    foreach ($tplData as $key => $tvalue)
+    {
+      $data['tags'] = $key;
+
+      if (!empty($tvalue))
+      {
+        foreach ($tvalue as $value)
+        {
+          if (!isset($value['status']) || $value['status'] != 1)  continue;
+
+          if ( isset($value['pid']) && $value['pid'] == 0)
+          {
+            $data['info']   = $value;
+          }
+
+          if ( isset($value['pid']) && $value['pid'] > 0)
+          {
+            $config         = !empty($value['config']) ? json_decode($value['config'], true) : [];
+            unset($value['config']);
+
+            $data['list'][] = array_merge($value,$config);;
+          }
+        }
+      }
+    }
+
+    return $data;
+  }
+
   //显示模板
   public function showTpl($pid = 0,$isEdit=1)
   {
@@ -75,7 +128,7 @@ class DevTpl
   }
 
   //格式化列表模板数据
-  public function formatListTplData($listNote = [],$info=[],$isEdit=0)
+  private function formatListTplData($listNote = [], $info = [], $tags = '')
   {
       //初始化数据
       $search                 = [];
@@ -99,13 +152,16 @@ class DevTpl
 
               if (isset($default[0]) && isset($default[1]))
               {
-                  if ($default[0] == 'parame') {
+                  if ($default[0] == 'parame')
+                  {
                       $listNote[$index]['default']['type'] = $default[0];
                       $listNote[$index]['default']['parame'] = $default[1];
-                  } else {
+                  } else
+                  {
                       $parame = array() ;
                       $arr = explode(',',$default[1]) ;
-                      foreach ($arr as $key => $value) {
+                      foreach ($arr as $key => $value)
+                      {
                           $arr = explode('=',$value) ;
                           $parame[$arr[0]] = $arr[1] ;
                       }
@@ -114,7 +170,8 @@ class DevTpl
                   }
               }
 
-              if ($counts == $nums) {
+              if ($counts == $nums)
+              {
                   $item['width']          = $width >= 100 ? 0 : 100-$width;
               }else{
                   $width                  += $item['width'];
@@ -134,7 +191,8 @@ class DevTpl
               $thead[$index]['default']  = $item['default'] ;
 
               //搜索位数据
-              if ($item['search'] ==1){
+              if ($item['search'] ==1)
+              {
                   $search[$i]['id']       = $item['id'] ;
                   $search[$i]['title']    = $item['title'] ;
                   $search[$i]['tag']      = $item['tag'] ;
@@ -153,13 +211,14 @@ class DevTpl
       $data['info']   = $info ;
       $data['search'] = $search ;
       $data['thead']  = $thead ;
+      $data['tags']   = $tags;
 
       return $data ;
   }
 
-  public function formatFormTplData($formFields=[],$info=[],$isEdit=0)
+  private function formatFormTplData($formFields = [], $info = [], $tags = '', $isEdit = 0)
   {
-    $type                   = $isEdit>0 ? 'edit' : 'add' ;
+    $type                   = $isEdit > 0 ? 'edit' : 'add' ;
 
     //格式化
     $i                      = 0;
@@ -206,7 +265,7 @@ class DevTpl
         }
     }
 
-    return ['info'=>$info,'list'=>$arr];
+    return ['tags'=>$tags,'info'=>$info,'list'=>$arr];
   }
 
   //获取模板信息
@@ -340,7 +399,8 @@ class DevTpl
     $updata['cname']        = $cname;
     $updata['update_time']  = $this->tt;
 
-    if ($id > 0) {
+    if ($id > 0)
+    {
       //清理缓存
       cache(md5('getTplById_tplType='.$this->tplType.'_'.$id),null);
       cache(md5('tpl_tplType='.$this->tplType.'_pid='.$pid),null);
@@ -361,36 +421,38 @@ class DevTpl
   }
 
   //获取模板允许提交的数据
-  public function getFormTplData($tplid = 0,$postData = [])
+  public function getFormTplData($param = [])
   {
-      if (empty($tplid) || empty($postData))  return [];
+    $formtag    = isset($param['formTag']) ? trim($param['formTag']) : '';
 
-      $formNode   = $this->showTpl($tplid,'-2');
-      $field      = [];
-      $signData   = [];
+    if (empty($formtag) || empty($param))  return [];
 
-      //定义允许提交的字段
-      if (!empty($formNode) && isset($formNode['list']) && !empty($formNode['list']))
-      {
-          foreach ($formNode['list'] as $arr)
-          {
-              $field[]    = $arr['tag'];
-          }
-      }
-      
-      //过滤允许提交的数据
-      if (!empty($field))
-      {
-          foreach ($postData as $key => $value)
-          {
-              if (in_array($key,$field))
-              {
-                  $signData[$key]     = $value;
-              }
-          }
-      }
+    $list       = $this->getReleaseData($formtag,'form','list');
+    $field      = [];
+    $signData   = [];
 
-      return $signData;
+    //定义允许提交的字段
+    if (!empty($list))
+    {
+        foreach ($list as $arr)
+        {
+            $field[]    = $arr['tag'];
+        }
+    }
+    
+    //过滤允许提交的数据
+    if (!empty($field))
+    {
+        foreach ($param as $key => $value)
+        {
+            if (in_array($key,$field))
+            {
+                $signData[$key]     = $value;
+            }
+        }
+    }
+
+    return $signData;
   }
 
   //校验调用标识是否存在
@@ -409,24 +471,11 @@ class DevTpl
   }
 
   //通过模板ID获取模板数据
-  public function getTplById($id=0)
+  public function getTplByFormtag($devtag = '', $code = '', $id=0)
   {
-    if (empty($id) || $id <= 0) return [];
+    if ((int)$id <= 0 || empty($devtag) || !in_array($code, ['form','list'])) return [];
 
-    //缓存KEY
-    $cachKey    = md5('getTplById_tplType='.$this->tplType.'_'.$id);
-    $info       = cache($cachKey);
-
-    if (empty($info)) {
-      $info = $this->model->where('id',$id)->find();
-      $info = !empty($info) ? $info->toArray() : [];
-    }
-
-    cache($cachKey,$info);
-
-    $this->tplid    = (isset($info['id']) && $info['id'] > 0) ? $info['id'] : 0;
-
-    return $info;
+    return $this->getReleaseData($devtag,$code,(int)$id);
   }
 
   public function delTplData($id=0)
@@ -450,11 +499,65 @@ class DevTpl
     return 1;
   }
 
-  public function checkTpl($id,$type)
+  public function checkFormTpl($param = [])
   {
-    $this->tplType  = $type;
-    $this->getTplById($id);
-    return $this->tplid;
+    $formtag    = isset($param['formTag']) ? trim($param['formTag']) : '';
+    $formid     = isset($param['formId']) ? intval($param['formId']) : 0;
+
+    if (empty($formtag) || $formid <= 0) return false;
+
+    $info       = $this->getReleaseData($formtag,'form','info');
+
+    if (!empty($info) && (int)$info['id'] === (int)$formid) return true;
+ 
+    return false;
+  }
+
+  private function getReleaseData($tag = '',$code = '',$type)
+  {
+    if (empty($tag) || empty($code)) return [];
+
+    $releasePath      = \Env::get('APP_PATH') . 'common/release/' . trim($code,'/') . '/' . $tag.'.php';
+    $releaseData      = [];
+    $tplData['info']  = [];
+    $tplData['list']  = [];
+
+    if (file_exists($releasePath))
+    {
+        $releaseData      = file_get_contents($releasePath);
+        $releaseData      = !empty($releaseData) ? unserialize(urldecode($releaseData)) : [];
+    }
+
+    if (!empty($releaseData))
+    {
+      //如果数据类型是数字，获取指定ID下的数据
+      if (is_numeric($type))
+      {
+        if ($type > 0)
+        {
+          foreach ($releaseData as $value)
+          {
+            if ((int)$value['id'] === $type) return $value;
+          }
+        }
+        
+        return $releaseData;
+      }
+
+      foreach ($releaseData as $key => $value)
+      {
+        if ($value['pid'] == 0)
+        {
+          $tplData['info']    = $value;
+        }else{
+          $tplData['list'][]  = $value;
+        }
+      }
+
+      return in_array($type, ['info','list']) ? $tplData[$type] : $tplData;
+    }
+
+    return $tplData;
   }
 }
 

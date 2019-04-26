@@ -28,6 +28,7 @@ class Devform extends Base
     {
         parent::__construct();
 
+        $this->tpl                    = new \xnrcms\DevTpl();
         $this->apiUrl['index']        = 'admin/Devform/listData';
         $this->apiUrl['edit']         = 'admin/Devform/detailData';
         $this->apiUrl['save_data']    = 'admin/Devform/saveData';
@@ -61,7 +62,8 @@ class Devform extends Base
 		$fieldList			= [];
 		$fieldInfo 			= ['id'=>0,'pid'=>$parame['pid'],'require'=>0];
 
-		if (!empty($list)){
+		if (!empty($list))
+		{
 			//获取表单模板字段数据
 			$search 			= [];
 			$parame 			= [];
@@ -75,9 +77,10 @@ class Devform extends Base
         	$allDevform         = $this->getApiData() ;
 	        $fieldList 			= (!empty($allDevform) && isset($allDevform['lists'])) ? $allDevform['lists'] : [];
 			
-			if (!empty($fieldList)) {
-				$firstid	= $fieldList[0]['id'];
-				$firstpid	= $fieldList[0]['pid'];
+			if (!empty($fieldList))
+			{
+				$firstid			= $fieldList[0]['id'];
+				$firstpid			= $fieldList[0]['pid'];
 
 				$parame 			= [];
 				$parame['uid']		= $this->uid;
@@ -206,6 +209,16 @@ class Devform extends Base
         $signData['id'] 			= isset($postData['id']) ? (int)$postData['id'] : 0;
         $signData['pid'] 			= isset($postData['pid']) ? (int)$postData['pid'] : 0;
 
+        if (isset($postData['fdone']) && isset($postData['fdone'][1]))
+        {
+        	$postData['add'] 		= $postData['fdone'][1];
+        }
+
+        if (isset($postData['fdone']) && isset($postData['fdone'][2]))
+        {
+        	$postData['edit'] 		= $postData['fdone'][2];
+        }
+
         $config 				 	= [];
 
         if($signData['pid'] > 0)
@@ -214,17 +227,17 @@ class Devform extends Base
             $config['tag']          = $signData['tag'];
             $config['type']         = isset($postData['type']) ? trim($postData['type']) : '';
             $config['group']        = isset($postData['group']) ? trim($postData['group']) : '';
-            $config['require']      = isset($postData['require']) ? (int)$postData['require'] : 0;
+            $config['require']      = isset($postData['require']) ? (int)$postData['require'] : 2;
             $config['add']          = isset($postData['add']) ? (int)$postData['add'] : 0;
             $config['edit']         = isset($postData['edit']) ? (int)$postData['edit'] : 0;
-            $config['notice']       = isset($postData['notice']) ? (int)$postData['notice'] : 0;
+            $config['notice']       = isset($postData['notice']) ? trim($postData['notice']) : '';
             $config['default']      = isset($postData['default']) ? trim($postData['default']) : '';
         	$config['field_value']	= isset($postData['field_value']) ? trim($postData['field_value']) : '';
         	$config['attr']	  		= isset($postData['attr']) ? trim(str_replace(["\r\n","\r","\n"], " ",$postData['attr'])) : '';
         }
-
+        
 		$signData['config']			= !empty($config) ? json_encode($config) : '';
-
+        
 		if (!isset($this->apiUrl['save_data']) || empty($this->apiUrl['save_data']))
 		$this->error('未设置接口地址');
 
@@ -283,10 +296,9 @@ class Devform extends Base
 		}
 	}
 
-	public function changeFieldList(){
-
+	public function changeFieldList()
+	{
 		$id 		= intval(input('post.id'));
-
 		$fieldList	= $this->getFormField($id);
 
 		$this->assign('_fieldList', $fieldList);
@@ -306,7 +318,6 @@ class Devform extends Base
 	
 	public function changeFieldInfo()
 	{	
-
 		$param 		= request()->param();
 		$pid 		= intval($param['pid']);
 		$id 		= intval($param['id']);
@@ -316,8 +327,13 @@ class Devform extends Base
 		$fieldInfo 	= ['id'=>$id,'pid'=>$pid,'status'=>1,'require'=>0,'type'=>'string','edit'=>0,'search'=>0];
 		if ($id >0)
 		{
-			$tpl 			= new \xnrcms\DevTpl(1);
-    		$fieldInfo 		= $tpl->getTplById($id);
+    		$parame 			= [];
+			$parame['uid']		= $this->uid;
+	        $parame['hashid']	= $this->hashid;
+			$parame['id']		= $id;
+
+			$res                = $this->apiData($parame,$this->apiUrl['edit']);
+			$fieldInfo			= $res  ? $this->getApiData() : $fieldInfo;
 
 			//数据格式化
             if($fieldInfo['pid'] > 0)
@@ -442,7 +458,7 @@ class Devform extends Base
 		}
 
 		//记录当前列表页的cookie
-        Cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__forward__',$_SERVER['REQUEST_URI']);
 
 		//渲染数据到页面模板上
 		$assignData['formPid'] 			= $id;
@@ -492,14 +508,14 @@ class Devform extends Base
         $config['tag']          = $signData['tag'];
         $config['type']         = isset($postData['type']) ? trim($postData['type']) : '';
         $config['group']        = isset($postData['group']) ? trim($postData['group']) : '';
-        $config['require']      = isset($postData['require']) ? (int)$postData['require'] : 0;
+        $config['require']      = isset($postData['require']) ? (int)$postData['require'] : 2;
         $config['add']          = isset($postData['add']) ? (int)$postData['add'] : 0;
         $config['edit']         = isset($postData['edit']) ? (int)$postData['edit'] : 0;
-        $config['notice']       = isset($postData['notice']) ? (int)$postData['notice'] : 0;
+        $config['notice']       = isset($postData['notice']) ? trim($postData['notice']) : '';
         $config['default']      = isset($postData['default']) ? trim($postData['default']) : '';
     	$config['field_value']	= isset($postData['field_value']) ? trim($postData['field_value']) : '';
     	$config['attr']	  		= isset($postData['attr']) ? trim(str_replace(["\r\n","\r","\n"], " ",$postData['attr'])) : '';
-        	
+
 		$signData['config']		= json_encode($config);
 
 		//请求数据
@@ -553,7 +569,7 @@ class Devform extends Base
 		}
 
 		//记录当前列表页的cookie
-        Cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__forward__',$_SERVER['REQUEST_URI']);
 
         //渲染数据到页面模板上
 		$assignData['lid'] 				= $id;
@@ -569,17 +585,22 @@ class Devform extends Base
 		if(request()->isPost())
 		{
 			$param 					= request()->param();
-			$form_title 			= input('form_title');
+			$form_title 			= isset($param['form_title']) ? $param['form_title'] : '';
+			$form_cname 			= isset($param['form_cname']) ? $param['form_cname'] : '';
+			$form_id 				= isset($param['formId']) ? (int)$param['formId'] : 0;
 			$clone 					= (isset($param['clone']) && !empty($param['clone'])) ? $param['clone'] : [];
 
+			if ($form_id <= 0) $this->error('数据ID错误');
 			if (empty($form_title)) $this->error('表单名称不能为空');
+			if (empty($form_cname)) $this->error('调用标识不能为空');
 			if (empty($clone)) $this->error('克隆数据不能为空');
 
 			$parame 				= [];
 			$parame['uid']			= $this->uid;
 	        $parame['hashid']		= $this->hashid;
 	        $parame['formname']		= $form_title;
-	        $parame['formid']		= intval(input('formId'));
+	        $parame['formtag']		= $form_cname;
+	        $parame['formid']		= $form_id;
 	        $parame['cloneData']	= json_encode($clone);
 
 	        $res 					= $this->apiData($parame,'admin/Devform/saveClone');
@@ -621,50 +642,41 @@ class Devform extends Base
 
     public function setFormField($id=0)
     {
-    	$param 					= request()->param();
-    	if(request()->isPost())
-    	{
-    		$tpl 				= new \xnrcms\DevTpl(1);
-    		$res 				= $tpl->saveTplData($param);
-    		$msg 				= $res == 1 ? '设置成功' : '新增成功';
-	        $this->success( $msg, Cookie('__forward__'));
-    	}
+		//数据提交
+        if (request()->isPost()) $this->update();
 
-    	if ($id<= 0)
-    	{
-    		$info['id'] 	= 0;
-    		$info['pid'] 	= $param['pid'];
-    		$info['edit'] 	= 0;
-    		$info['search'] = 0;
-    	}else{
+    	//初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('','新增/编辑表单字段信息表单','form'),1);
+        $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
-    		$tpl 			= new \xnrcms\DevTpl(1);
-    		$info 			= $tpl->getTplById($id);
-    	}
+    	$forminfo 	= $this->tpl->getTplByFormtag(Cookie('__formtag__'),'form',$id);
+    	if (empty($forminfo)) exit('表单模板字段不存在');
 
-    	$config 	= (isset($info['config']) && !empty($info['config'])) ? $info['config'] : [];
-    	$config 	= !empty($config) ? json_decode($config,true) : [];
-    	$info 		= !empty($info) ? array_merge($info,$config) : [];
+        //参数数据接收
+        $param      		= request()->param();
 
-    	if (!empty($info))
-    	{
-    		$info['fdone'] 	= [$info['add'] == 1 ? 1 : 0,$info['edit'] == 1 ? 2 : 0];
-    	}
-
-    	//表单模板
-        $formData                       = $this->formNote(1);
+    	$config 			= (isset($forminfo['config']) && !empty($forminfo['config'])) ? json_decode($forminfo['config'],true) : [];
+    	$info 				= array_merge($forminfo,$config);
+    	$add 				= (isset($info['add']) && $info['add'] == 1) ? 1 : 0;
+    	$edit 				= (isset($info['edit']) && $info['edit'] == 2) ? 2 : 0;
+    	$info['fdone'] 		= [$add,$edit];
 
     	//页面头信息设置
         $pageData['isback']             = 0;
         $pageData['title1']             = '';
         $pageData['title2']             = '';
         $pageData['notice']             = [];
+        
+        //记录当前列表页的cookie
+        cookie('__forward__',$_SERVER['REQUEST_URI']);
 
         //渲染数据到页面模板上
-        $assignData['formId']           = 1;
+        $assignData['formId']           = $formId;
+        $assignData['formTag']          = $formTag;
+        $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
-        $assignData['formFieldList']    = $formData['list'];
-        $assignData['_fieldInfo']       = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['pageData']         = $pageData;
         $this->assignData($assignData);
@@ -673,44 +685,9 @@ class Devform extends Base
         return view();
     }
 
-    public function delFormField()
-    {
-    	$param 		= request()->param();
-    	$ids     	= (isset($param['ids']) && !empty($param['ids'])) ? $param['ids'] : $this->error('请选择要操作的数据');
-    	$tpl 				= new \xnrcms\DevTpl(1);
-    	$res 				= $tpl->delTplData($ids[0]);
-
-    	$res == 1 ? $this->success( '删除成功', Cookie('__forward__')) : $this->error('删除失败');
-    }
-
-    private function formNote($isEdit)
-    {
-        $formNote   = [] ;
-        $formNote[] = ['id'=>0,'title'=>'ID','tag'=>'pid','type'=>'hidden','require'=>'0',"add"=>"1","edit"=>"1","notice"=>"","group"=>"","default"=>"0","attr"=>""] ;
-        $formNote[] = ['id'=>0,'title'=>'ID','tag'=>'id','type'=>'hidden','require'=>'1',"add"=>"1","edit"=>"1","notice"=>"","group"=>"","default"=>"","attr"=>""] ;
-        //新订单处理处理
-        $formNote[] = ['id'=>0,'title'=>'字段名称','tag'=>'title','type'=>'string','require'=>'1',"add"=>"1","edit"=>"1","notice"=>"字段名称","group"=>"","default"=>"","attr"=>""];
-        $formNote[] = ['id'=>0,'title'=>'字段标识','tag'=>'tag','type'=>'string','require'=>'1',"add"=>"1","edit"=>"1","notice"=>"获取数据的数据下标","group"=>"","default"=>"","attr"=>"cols='50'"];
-        $formNote[] = ['id'=>0,'title'=>'字段类型','tag'=>'type','type'=>'select','require'=>'1',"add"=>"1","edit"=>"1","notice"=>"字段类型默认是字符串","group"=>"","default"=>"parame:type","attr"=>""] ;
-        $formNote[] = ['id'=>0,'title'=>'分组标识','tag'=>'group','type'=>'string','require'=>'0',"add"=>"1","edit"=>"1","notice"=>"分组标识，默认可不填写","group"=>"","default"=>"","attr"=>""] ;
-        $formNote[] = ['id'=>0,'title'=>'是否必填','tag'=>'require','type'=>'bool','require'=>'0',"add"=>"1","edit"=>"1","notice"=>"","group"=>"","default"=>"string:1=是,0=否","attr"=>"cols='50'"];
-        $formNote[] = ['id'=>0,'title'=>'字段默认值','tag'=>'field_value','type'=>'string','require'=>'0',"add"=>"1","edit"=>"1","notice"=>"字段默认值","group"=>"","default"=>"string:1=可编辑,2=可搜索","attr"=>""] ;
-        $formNote[] = ['id'=>0,'title'=>'使用场景','tag'=>'fdone','type'=>'checkbox','require'=>'0',"add"=>"1","edit"=>"1","notice"=>"该字段字段功能","group"=>"","default"=>"string:1=新增,2=编辑","attr"=>""] ;
-        $formNote[] = ['id'=>0,'title'=>'字段提示','tag'=>'notice','type'=>'string','require'=>'0',"add"=>"1","edit"=>"1","notice"=>"字段下方小提示","group"=>"","default"=>"parame:parameName","attr"=>"cols='50'"];
-        $formNote[] = ['id'=>0,'title'=>'字段属性','tag'=>'attr','type'=>'textarea','require'=>'0',"add"=>"1","edit"=>"1","notice"=>"字段属性设置每行一个","group"=>"","default"=>"parame:parameName","attr"=>"cols='50'"];
-        $formNote[] = ['id'=>0,'title'=>'字段附加数据','tag'=>'default','type'=>'textarea','require'=>'0',"add"=>"1","edit"=>"1","notice"=>"字段附加数据是单选、多选、枚举、布尔的选项数据，其他类型此处填写无效填写示例:<br>字符串：string:1=张三,2=李四,....<br>成员变量：parame:parameName<br>","group"=>"","default"=>"","attr"=>"cols='50'"];
-        $formNote[] = ['id'=>0,'title'=>'字段排序','tag'=>'sort','type'=>'string','require'=>'0',"add"=>"1","edit"=>"1","notice"=>"","group"=>"","default"=>"","attr"=>""];
-        $formNote[] = ['id'=>0,'title'=>'状态','tag'=>'status','type'=>'bool','require'=>'0',"add"=>"1","edit"=>"1","notice"=>"","group"=>"","default"=>"string:1=启用,2=禁用","attr"=>"cols='50'"];
-
-        $info['id']			= '1';
-        $tpl 				= new \xnrcms\DevTpl();
-        $list       		= $tpl->formatFormTplData($formNote,$info,$isEdit) ;
-        return $list ;
-    }
-
     protected function getDefaultParameData()
     {
-    	$defaultData['type']   = config('extend.form_type_list');
+    	$defaultData['getFieldTypeList']   = config('extend.form_type_list');
         return $defaultData;
     }
 }

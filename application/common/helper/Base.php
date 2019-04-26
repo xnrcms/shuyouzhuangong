@@ -79,23 +79,22 @@ class Base
      */
     public function getReturnData()
     {
-      if (empty($this->backData)) {
-
+      if (empty($this->backData))
+      {
         $this->setReturnData(['Code' => '100016', 'Msg'=>lang('100016')]);
-        
         return $this->returnData;
       }
 
       //新接口模式数据格式化调用
-      if (isset($this->backData[0][0]) && $this->backData[0][0] == 'Code') {
-
+      if (isset($this->backData[0][0]) && $this->backData[0][0] == 'Code')
+      {
         //接口返回参数结构格式模板
         $dataTpl    = toLevel($this->backData);
         if (empty($dataTpl)) return ['Code' => '120022', 'Msg'=>lang('120022')];
 
         //生成测试数据
-        if (isset($this->returnData['Data'][0]) && $this->returnData['Data'][0] == 'TEST') {
-          
+        if (isset($this->returnData['Data'][0]) && $this->returnData['Data'][0] == 'TEST')
+        {  
           return $this->apiTestData($dataTpl,$this->returnData);
         }
 
@@ -118,23 +117,26 @@ class Base
 
       $bacaData       = [];
       $val            = '';
-      foreach ($dataTpl as $key => $value) {
 
+      foreach ($dataTpl as $key => $value)
+      {
         $data[$value[0]]      = isset($data[$value[0]]) ? $data[$value[0]] : '';
 
-        if (isset($data[$value[0]]) ) {
-
+        if (isset($data[$value[0]]) )
+        {
           //如果设置了函数处理
           $mock     = (isset($value[6]) && !empty($value[6])) ? explode('|',$value[6]) : '';
           $func     = (isset($mock[0]) && !empty($mock[0])) ? $mock[0] : '';
           $extends  = (isset($mock[1]) && !empty($mock[1])) ? $mock[1] : '';
 
-          if (!empty($func) && $func != '/' ) {
-
-            if (function_exists($func)) {
+          if (!empty($func) && $func != '/' )
+          {
+            if (function_exists($func))
+            {
               //函数处理
               $data[$value[0]]  = $func($data[$value[0]],$data,$extends);
-            }elseif (method_exists($this,$func)) {
+            }elseif (method_exists($this,$func))
+            {
               //helper中处理
               $data[$value[0]]  = $this->$func($data[$value[0]],$data,$extends);
             }else{
@@ -143,16 +145,20 @@ class Base
           }
           //--end
           
-          switch (strtolower($value[1])) {
+          switch (strtolower($value[1]))
+          {
             case 'string':  $val  = isset($data[$value[0]]) ? trim($data[$value[0]]) : ''; break;
             case 'number':  $val  = intval($data[$value[0]]); break;
             case 'float':   $val  = !empty($data[$value[0]]) ? trim($data[$value[0]]) : '0.00' ; break;
             case 'array':
-              if (!empty($value[7]) && isset($data[$value[0]]) && is_array($data[$value[0]]) && !empty($data[$value[0]])) {
-                if (isset($data[$value[0]][0])) {
+              if (!empty($value[7]) && isset($data[$value[0]]) && is_array($data[$value[0]]) && !empty($data[$value[0]]))
+              {
+                if (isset($data[$value[0]][0]))
+                {
                   $listsVal = [];
 
-                  foreach ($data[$value[0]] as $key1 => $value1){
+                  foreach ($data[$value[0]] as $key1 => $value1)
+                  {
                     $listsVal[]   = $this->formatBackData($value[7],$value1);
                   }
 
@@ -165,22 +171,22 @@ class Base
               }
               break;
             case 'object':
-              if (isset($data[$value[0]]) && is_array($data[$value[0]]) && !empty($data[$value[0]])) {
+              if (isset($data[$value[0]]) && is_array($data[$value[0]]) && !empty($data[$value[0]]))
+              {
                   $val  = $this->formatBackData($value[7],$data[$value[0]]);
-                }else{
+              }else{
                   $val  = (object)[];
-                }
+              }
               break;
             case 'json':
-              if (is_array($data[$value[0]])) {
-                
+              if (is_array($data[$value[0]]))
+              {
                 $val    = !empty($data[$value[0]]) ? json_encode($data[$value[0]]) : ''; break;
               }else{
-
                 $val    = !empty($data[$value[0]]) ? trim($data[$value[0]]) : ''; break;
               }
             case 'bool':  $val  = !empty($data[$value[0]]) ? true : false; break;
-            default:    $val  = trim($data[$value[0]]); break;
+            default:      $val  = trim($data[$value[0]]); break;
           }
         }else{
           $val    = '';
@@ -202,36 +208,38 @@ class Base
     protected function checkData($postData)
     {
       if (isset($postData['is_inside']) && $postData['is_inside'] == 1) return true;
-      if (empty($this->checkData) || !is_array($this->checkData))
-      return $this->setReturnData();
+      if (empty($this->checkData) || !is_array($this->checkData)) return $this->setReturnData();
 
       $checkData      = array_merge($this->baseParame,$this->checkData);
-
       $parameData     = array();
       $signData       = [];
 
       //先判断数据传递是否完整合法
-      foreach ($checkData as $val){
-
+      foreach ($checkData as $val)
+      {
         //检验接口参数是否存在
-        if (!isset($postData[$val[0]])) {
+        if (!isset($postData[$val[0]]))
+        {
           //漏传必须参数
           return $this->setReturnData(['Code' => '100007', 'Msg'=>lang('100007',[$val[0],$val[0]])]);
         }
 
         //接口参数非空检查
-        if ($val[2] == 1){
+        if ($val[2] == 1)
+        {
           if ( 
             ($val[1] == 'number' && intval($postData[$val[0]]) == 0) ||
             ($val[1] == 'string' && empty($postData[$val[0]])) ||
             ($val[1] == 'json' && empty($postData[$val[0]]))
-          ){
+          )
+          {
             return $this->setReturnData(['Code' => '100008', 'Msg'=>lang('100008',[$val[0],$val[0]])]);
           }
         }
 
         //如果是Json数据，并且非空，需要判断Json数据格式是否合法
-        if ($val[1] == 'json' && !empty($postData[$val[0]]) && !is_json($postData[$val[0]])) {
+        if ($val[1] == 'json' && !empty($postData[$val[0]]) && !is_json($postData[$val[0]]))
+        {
           return $this->setReturnData(['Code' => '100017', 'Msg'=>lang('100017',[$val[0],$val[0]])]);
         }
 
@@ -252,37 +260,15 @@ class Base
       if (!$isApiId) return $this->setReturnData(array('Code' => '120024', 'Msg'=>lang('120024')));
 
       //校验用户身份ID是否正确
-      if ( isset($parameData['uid']) && $parameData['uid'] > 0 && isset($parameData['hashid']) ) {
-        
+      if ( isset($parameData['uid']) && $parameData['uid'] > 0 && isset($parameData['hashid']) )
+      {  
         $hashid       = (!isset($parameData['hashid']) || empty($parameData['hashid']) ) ? '' : trim($parameData['hashid']);
-        $uid        = intval($parameData['uid']);
+        $uid          = intval($parameData['uid']);
 
-        if (!$this->checkHashid($uid,$hashid)) {
-
-          return $this->setReturnData(array('Code' => '100010', 'Msg'=>lang('100010')));
-        }
+        if (!$this->checkHashid($uid,$hashid)) return $this->setReturnData(array('Code' => '100010', 'Msg'=>lang('100010')));
       }
       
       return $parameData;
-    }
-
-    /**
-     * [apidoc 接口文档数据]
-     * @access protected
-     * @param  array $checkData [返回的数据]
-     * @param  array $backData  [返回的数据]
-     * @return json
-     */
-    protected function apidoc($checkData = [],$backData = []){
-
-      $apidoc         = request()->param('apidoc');
-
-      $checkData    = array_merge($this->baseParame,$checkData);
-
-          if ($apidoc == 1) {
-            
-              echo json_encode(['Code' => '000000', 'Msg'=>lang('000000'),'checkData'=>$checkData,'backData'=>$backData]); exit;
-          }
     }
 
     /**
@@ -293,18 +279,17 @@ class Base
      */
     private function sign($data=array())
     {
-        if (!empty($data)) {
-
+        if (!empty($data))
+        {
           //hash字段不参与加密
-          if(isset($data['hash'])){
-              unset($data['hash']);
-          }
+          if(isset($data['hash'])) unset($data['hash']);
 
           //按字母排序
           ksort($data);
 
           $signStr    = "";
-          foreach ($data as $key => $value) {
+          foreach ($data as $key => $value)
+          {
             $signStr  .= $key . $value;
           }
 
@@ -322,7 +307,8 @@ class Base
      * @param  string $apiId [接口调用ID]
      * @return bool
      */
-    private function checkApiId($apiId){
+    private function checkApiId($apiId)
+    {
       return md5('xnrcms_api_key'.$apiId) == $this->ApiKey ? true : false;
     }
 
@@ -333,7 +319,8 @@ class Base
      * @param  string   $hashid 用户秘钥
      * @return bool
      */
-    private function checkHashid($uid,$hashid){
+    private function checkHashid($uid,$hashid)
+    {
       return md5($uid.config('extend.uc_auth_key')) == $hashid ? true : false;
     }
 
@@ -342,12 +329,14 @@ class Base
       if (empty($dataTpl))  return [];
 
       $bacaData       = [];
-      $val        = '';
-      foreach ($dataTpl as $key => $value) {
+      $val            = '';
 
+      foreach ($dataTpl as $key => $value)
+      {
         $isValue  = ( isset($data[$value[0]]) && !empty($data[$value[0]]) ) ? true : false;
 
-        switch (strtolower($value[1])) {
+        switch (strtolower($value[1]))
+        {
           case 'string':
             $val = $isValue ? trim($data[$value[0]]) : $value[0].'_test_val';
             break;
@@ -357,11 +346,13 @@ class Base
           case 'float':
             $val  = $isValue ? trim($data[$value[0]]) : '0.01' ; break;
           case 'array':
-            if (!empty($value[7]) && isset($data[$value[0]]) && is_array($data[$value[0]]) && !empty($data[$value[0]])) {
-              if (isset($data[$value[0]][0])) {
+            if (!empty($value[7]) && isset($data[$value[0]]) && is_array($data[$value[0]]) && !empty($data[$value[0]]))
+            {
+              if (isset($data[$value[0]][0]))
+              {
                 $listsVal = [];
-                foreach ($data[$value[0]] as $key1 => $value1) {
-
+                foreach ($data[$value[0]] as $key1 => $value1)
+                {
                   $listsVal[]   = $this->apiTestData($value[7],$value1);
                 }
                 
@@ -375,20 +366,20 @@ class Base
 
             break;
           case 'object':
-            if (isset($data[$value[0]]) && is_array($data[$value[0]]) && !empty($data[$value[0]])) {
+            if (isset($data[$value[0]]) && is_array($data[$value[0]]) && !empty($data[$value[0]]))
+            {
                 $val  = $this->formatBackData($value[7],$data[$value[0]]);
             }else{
                 $val  = (object)[];
             }
             break;
           case 'json':
-            if ($isValue) {
-              
-              if (is_array($data[$value[0]])) {
-                
+            if ($isValue)
+            {
+              if (is_array($data[$value[0]]))
+              {
                 $val    = !empty($data[$value[0]]) ? json_encode($data[$value[0]]) : ''; break;
               }else{
-
                 $val    = !empty($data[$value[0]]) ? trim($data[$value[0]]) : ''; break;
               }
             }else{
@@ -439,16 +430,9 @@ class Base
 
     private function setParameData()
     {
-      $cName            = formatStringToHump($this->controllerName);
-      $apicode          = md5(strtolower($this->moduleName.$cName.$this->actionName));
-      $paramePath       = \Env::get('APP_PATH') . 'common/parame/' . $apicode.'.php';
-      $parameContent    = [];
-
-      if (file_exists($paramePath)) {
-          $parameContent      = file_get_contents($paramePath);
-          $parameContent      = unserialize($parameContent);
-      }
-      
+      $cName              = formatStringToHump($this->controllerName);
+      $apicode            = md5(strtolower($this->moduleName.$cName.$this->actionName));
+      $parameContent      = get_release_data($apicode,'api',1);
       $this->checkData    = isset($parameContent['request_parame']) ? $parameContent['request_parame'] : '';
       $this->backData     = isset($parameContent['back_parame']) ? $parameContent['back_parame'] : '';
     }

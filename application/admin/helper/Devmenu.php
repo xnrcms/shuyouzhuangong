@@ -280,18 +280,11 @@ class Devmenu extends Base
         $dbModel                = model($this->mainTable);
 
         //自行书写业务逻辑代码
-
         $project_id             = 1;
         $menu                   = $dbModel->getReleaseMenu(['project_id'=>$project_id]);
+        $filecode               = 'menu.data.project_id=' . $project_id;
 
-        $filename               = 'menu'. md5('menu.data.project_id=' . $project_id);
-        $content                = serialize($menu);
-        $paramePath             = \Env::get('APP_PATH') . 'common/parame/' . $filename.'.php';
-
-        //先删除原有的参数文件
-        if (file_exists($paramePath)) unlink($paramePath);
-
-        file_put_contents($paramePath,$content);
+        set_release_data($menu,$filecode,'menu');
 
         //需要返回的数据体
         $Data                   = ['id'=>$project_id];

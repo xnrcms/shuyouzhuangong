@@ -72,7 +72,7 @@
                       <input type="checkbox" class="checkbox_item" name="edit_{$vo.id}" value="1" {if condition="$vo['config']['edit'] eq 1"}checked{/if}> 可编辑
                     </label>
                     <label>
-                      <input type="checkbox" class="checkbox_item" name="search_{$vo.id}" value="1" {if condition="$vo['config']['search'] eq 1"}checked{/if}> 可搜索
+                      <input type="checkbox" class="checkbox_item" name="search_{$vo.id}" value="2" {if condition="$vo['config']['search'] eq 2"}checked{/if}> 可搜索
                     </label>
                   </div>
                 </td>
@@ -144,7 +144,7 @@ function submitListData(id){
       parame.width    = obj.find("input[name='width_"+id+"']").val();
       parame.type     = obj.find("select[name='type_"+id+"']").val();
       parame.edit     = (obj.find("input[name='edit_"+id+"']").is(':checked')) ? 1 : 0;
-      parame.search   = (obj.find("input[name='search_"+id+"']").is(':checked')) ? 1 : 0;
+      parame.search   = (obj.find("input[name='search_"+id+"']").is(':checked')) ? 2 : 0;
       parame.sort     = obj.find("input[name='sort_"+id+"']").val();
       parame.status   = obj.find("input[name='status_"+id+"']:checked").val();
 

@@ -56,21 +56,22 @@ class Devconfig extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $tag        = $this->configType;
-        $tpl_title  = $pageData['tpl_title']; //初始化列表模板的名称，为空时不初始化
-        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
-        $formNode   = $this->tpl->showTpl($tplid);
+        $formNode   = $this->tpl->showFormTpl($this->getTplData($this->configType,$pageData['tpl_title'],'form'),0);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail(0);
 
         //记录当前列表页的cookie
         cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__formtag__',$formTag);
 
         //渲染数据到页面模板上
         $assignData['formId']           = $formId;
-        $assignData['formFieldList']    = $formNode['list'];
+        $assignData['formTag']          = $formTag;
+        $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['pageData']         = $pageData;
@@ -83,12 +84,11 @@ class Devconfig extends Base
     //配置更新
     private function update()
     {
-        $formid                     = intval(input('formId'));
-        $tplid                   = $this->tpl->checkTpl(intval($formid),1);
-        if($tplid <= 0) $this->error('表单模板数据不存在');
-
         //表单数据
-        $postData                   = input('post.');
+        $postData                   = request()->param();
+
+        //表单模板
+        if(!$this->tpl->checkFormTpl($postData)) $this->error('表单模板数据不存在');
 
         //表单中不允许提交至接口的参数
         $notAllow                   = ['formId'];

@@ -42,11 +42,9 @@ class Devfile extends Base
         $param      = request()->param();
 
         //初始化模板
-        $tag        = ''; //默认当前路由为唯一标识，自己可以自定义标识
-        $tpl_title  = '脚本文件列表'; //初始化列表模板的名称，为空时不初始化
-        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,0);
-        $listNode   = $this->tpl->showTpl($tplid);
+        $listNode   = $this->tpl->showListTpl($this->getTplData('','脚本文件列表','list'));
         $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
+        $listTag    = isset($listNode['tags']) ? $listNode['tags'] : '';
 
         //参数定义
         $menuid     = isset($param['menuid']) ? $param['menuid'] : 0;
@@ -90,6 +88,7 @@ class Devfile extends Base
 
         //记录当前列表页的cookie
 		cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__listtag__',$listTag);
 		
         //渲染数据到页面模板上
         $assignData['isTree']           = $isTree;
@@ -119,11 +118,9 @@ class Devfile extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $tag        = 'addedit';
-        $tpl_title  = '新增脚本文件表单'; //初始化列表模板的名称，为空时不初始化
-        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
-        $formNode   = $this->tpl->showTpl($tplid);
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','新增脚本文件表单','form'),0);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
         $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
 		$info               			= [];
@@ -136,9 +133,11 @@ class Devfile extends Base
 
         //记录当前列表页的cookie
 		cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__formtag__',$formTag);
 
         //渲染数据到页面模板上
         $assignData['formId']           = $formId;
+        $assignData['formTag']          = $formTag;
         $assignData['formFieldList']    = $formList;
 		$assignData['info'] 			= $info;
 		$assignData['defaultData'] 		= $this->getDefaultParameData();

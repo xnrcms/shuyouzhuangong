@@ -800,6 +800,64 @@ if (!function_exists('msubstr'))
 			preg_match_all($re[$charset], $str, $match);
 			$slice = join("",array_slice($match[0], $start, $length));
 		}
+
 		return $suffix ? $slice.'...' : $slice;
 	}
+}
+
+if(!function_exists('get_release_data'))
+{
+    function get_release_data($filename = '', $tag = '', $dtype = 0)
+    {
+    	if (empty($filename) || empty($tag))  return [];
+
+    	$filename      		= md5(strtolower(trim($filename,'/')));
+        $releasePath       	= \Env::get('APP_PATH') . 'common/release/' . trim($tag,'/') . '/' . $filename.'.php';
+        $releaseData 		= [];
+
+        if (file_exists($releasePath))
+        {
+        	$releaseData      = file_get_contents($releasePath);
+          	$releaseData      = !empty($releaseData) ? unserialize(urldecode($releaseData)) : [];
+	    }
+
+	    if ($dtype === 1) return $releaseData;
+
+	    return [$filename=>$releaseData];
+    }
+}
+
+if(!function_exists('set_release_data'))
+{
+    function set_release_data($data = [], $filename = '',$tag = '')
+    {
+    	if (empty($filename) || empty($tag))  return false;
+
+    	$filename      		= md5(strtolower(trim($filename,'/')));
+    	$releaseData 		= !empty($data) ? (is_string($data) ? $data : urlencode(serialize($data))) : '';
+        $releasePath       	= \Env::get('APP_PATH') . 'common/release/' . trim($tag,'/') . '/' . $filename .'.php';
+
+        //删除原有文件
+        if (file_exists($releasePath)) unlink($releasePath);
+
+        //数据保存
+        file_put_contents($releasePath,$releaseData);
+
+	    return true;
+    }
+}
+
+if(!function_exists('del_release_data'))
+{
+    function del_release_data($filename = '',$code = '')
+    {
+    	if (empty($filename) || empty($code))  return false;
+
+        $releasePath       	= \Env::get('APP_PATH') . 'common/release/' . trim($code,'/') . '/' . trim($filename,'/').'.php';
+
+        //删除原有文件
+        if (file_exists($releasePath)) unlink($releasePath);
+
+	    return true;
+    }
 }

@@ -60,9 +60,9 @@
       <dd class="opt">
         <div class="onoff">
           <label for="menu_require1" class="cb-enable {if condition="isset($_fieldInfo['require']) && $_fieldInfo['require'] eq 1"}selected{/if}">是</label>
-          <label for="menu_require0" class="cb-disable {if condition="isset($_fieldInfo['require']) && $_fieldInfo['require'] eq 0"}selected{/if}">否</label>
+          <label for="menu_require2" class="cb-disable {if condition="isset($_fieldInfo['require']) && $_fieldInfo['require'] eq 2"}selected{/if}">否</label>
           <input id="menu_require1" name="require" value="1" type="radio" {if condition="isset($_fieldInfo['require']) && $_fieldInfo['require'] eq 1"} checked="checked"{/if}>
-          <input id="menu_require0" name="require" value="0" type="radio" {if condition="isset($_fieldInfo['require']) && $_fieldInfo['require'] eq 0"} checked="checked"{/if}>
+          <input id="menu_require2" name="require" value="2" type="radio" {if condition="isset($_fieldInfo['require']) && $_fieldInfo['require'] eq 2"} checked="checked"{/if}>
         </div>
         <span class="err" id="err_require" style="color:#F00; display:none;"></span>
         <p class="notic">该字段是否必填</p>
@@ -83,8 +83,15 @@
         <label for="t_mane">使用场景</label>
       </dt>
       <dd class="opt">
-        <input type="checkbox" class="checkbox_item" name="fdone[1]" value="1" {if condition="isset($_fieldInfo['add']) && $_fieldInfo['add'] neq '0'"}checked{/if}> 新增
-        <input type="checkbox" class="checkbox_item" name="fdone[2]" value="2" {if condition="isset($_fieldInfo['add']) && $_fieldInfo['edit'] neq '0'"}checked{/if}> 编辑
+
+        <label>
+          <input type="checkbox" class="checkbox_item" name="add" value="1" {if condition="isset($_fieldInfo['add']) && $_fieldInfo['add'] eq 1"}checked{/if}> 新增
+        </label>
+
+        <label>
+          <input type="checkbox" class="checkbox_item" name="edit" value="2" {if condition="isset($_fieldInfo['add']) && $_fieldInfo['edit'] eq 2"}checked{/if}> 编辑
+        </label>
+
         <span class="err" id="err_form_type" style="color:#F00; display:none;"></span>
         <p class="notic">新增、编辑时是否显示该字段</p>
       </dd>

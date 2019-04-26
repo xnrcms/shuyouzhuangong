@@ -99,11 +99,9 @@ class Config extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $tag        = '';
-        $tpl_title  = $pageData['tpl_title']; //初始化列表模板的名称，为空时不初始化
-        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
-        $formNode   = $this->tpl->showTpl($tplid);
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('',$pageData['tpl_title'],'form'),0);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
         $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
@@ -111,9 +109,11 @@ class Config extends Base
 
         //记录当前列表页的cookie
         cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__formtag__',$formTag);
 
         //渲染数据到页面模板上
         $assignData['formId']           = $formId;
+        $assignData['formTag']          = $formTag;
         $assignData['formFieldList']    = $formList;
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
@@ -128,8 +128,7 @@ class Config extends Base
     private function update()
     {
         $postData                = request()->param();
-        $tplid                   = $this->tpl->checkTpl(intval($postData['formId']),1);
-        if($tplid <= 0) $this->error('表单模板数据不存在');
+        if(!$this->tpl->checkFormTpl($postData)) $this->error('表单模板数据不存在');
         
         //表单中不允许提交至接口的参数
         $notAllow                   = ['formId'];

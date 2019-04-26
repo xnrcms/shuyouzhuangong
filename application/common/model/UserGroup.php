@@ -23,16 +23,16 @@ class UserGroup extends Base
     //默认查询方法，如果特殊需求，则自行改造
     public function formatWhereDefault($model,$parame)
     {
-        if (isset($parame['search']) && !empty($parame['search'])) {
-
+        if (isset($parame['search']) && !empty($parame['search']))
+        {
           $search     = json_decode($parame['search'],true);
 
-          if (!empty($search)) {
-
-            foreach ($search as $key => $value) {
-
-              if (!empty($value) && (is_string($value) || is_numeric($value)) ) {
-
+          if (!empty($search))
+          {
+            foreach ($search as $key => $value)
+            {
+              if (!empty($value) && (is_string($value) || is_numeric($value)) )
+              {
                 $model->where('main.'.$key,'eq',$value);
               }
             }
@@ -55,7 +55,7 @@ class UserGroup extends Base
 
     public function getList($parame)
     {
-      $ckey       = (isset($parame['cacheKey']) && !empty($parame['cacheKey'])) ? json_encode($parame['cacheKey']) : '';
+      $ckey       = (isset($parame['cacheKey']) && !empty($parame['cacheKey'])) ? $this->name . json_encode($parame['cacheKey']) : '';
       $ctag       = 'table_' . $this->name . '_getList';
       $data       = $this->getCache($ckey);
 

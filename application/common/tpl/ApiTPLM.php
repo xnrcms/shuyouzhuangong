@@ -55,7 +55,7 @@ class {ModelNameTPL} extends Base
 
     public function getList($parame)
     {
-      $ckey       = (isset($parame['cacheKey']) && !empty($parame['cacheKey'])) ? json_encode($parame['cacheKey']) : '';
+      $ckey       = (isset($parame['cacheKey']) && !empty($parame['cacheKey'])) ? $this->name . json_encode($parame['cacheKey']) : '';
       $ctag       = 'table_' . $this->name . '_getList';
       $data       = $this->getCache($ckey);
 

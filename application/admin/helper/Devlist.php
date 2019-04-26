@@ -231,15 +231,13 @@ class Devlist extends Base
         $id                 = isset($parame['id']) ? intval($parame['id']) : 0;
         if ($id <= 0) return ['Code' => '120023', 'Msg'=>lang('120023')];
 
-    	$info 				= $dbModel->updateById($id,[$parame['fieldName']=>$parame['updata']]);
+        //根据ID更新数据
+        $info               = $dbModel->saveData($id,[$parame['fieldName']=>$parame['updata']]);
 
-    	if (!empty($info)) {
+        //保存后发布数据
+        $this->releaseData(['id'=>!empty($info) ? ($info['pid'] > 0 ? $info['pid'] : $info['id']) : 0]);
 
-    		return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['id'=>$id]];
-    	}else{
-
-    		return ['Code' => '100015', 'Msg'=>lang('100015')];
-    	}
+        return !empty($info) ? ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$info] : ['Code' => '100015', 'Msg'=>lang('100015')];
     }
 
     /**
@@ -270,6 +268,8 @@ class Devlist extends Base
         
         //执行删除操作
     	$delCount				= $dbModel->delData($id);
+
+        $this->releaseData(['id'=>$id]);
 
     	return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
     }
@@ -315,12 +315,12 @@ class Devlist extends Base
         $lists                      = $lists['lists'];
         $tpl                        = [];
 
-        foreach ($lists as $key => $value) {
-            
-            foreach ($value as $kk => $vv) {
-                    
-                if ($kk == 'config') {
-
+        foreach ($lists as $key => $value)
+        {
+            foreach ($value as $kk => $vv)
+            {
+                if ($kk == 'config')
+                {
                     $value[$kk]   = json_decode($vv,true);
                 }
             }
@@ -328,15 +328,22 @@ class Devlist extends Base
             $tpl[$value['id']]  = $value;
         }
 
-        //入库表单数据
-        //检测菜单名称是否存在
-        if ($dbModel->checkValue($parame['listname'],0,'title'))
-        return ['Code' => '200001', 'Msg'=>lang('200001')];
+        $title              = isset($parame['listname']) ? trim($parame['listname']) : '';
+        $listtag            = isset($parame['listtag']) ? explode('/', $parame['listtag']) : [];
+        $cname              = implode('/', $listtag);
+        $tag                = implode('_', $listtag);
 
-        $saveData['title']                      = $parame['listname'];
+        if (count($listtag) !== 3)  return ['Code' => '200013', 'Msg'=>lang('200013')];
+        if ($dbModel->checkFieldExist($title,0,'title')) return ['Code' =>'200001','Msg'=>lang('200001')];
+        if ($dbModel->checkFieldExist($tag,0,'tag')) return ['Code' =>'200012','Msg'=>lang('200012')];
+
+        $saveData['title']                      = $title;
+        $saveData['tag']                        = $tag;
+        $saveData['cname']                      = $cname;
         $saveData['status']                     = 1;
         $saveData['sort']                       = 1;
         $saveData['pid']                        = 0;
+        $saveData['config']                     = json_encode([]);
         $saveData['update_time']                = time();
         $saveData['create_time']                = time();
         $info                                   = $dbModel->addData($saveData);
@@ -349,10 +356,11 @@ class Devlist extends Base
         $updata                 = [];
         $cloneListId            = $cloneData['listid'];
 
-        foreach ($cloneListId as $key => $value) {
-
+        foreach ($cloneListId as $key => $value)
+        {
             $title   = (isset($cloneData['title'][$key]) && !empty($cloneData['title'][$key])) ? $cloneData['title'][$key] : $tpl[$value]['title'];
             $tag     = (isset($cloneData['tag'][$key]) && !empty($cloneData['tag'][$key])) ? $cloneData['tag'][$key] : $tpl[$value]['tag'];
+            $fname   = $cname . '_' . $tag;
             $status  = (isset($cloneData['status'][$key]) && !empty($cloneData['status'][$key])) ? $cloneData['status'][$key] : $tpl[$value]['status'];
             $sort    = (isset($cloneData['sort'][$key]) && !empty($cloneData['sort'][$key])) ? $cloneData['sort'][$key] : $tpl[$value]['sort'];
             $width   = (isset($cloneData['width'][$key]) && !empty($cloneData['width'][$key])) ? $cloneData['width'][$key] : $tpl[$value]['width'];
@@ -376,22 +384,24 @@ class Devlist extends Base
             $config                   = json_encode($config);
 
             $updata[] = [
-            'title'=>$title,
-            'pid'=>$pid,
-            'tag'=>$tag,
-            'cname'=>'',
-            'config'=>$config,
-            'status'=>$status,
-            'sort'=>$sort,
-            'create_time'=>time(),
-            'update_time'=>time(),
-            'width'=>$width
+                'title'=>$title,
+                'pid'=>$pid,
+                'tag'=>$tag,
+                'cname'=>$fname,
+                'config'=>$config,
+                'status'=>$status,
+                'sort'=>$sort,
+                'create_time'=>time(),
+                'update_time'=>time(),
+                'width'=>$width
             ];
         }
 
-        if (!empty($updata)) {
-            
+        if (!empty($updata))
+        {
             $res = $dbModel->insertAll($updata);
+
+            $this->releaseData(['id'=>$pid]);
 
             return ['Code' => '000000', 'Msg'=>lang('200011'),'Data'=>['id'=>$pid]];
         }
@@ -435,16 +445,7 @@ class Devlist extends Base
 
             if ($releaseCount <= 0) return ['Code' => '200014', 'Msg'=>lang('200014')];
 
-            //开始生产静态数据
-            $dataStr                    = urlencode(serialize($data));
-            $fieldName                  = 'list'.md5(strtolower($info['cname']));
-            $paramePath                 = \Env::get('APP_PATH') . 'common/parame/' . $fieldName.'.php';
-
-            //先删除原有的参数文件
-            if ( file_exists($paramePath)) unlink($paramePath);
-
-            //保存数据
-            file_put_contents($paramePath,$dataStr);
+            set_release_data($data,md5(strtolower($info['cname'])),'list');
 
             return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$releaseCount]];
         }
@@ -453,6 +454,70 @@ class Devlist extends Base
     }
 
     /*api:f7cbd4d84eec5b63f3edb55034775e00*/
+
+    /*api:3fe5b175000c2be3c357b421ec984081*/
+    /**
+     * * 列表模板初始化接口
+     * @param  [array] $parame 接口参数
+     * @return [array]         接口输出数据
+     */
+    private function initListData($parame)
+    {
+        //主表数据库模型
+        $dbModel                = model($this->mainTable);
+
+        //自行书写业务逻辑代码
+        $cname                  = isset($parame['cname']) ? strtolower($parame['cname']) : '';
+        $title                  = isset($parame['title']) ? $parame['title'] : '';
+        $id                     = $dbModel->getTplIdByCname($cname);
+
+        if (!empty($id) && $id >= 0)
+        {
+            $info     = $dbModel->getOneById($id);
+
+            //表单名称相同 直接返回
+            if ( $info['title'] != $title)
+            {
+                $updata                 = [];
+                $updata['title']        = $title;
+                $updata['update_time']  = time();
+
+                $dbModel->updateById($id,$updata);
+
+                //保存后发布数据
+                $this->releaseData(['id'=>$id]);
+            }
+        }else{
+
+            $updata                     = [];
+            $cname                      = explode('/', $cname);
+            $updata['tag']              = implode('_', $cname);
+
+            if (count($cname) !== 3)  return ['Code' => '200013', 'Msg'=>lang('200013')];
+            if ($dbModel->checkFieldExist($updata['tag'],0,'tag')) return ['Code' =>'200012','Msg'=>lang('200012')];
+
+            //不存在新增并返回模板ID
+            $updata['title']        = $title;
+            $updata['pid']          = 0;
+            $updata['cname']        = implode('/', $cname);
+            $updata['config']       = '';
+            $updata['create_time']  = time();
+            $updata['update_time']  = time();
+
+            //入库数据
+            $info                   = $dbModel->addData($updata);
+            $id                     = isset($info['id']) ? $info['id'] : 0;
+
+            $this->releaseData(['id'=>$id]);
+        }
+
+        //需要返回的数据体
+        $Data['id']                   = $id;
+
+        return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$Data];
+    }
+
+    /*api:3fe5b175000c2be3c357b421ec984081*/
 
     /*接口扩展*/
 }

@@ -1274,16 +1274,16 @@ class Devapi extends Base
 
         $parameList         = $this->helper($parame,'admin','DevapiParame','listData');
 
-        if ( isset($parameList['Data']['lists']) && !empty($parameList['Data']['lists'])) {
-
+        if ( isset($parameList['Data']['lists']) && !empty($parameList['Data']['lists']))
+        {
             //区分接口参数和返回参数
             $request_parame     = [];
             $back_parame        = [];
             $num                = 300000;
             $defaultParame      = ['Code','Msg','Time','ApiUrl','Data'];
 
-            foreach ($parameList['Data']['lists'] as $key => $value) {
-                
+            foreach ($parameList['Data']['lists'] as $key => $value)
+            {    
                 $tag            = $value['tag'];
                 $ptype          = $value['ptype'];
                 $required       = $value['is_required'] == 1 ? 1 : 0;
@@ -1317,22 +1317,7 @@ class Devapi extends Base
             $apiParame['api_id']           = $apiid;
             $apiParame['api_release']      = time();
 
-            $parameStr                  = serialize($apiParame);
-            $paramePath                 = \Env::get('APP_PATH') . 'common/parame/' . $apicode.'.php';
-
-            //先删除原有的参数文件
-            $cacheDataKey               = 'make_parame_file_'.$apiid;
-            $oldPath                    = app('cache')->get($cacheDataKey);
-            if (!empty($oldPath) && file_exists($oldPath)) {
-
-                unlink($oldPath);
-            }
-
-            file_put_contents($paramePath,$parameStr);
-            
-            app('cache')->set($cacheDataKey,$paramePath);
+            set_release_data($apiParame,$apicode,'api');
         }
-
-        return [];
     }
 }

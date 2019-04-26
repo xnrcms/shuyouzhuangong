@@ -27,6 +27,7 @@ class Devmenu extends Base
     public function __construct()
     {
         parent::__construct();
+
         $this->tpl                    = new \xnrcms\DevTpl();
         $this->apiUrl['index']        = 'admin/Devmenu/listData';
         $this->apiUrl['edit']         = 'admin/Devmenu/detailData';
@@ -47,11 +48,9 @@ class Devmenu extends Base
         $param      = request()->param();
 
         //初始化模板
-        $tag        = ''; //默认当前路由为唯一标识，自己可以自定义标识
-        $tpl_title  = '菜单列表'; //初始化列表模板的名称，为空时不初始化
-        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,0);
-        $listNode   = $this->tpl->showTpl($tplid);
+        $listNode   = $this->tpl->showListTpl($this->getTplData('','菜单列表','list'));
         $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
+        $listTag    = isset($listNode['tags']) ? $listNode['tags'] : '';
 
         //参数定义
         $menuid     = isset($param['menuid']) ? $param['menuid'] : 0;
@@ -110,7 +109,8 @@ class Devmenu extends Base
         $pageData['notice']     		= ['温馨提示：默认显展示所有菜单，点击减号收缩或点击加号展开'];
 
 		//记录当前列表页的cookie
-		Cookie('__forward__',$_SERVER['REQUEST_URI']);
+		cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__listtag__',$listTag);
 
 		//渲染数据到页面模板上
         $assignData['isTree']           = $isTree;

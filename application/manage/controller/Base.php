@@ -56,13 +56,8 @@ class Base extends Controller
 
     public function ininMenu()
     {
-        $filename               = 'menu'. md5('menu.data.project_id=0');
-        $devMenu                = file_get_contents(\Env::get('APP_PATH') . 'common/parame/' . $filename.'.php');
-        $devMenu                = !empty($devMenu) ? unserialize($devMenu) : [];
-
-        $filename               = 'menu'. md5('menu.data.project_id=1');
-        $sysMenu                = file_get_contents(\Env::get('APP_PATH') . 'common/parame/' . $filename.'.php');
-        $sysMenu                = !empty($sysMenu) ? unserialize($sysMenu) : [];
+        $devMenu                = get_release_data('menu.data.project_id=0','menu',1);
+        $sysMenu                = get_release_data('menu.data.project_id=1','menu',1);
 
         return array_merge($devMenu,$sysMenu);
     }
@@ -152,10 +147,14 @@ class Base extends Controller
      * @param  integer  $pid 菜单上级ID
      * @return array         处理后的菜单数据
      */
-    public function formatMenu($arr=[],$pid=0){
-        $menu  = [];
-        if (!empty($arr)) {
-            foreach ($arr as $key => $value) {
+    public function formatMenu($arr=[],$pid=0)
+    {
+        $menu       = [];
+
+        if (!empty($arr))
+        {
+            foreach ($arr as $key => $value)
+            {
                 if ($value['pid'] == $pid) $menu[]     = $value;
             }
         }
@@ -333,225 +332,6 @@ class Base extends Controller
     	return $this->apiData;
     }
 
-    //获取列表设置
-    protected function getListNote($listid = '')
-    {
-        //初始化数据
-        $data                   = ['info'=>[],'search'=>[],'thead'=>[]];
-
-        $listid    = !empty($listid) ? $listid : strtolower(request()->controller().'/'.request()->action());
-        
-        //获取列表模板详情
-        $parame                 = [];
-        $parame['uid']          = $this->uid;
-        $parame['hashid']       = $this->hashid;
-        $parame['id']           = $listid;
-        $res                    = $this->apiData($parame,'api/Sys/listdetail');
-        $info                   = $res ? $this->getApiData() : [];
-
-        if (empty($info))  return $data;
-
-        //获取列表模板字段数据
-        $parame                 = [];
-        $parame['uid']          = $this->uid;
-        $parame['hashid']       = $this->hashid;
-        $parame['pid']          = $listid;
-        $parame['page']         = 1;
-        $parame['search']       = '';
-        $res                    = $this->apiData($parame,'api/Sys/listtpl');
-
-        $listTpl                = $res ? $this->getApiData() : [];
-        $list                   = (!empty($listTpl) && isset($listTpl['lists'])) ? $listTpl['lists'] : [];
-
-        if (empty($list))  return $data;
-
-        //数据格式化
-        $i          = 0 ;
-        $j          = 0 ;
-        $search     = array() ;
-        $thead      = array() ;
-
-        //去除禁用的
-        if (!empty($list)) {
-            foreach ($list as $index => $item) {
-                if ($item['status'] != 1) unset($list[$index]);
-            }
-        }
-
-        //格式化数据
-        if (!empty($list)) {
-
-            $width              = 0;
-            $counts             = count($list);
-            $nums               = 0;
-
-            foreach ($list as $index => $item) {
-
-                $nums++;
-                $list[$index]['config'] = json_decode($item['config'] , true) ;
-
-                //处理默认数据
-                $default                = !empty($list[$index]['config']['default']) ? explode(':',$list[$index]['config']['default']) : [];
-
-                $list[$index]['config']['default'] = [];
-
-                if (isset($default[0]) && isset($default[1]))
-                {
-                    if ($default[0] == 'parame') {
-                        $list[$index]['config']['default']['type'] = $default[0];
-                        $list[$index]['config']['default']['parame'] = $default[1];
-                    } else {
-                        $parame = array() ;
-                        $arr = explode(',',$default[1]) ;
-                        foreach ($arr as $key => $value) {
-                            $arr = explode('=',$value) ;
-                            $parame[$arr[0]] = $arr[1] ;
-                        }
-                        $list[$index]['config']['default']['type'] = $default[0];
-                        $list[$index]['config']['default']['parame'] = count($arr)>1 ? $parame : $default[1];
-                    }                    
-                }
-
-                if ($counts == $nums) {
-                    $item['width']          = $width >= 100 ? 0 : 100-$width;
-                }else{
-                    $width                  += $item['width'];
-                }
-
-                if ($width >= 100)  continue;
-
-                //表头位数据
-                $thead[$index]['id']       = $item['id'] ;
-                $thead[$index]['title']    = $item['title'] ;
-                $thead[$index]['tag']      = $item['tag'] ;
-                $thead[$index]['width']    = $item['width'] ;
-                $thead[$index]['edit']     = $list[$index]['config']['edit'] ;
-                $thead[$index]['search']   = $list[$index]['config']['search'] ;
-                $thead[$index]['type']     = $list[$index]['config']['type'] ;
-                $thead[$index]['attr']     = $list[$index]['config']['attr'] ;
-                $thead[$index]['default']  = $list[$index]['config']['default'] ;
-
-                //搜索位数据
-                if ($list[$index]['config']['search'] ==1){
-                    $search[$i]['title']    = $item['title'] ;
-                    $search[$i]['tag']      = $item['tag'] ;
-                    $search[$i]['width']    = $item['width'] ;
-                    $search[$i]['edit']     = $list[$index]['config']['edit'] ;
-                    $search[$i]['search']   = $list[$index]['config']['search'] ;
-                    $search[$i]['type']     = $list[$index]['config']['type'] ;
-                    $search[$i]['attr']     = $list[$index]['config']['attr'] ;
-
-                    $search[$i]['default']  = $list[$index]['config']['default'] ;
-
-                    $i++ ;
-                }
-            }
-        }
-
-        $data['info']   = $info ;
-        $data['search'] = $search ;
-        $data['thead']  = $thead ;
-
-        return $data ;
-    }
-
-    //获取表单设置
-    protected function getFormFields($formId,$isEdit)
-    {
-        //初始化数据
-        $data                   = ['info'=>[],'list'=>[]];
-
-        //获取表单模板详情
-        $parame                 = [];
-        $parame['uid']          = $this->uid;
-        $parame['hashid']       = $this->hashid;
-        $parame['id']           = $formId;
-        $res                    = $this->apiData($parame,'api/Sys/fromdetail');
-        $info                   = $res ? $this->getApiData() : [];
-
-        if (empty($info))  return $data;
-
-        //获取表单模板字段数据
-        $parame                 = [];
-        $parame['uid']          = $this->uid;
-        $parame['hashid']       = $this->hashid;
-        $parame['pid']          = $formId;
-        $parame['page']         = 1;
-        $parame['search']       = '';
-        $res                    = $this->apiData($parame,'api/Sys/fromtpl');
-
-        $listTpl                = $res ? $this->getApiData() : [];
-        $formList               = (!empty($listTpl) && isset($listTpl['lists'])) ? $listTpl['lists'] : [];
-
-        if (empty($formList))  return $data;
-
-        //缓存表单一条数据
-        if (isset($info['id']) && $info['id'] > 0 )  cache('DevformDetails'.$info['id'],$info);
-
-        if ($isEdit == '-2')  return ['info'=>$info,'list'=>$formList] ;
-
-        //数据整理
-        $formFields         = array() ;
-        foreach ($formList as $index => $datum) {
-
-            if ($datum['status'] != 1 || empty($datum['config'])) continue;
-            $config         = !empty($datum['config']) ? json_decode($datum['config'], true) : [];
-
-            unset($datum['config']);
-            $config         = array_merge($datum,$config);
-
-            $formFields[]   = $config;
-        }
-
-        $type                   = $isEdit>0 ? 'edit' : 'add' ;
-        //格式化
-        $i = 0 ;
-        $formField = array() ;
-        foreach ($formFields as $index => $item) {
-            $formFields[$index] = $item;
-
-            if ($formFields[$index][$type] <= 0 && $isEdit != '-1') continue;
-
-            if(!empty($formFields[$index]['default'])){
-                //获取当前默认值类型
-                $default = explode(':', $formFields[$index]['default']);
-                $formFields[$index]['default'] = [];
-                if ( isset($default[0]) && isset($default[1]) )
-                {
-                    if ($default[0] == 'parame') {
-                        $formFields[$index]['default']['type'] = $default[0];
-                        $formFields[$index]['default']['parame'] = $default[1];
-                    } else {
-                        $parame = array() ;
-                        $arr = explode(',',$default[1]) ;
-                        foreach ($arr as $key => $value) {
-                            $arr = explode('=',$value) ;
-                            $parame[$arr[0]] = $arr[1] ;
-                        }
-                        $formFields[$index]['default']['type'] = $default[0];
-                        $formFields[$index]['default']['parame'] = count($arr)>1 ? $parame : $default[1];
-                    }
-                }
-            }
-
-            $formField[$i] = $formFields[$index];
-            $i++;
-        }
-
-        $arr = [];
-        if (!empty($formField)) {
-            
-            foreach ($formField as $k => $v) {
-                
-                $group = empty($v['group']) ? '基本信息' : $v['group'];
-
-                $arr[$group][]        = $v;
-            }
-        }
-
-        return ['info'=>$info,'list'=>$arr] ;
-    }
-
     /**
      * [quickEdit 快捷编辑]
      * @return [json] [反馈信息]
@@ -604,9 +384,12 @@ class Base extends Controller
     public function getSearchParame($param = [])
     {
         $search             = [];
-        if (!empty($param)) {
-            foreach ($param as $key => $value) {
-                if (strpos('#'.$key, 'data_search_') === 1) {
+        if (!empty($param))
+        {
+            foreach ($param as $key => $value)
+            {
+                if (strpos('#'.$key, 'data_search_') === 1)
+                {
                     $search[str_replace('data_search_', '', $key)]   = $value;
                 }
             }
@@ -622,5 +405,56 @@ class Base extends Controller
     protected function getDefaultParameData()
     {
         return [];
+    }
+
+    protected function getTplData($tag = '', $title = '', $type = '')
+    {
+        if (empty($title) || empty($type) || !in_array($type, ['form','list']))  return [];
+
+        $cname      = get_devtpl_tag($tag);
+        $data       = get_release_data($cname,$type);
+
+        if (is_dev())
+        {
+            if (!empty($data))
+            {
+                foreach ($data as $value)
+                {
+                    if (!empty($value))
+                    {
+                        foreach ($value as $v2)
+                        {
+                            if ($v2['pid'] == 0 && $title == $v2['title']) return $data;
+                        }
+                    }
+                }
+            }
+
+            //初始化数据
+            $signData                   = [];
+            $signData['uid']            = $this->uid;
+            $signData['hashid']         = $this->hashid;
+            $signData['title']          = $title;
+            $signData['cname']          = $cname;
+
+            $apiUrl                     = [
+                'list'  => 'admin/Devlist/initListData',
+                'form'  => 'admin/Devform/initFormData'
+            ];
+
+            if (isset($apiUrl[$type]) && !empty($apiUrl[$type]))
+            {
+                //请求数据
+                $res        = $this->apiData($signData,$apiUrl[$type]) ;
+                $devtpl     = $this->getApiData() ;
+                
+                if ($res)
+                {
+                    $data   = get_release_data($cname,$type);
+                }
+            }
+        }
+
+        return $data;
     }
 }

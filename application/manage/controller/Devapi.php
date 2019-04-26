@@ -52,6 +52,7 @@ class Devapi extends Base
 
         //项目ID
         $this->project_id   = 1;
+        $this->user_id      = 1;
 
         $api_sign_id        = config('dev_config.api_sign_id');
         $api_sign_key       = config('dev_config.api_sign_key');
@@ -72,24 +73,34 @@ class Devapi extends Base
 	//列表页面
 	public function index()
     {
-        //记录当前列表页的cookie
-        Cookie('__forward__',$_SERVER['REQUEST_URI']);
+        //参数数据接收
+        $param      = request()->param();
 
-		$menuid     = input('menuid');
-        $module_id  = input('mid',-1);
-        $mkeys      = input('keys',0);
+        //初始化模板
+        $listNode   = $this->tpl->showListTpl($this->getTplData('','接口列表','list'));
+        $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
+        $listTag    = isset($listNode['tags']) ? $listNode['tags'] : '';
+
+        //参数定义
+        $menuid     = isset($param['menuid']) ? $param['menuid'] : 0;
+        $page       = isset($param['page']) ? $param['page'] : 1;
+        $search     = $this->getSearchParame($param);
+        $isTree     = 0;
+
+        $module_id  = isset($param['mid']) ? $param['mid'] : -1;
+        $mkeys      = isset($param['keys']) ? $param['keys'] : 0;
+
 
         //初始化接口列表ID
         session('api_list_ids_to_release',null);
 
-        //模块列表
-        $search                 = [];
         $search['project_id']   = $this->project_id;
 
+        //模块列表
         $parame             = [];
         $parame['uid']      = $this->uid;
         $parame['hashid']   = $this->hashid;
-        $parame['page']     = input('page',1);
+        $parame['page']     = $page;
         $parame['search']   = !empty($search) ? json_encode($search) : '' ;
 
         $listData2          = [];
@@ -107,9 +118,6 @@ class Devapi extends Base
         //页面操作功能菜单
         $topMenu    = formatMenuByPidAndPos($menuid,2, $this->menu);
         $rightMenu  = formatMenuByPidAndPos($menuid,3, $this->menu);
-
-        //获取表头以及搜索数据
-        $listNode   = $this->getListNote(request()->controller()) ;
 
         //获取接口列表数据
         $search                 = [];
@@ -163,7 +171,7 @@ class Devapi extends Base
         $assignData['_total']           = $total;
         $assignData['topMenu']          = $topMenu;
         $assignData['rightMenu']        = $rightMenu;
-        $assignData['listId']           = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
+        $assignData['listId']           = $listId;
         $assignData['listNode']         = $listNode;
         $assignData['listData']         = $listData;
         $assignData['listData2']        = $listData2;
@@ -179,9 +187,13 @@ class Devapi extends Base
             session('api_list_ids_to_release',$apiids);
         }
 
-        //异步请求处理
-        if(request()->isAjax()){
+        //记录当前列表页的cookie
+        cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__listtag__',$listTag);
 
+        //异步请求处理
+        if(request()->isAjax())
+        {
         	echo json_encode(['listData'=>$this->fetch('public/list/listData'),'listPage'=>$p]);exit;
         }
 
@@ -195,8 +207,11 @@ class Devapi extends Base
 		//数据提交
         if (request()->isPost()) $this->update();
 
-        //表单模板
-        $formData           = $this->getFormFields(request()->controller(),0);
+        //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','新增/编辑接口设计表单','form'),0);
+        $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail(0);
@@ -214,8 +229,9 @@ class Devapi extends Base
         $pageData['notice']             = [''];
 
         //渲染数据到页面模板上
-        $assignData['formId']           = isset($formData['info']['id']) ? intval($formData['info']['id']) : 0;
-        $assignData['formFieldList']    = $formData['list'];
+        $assignData['formId']           = $formId;
+        $assignData['formTag']          = $formTag;
+        $assignData['formFieldList']    = $formList;
         $assignData['pageData']         = $pageData;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['info']             = $info;
@@ -231,8 +247,11 @@ class Devapi extends Base
 		//数据提交
         if (request()->isPost()) $this->update();
 
-		//表单模板
-        $formData           = $this->getFormFields(request()->controller(),1) ;
+		//初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','新增/编辑接口设计表单','form'),0);
+        $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail($id);
@@ -249,8 +268,9 @@ class Devapi extends Base
         $pageData['notice']             = [''];
 
         //渲染数据到页面模板上
-        $assignData['formId']           = isset($formData['info']['id']) ? intval($formData['info']['id']) : 0;
-        $assignData['formFieldList']    = $formData['list'];
+        $assignData['formId']           = $formId;
+        $assignData['formTag']          = $formTag;
+        $assignData['formFieldList']    = $formList;
         $assignData['pageData']         = $pageData;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['info']             = $info;
@@ -305,43 +325,25 @@ class Devapi extends Base
     //处理提交新增或编辑的数据
     private function update()
     {
-        $formid                     = intval(input('formId'));
-        $formInfo                   = cache('DevformDetails'.$formid);
-        if(empty($formInfo)) $this->error('表单模板数据不存在');
-
-        $apidoc_name                = session('apidoc_user_auth.apidoc_name');
-
         //表单数据
-        $postData                   = input('post.');
+        $postData                = request()->param();
+        if(!$this->tpl->checkFormTpl($postData)) $this->error('表单模板数据不存在');
 
-        //用户信息
-        $postData['uid']            = $this->uid;
-        $postData['hashid']         = $this->hashid;
-
-        if (in_array(request()->action(),['add','edit'])) {
-
-           $postData['api_type']       = isset($postData['api_type']) ? $postData['api_type'] : 0;
-        }
-
-        //表单中不允许提交至接口的参数
-        $notAllow                   = ['formId'];
-
-        //过滤不允许字段
-        if(!empty($notAllow)){
-
-            foreach ($notAllow as $key => $value) unset($postData[$value]);
-        }
+        //接口数据
+        $signData                   = $this->tpl->getFormTplData($postData);
+        $signData['uid']            = $this->uid;
+        $signData['hashid']         = $this->hashid;
 
         //请求数据
         if (!isset($this->apiUrl[request()->action().'_save'])||empty($this->apiUrl[request()->action().'_save'])) 
         $this->error('未设置接口地址');
 
-        $res       = $this->apiData($postData,$this->apiUrl[request()->action().'_save']) ;
+        $res       = $this->apiData($signData,$this->apiUrl[request()->action().'_save']) ;
         $data      = $this->getApiData() ;
 
         if($res){
 
-            $this->success($postData['id']  > 0 ? '更新成功' : '新增成功',Cookie('__forward__')) ;
+            $this->success($signData['id']  > 0 ? '更新成功' : '新增成功',Cookie('__forward__')) ;
         }else{
 
             $this->error($this->getApiError()) ;
@@ -410,35 +412,6 @@ class Devapi extends Base
 
         //加载视图模板
         return view('set_parame');
-    }
-
-    //参数设置界面
-    public function add_parame($id = 0)
-    {
-        //数据提交
-        if (request()->isPost()) $this->update();
-
-        //表单模板
-        $formData           = $this->getFormFields(RequestParame,1) ;
-        $this->assign('formFieldList', $formData['list']);
-
-        //数据详情
-        //$info                           = $this->getDetail($id);
-
-        //页面头信息设置
-        $pageData['isback']             = 0;
-        $pageData['title1']             = '';
-        $pageData['title2']             = '';
-        $pageData['notice']             = [];
-
-        //渲染数据到页面模板上
-        $this->assign('pageData',       $pageData);
-        $this->assign('defaultData' ,   $this->getDefaultParameData()) ;
-        $this->assign('info',           $info);
-        $this->assign('formId',         isset($formData['info']['id']) ? intval($formData['info']['id']) : 0);
-        
-        //加载视图模板
-        $this->display('addedit');
     }
 
     //接口调试
@@ -755,48 +728,6 @@ class Devapi extends Base
         return [$res,$this->getApiData(),$this->getApiError()];
     }
 
-    //APIDOC授权登录
-    public function apidoc_login()
-    {
-        if (request()->isPost()) $this->apidoc_start_login();
-
-        $this->assignData();
-        return view();
-    }
-
-    //新增接口模块
-    public function addModule()
-    {
-        //数据提交
-        if (request()->isPost()) $this->update();
-
-        //表单模板
-        $formData           = $this->getFormFields('DevapiModule',1) ;
-
-        //数据详情
-        $info                           = $this->getDetail(0);
-        $info['project_id']             = $this->project_id;
-        $info['user_id']                = $this->uid;
-
-        //页面数据
-        $pageData                       = [];
-        $pageData['isback']             = 0;
-        $pageData['title1']             = '';
-        $pageData['title2']             = '';
-        $pageData['notice']             = [''];
-
-        //渲染数据到页面模板上
-        $assignData['formId']           = isset($formData['info']['id']) ? intval($formData['info']['id']) : 0;
-        $assignData['formFieldList']    = $formData['list'];
-        $assignData['pageData']         = $pageData;
-        $assignData['defaultData']      = $this->getDefaultParameData();
-        $assignData['info']             = $info;
-        $this->assignData($assignData);
-
-        //加载视图模板
-        return view('addedit');
-    }
-
     //接口文档导出
     public function exportApi()
     {
@@ -947,18 +878,27 @@ class Devapi extends Base
         return $listData;
     }
 
-    //编辑接口模块
-    public function editModule($id)
+
+
+    //新增接口模块
+    public function addModule()
     {
         //数据提交
         if (request()->isPost()) $this->update();
 
-        //表单模板
-        $formData           = $this->getFormFields('DevapiModule',1) ;
+        //参数数据接收
+        $param      = request()->param();
+
+        //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('','新增/编辑接口模块表单','form'),1);
+        $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
-        $info                           = $this->getDetail($id);
+        $info                           = $this->getDetail(0);
         $info['project_id']             = $this->project_id;
+        $info['user_id']                = $this->uid;
 
         //页面数据
         $pageData                       = [];
@@ -968,8 +908,53 @@ class Devapi extends Base
         $pageData['notice']             = [''];
 
         //渲染数据到页面模板上
-        $assignData['formId']           = isset($formData['info']['id']) ? intval($formData['info']['id']) : 0;
-        $assignData['formFieldList']    = $formData['list'];
+        $assignData['formId']           = $formId;
+        $assignData['formTag']          = $formTag;
+        $assignData['formFieldList']    = $formList;
+        $assignData['pageData']         = $pageData;
+        $assignData['defaultData']      = $this->getDefaultParameData();
+        $assignData['info']             = $info;
+        $this->assignData($assignData);
+
+        //加载视图模板
+        return view('addedit');
+    }
+
+    //编辑接口模块
+    public function editModule($id)
+    {
+        //数据提交
+        if (request()->isPost()) $this->update();
+
+        //参数数据接收
+        $param      = request()->param();
+
+        //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('','新增/编辑接口模块表单','form'),0);
+        $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
+
+        //数据详情
+        $info                           = $this->getDetail($id);
+        $info['project_id']             = $this->project_id;
+        $info['user_id']                = $this->uid;
+
+        //页面数据
+        $pageData                       = [];
+        $pageData['isback']             = 0;
+        $pageData['title1']             = '';
+        $pageData['title2']             = '';
+        $pageData['notice']             = [''];
+        
+        //记录当前列表页的cookie
+        cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__formtag__',$formTag);
+
+        //渲染数据到页面模板上
+        $assignData['formId']           = $formId;
+        $assignData['formTag']          = $formTag;
+        $assignData['formFieldList']    = $formList;
         $assignData['pageData']         = $pageData;
         $assignData['defaultData']      = $this->getDefaultParameData();
         $assignData['info']             = $info;
@@ -1038,11 +1023,10 @@ class Devapi extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $tag        = '';
-        $tpl_title  = '基础API一键添加表单'; //初始化列表模板的名称，为空时不初始化
-        $tplid      = $this->tpl->initTplData(get_devtpl_tag($tag),$tpl_title,1);
-        $formNode   = $this->tpl->showTpl($tplid);
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('','基础API一键添加表单','form'),0);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail($id);
@@ -1056,9 +1040,11 @@ class Devapi extends Base
         
         //记录当前列表页的cookie
         cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__formtag__',$formTag);
 
         //渲染数据到页面模板上
         $assignData['formId']           = $formId;
+        $assignData['formTag']          = $formTag;
         $assignData['formFieldList']    = $formNode['list'];
         $assignData['info']             = $info;
         $assignData['defaultData']      = $this->getDefaultParameData();
@@ -1073,8 +1059,9 @@ class Devapi extends Base
     {
         //表单数据
         $postData     = request()->param();
-        $tplid        = $this->tpl->checkTpl(intval($postData['formId']),1);
-        if($tplid <= 0) $this->error('表单模板数据不存在');
+
+        //表单模板
+        if(!$this->tpl->checkFormTpl($postData)) $this->error('表单模板数据不存在');
 
         $api_title    = (isset($postData['api_title']) && !empty($postData['api_title'])) ? trim($postData['api_title']) : '';
         if( empty($api_title) ) $this->error('接口名称不能为空');

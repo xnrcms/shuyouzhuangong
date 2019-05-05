@@ -55,9 +55,11 @@ class Devfile extends Base
         $topMenu    = formatMenuByPidAndPos($menuid,2, $this->menu);
         $rightMenu  = formatMenuByPidAndPos($menuid,3, $this->menu);
 
-		$allFile        = glob ( \Env::get('APP_PATH') . 'manage/Controller/' . '*' );
+		$allFile        = glob ( \Env::get('APP_PATH') . 'manage/controller/' . '*' );
 		$hideFile 		= ['Devfile','Devform','Devlist','Devmenu','Base','Devapi','Devproject','Devconfig'];
-
+		
+		$fname 			= [];
+		
         if (!empty($allFile))
         {
             foreach ($allFile as $key => $file)

@@ -8,16 +8,16 @@
  * 不允许对程序代码以任何形式任何目的的再发布。
  * 采用TP5助手函数可实现单字母函数M D U等,也可db::name方式,可双向兼容
  * ============================================================================
- * Author: {ControllerAuth}
- * Date: {ControllerDate}
- * Description:{ControllerDescription}
+ * Author: XNRCMS<562909771@qq.com>
+ * Date: 2019-05-05
+ * Description:广告位模块
  */
 
 namespace app\manage\controller;
 
 use app\manage\controller\Base;
 
-class {ControllerName} extends Base
+class AdPosition extends Base
 {
     private $apiUrl         = [];
     private $tpl            = null;
@@ -27,12 +27,12 @@ class {ControllerName} extends Base
         parent::__construct();
 
         $this->tpl                    = new \xnrcms\DevTpl();
-        $this->apiUrl['index']        = 'api/{ApiName}/listData';
-        $this->apiUrl['edit']         = 'api/{ApiName}/detailData';
-        $this->apiUrl['add_save']     = 'api/{ApiName}/saveData';
-        $this->apiUrl['edit_save']    = 'api/{ApiName}/saveData';
-        $this->apiUrl['quickedit']    = 'api/{ApiName}/quickEditData';
-        $this->apiUrl['del']          = 'api/{ApiName}/delData';
+        $this->apiUrl['index']        = 'api/AdPosition/listData';
+        $this->apiUrl['edit']         = 'api/AdPosition/detailData';
+        $this->apiUrl['add_save']     = 'api/AdPosition/saveData';
+        $this->apiUrl['edit_save']    = 'api/AdPosition/saveData';
+        $this->apiUrl['quickedit']    = 'api/AdPosition/quickEditData';
+        $this->apiUrl['del']          = 'api/AdPosition/delData';
     }
 
 	//列表页面
@@ -42,7 +42,7 @@ class {ControllerName} extends Base
         $param      = request()->param();
 
         //初始化模板
-        $listNode   = $this->tpl->showListTpl($this->getTplData('','','list'));
+        $listNode   = $this->tpl->showListTpl($this->getTplData('','广告位列表','list'));
         $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
         $listTag    = isset($listNode['tags']) ? $listNode['tags'] : '';
 
@@ -96,9 +96,9 @@ class {ControllerName} extends Base
 
         //页面头信息设置
         $pageData['isback']             = 0;
-        $pageData['title1']             = '';
-        $pageData['title2']             = '';
-        $pageData['notice']             = [];
+        $pageData['title1']             = '广告位管理';
+        $pageData['title2']             = '广告位列表';
+        $pageData['notice']             = ['广告位置在前台模板标签里面调用.','当模板标签调用时程序会自动判断 pid 不存在则自动'];
 
         //渲染数据到页面模板上
         $assignData['isTree']           = $isTree;
@@ -136,7 +136,7 @@ class {ControllerName} extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','','form'),0);
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','新增/编辑广告位表单','form'),0);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
         $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
         $formList   = isset($formNode['list']) ? $formNode['list'] : [];
@@ -177,7 +177,7 @@ class {ControllerName} extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','','form'),1);
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','新增/编辑广告位表单','form'),1);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
         $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
         $formList   = isset($formNode['list']) ? $formNode['list'] : [];

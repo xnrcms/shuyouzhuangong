@@ -8,16 +8,16 @@
  * 不允许对程序代码以任何形式任何目的的再发布。
  * 采用TP5助手函数可实现单字母函数M D U等,也可db::name方式,可双向兼容
  * ============================================================================
- * Author: {ControllerAuth}
- * Date: {ControllerDate}
- * Description:{ControllerDescription}
+ * Author: XNRCMS<562909771@qq.com>
+ * Date: 2019-05-05
+ * Description:广告模块
  */
 
 namespace app\manage\controller;
 
 use app\manage\controller\Base;
 
-class {ControllerName} extends Base
+class Ad extends Base
 {
     private $apiUrl         = [];
     private $tpl            = null;
@@ -27,12 +27,12 @@ class {ControllerName} extends Base
         parent::__construct();
 
         $this->tpl                    = new \xnrcms\DevTpl();
-        $this->apiUrl['index']        = 'api/{ApiName}/listData';
-        $this->apiUrl['edit']         = 'api/{ApiName}/detailData';
-        $this->apiUrl['add_save']     = 'api/{ApiName}/saveData';
-        $this->apiUrl['edit_save']    = 'api/{ApiName}/saveData';
-        $this->apiUrl['quickedit']    = 'api/{ApiName}/quickEditData';
-        $this->apiUrl['del']          = 'api/{ApiName}/delData';
+        $this->apiUrl['index']        = 'api/Ad/listData';
+        $this->apiUrl['edit']         = 'api/Ad/detailData';
+        $this->apiUrl['add_save']     = 'api/Ad/saveData';
+        $this->apiUrl['edit_save']    = 'api/Ad/saveData';
+        $this->apiUrl['quickedit']    = 'api/Ad/quickEditData';
+        $this->apiUrl['del']          = 'api/Ad/delData';
     }
 
 	//列表页面
@@ -262,7 +262,7 @@ class {ControllerName} extends Base
         if(!$this->tpl->checkFormTpl($postData)) $this->error('表单模板数据不存在');
 
         //接口数据
-        $signData                   = $this->tpl->getFormTplData($postData);
+        $signData                   = $this->tpl->getFormTplData($tplid,$postData);
         $signData['uid']            = $this->uid;
         $signData['hashid']         = $this->hashid;
         

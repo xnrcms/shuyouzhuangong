@@ -76,20 +76,20 @@ class Logs extends Base
         return $this->execApi($parame);
     }
 
-    /*api:269bf6a7f02ce2045af284e9bda57683*/
+    /*api:1c6d967a78ed832677c6ac12b00de3b6*/
     /**
      * 操作日志清理
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function clearLogs($parame = []){
-
+    public function clearLogs($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:269bf6a7f02ce2045af284e9bda57683*/
+    /*api:1c6d967a78ed832677c6ac12b00de3b6*/
 
     /*接口扩展*/
 }

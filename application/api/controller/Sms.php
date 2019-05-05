@@ -91,35 +91,35 @@ class Sms extends Base
 
     /*api:60870c74979b9a68c9525a718549836e*/
 
-    /*api:38a9bd7f2764f6224569544127bba675*/
+    /*api:704cbfb35b0703f4566dbf3277a0eb63*/
     /**
      * 发送手机验证码
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function sendMobileCode($parame = []){
-
+    public function sendMobileCode($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:38a9bd7f2764f6224569544127bba675*/
+    /*api:704cbfb35b0703f4566dbf3277a0eb63*/
 
-    /*api:5031066d750488238efc7dfab124ce46*/
+    /*api:0f4a8eb21969e97fbc8f536e888c7ff4*/
     /**
      * 验证码校验
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function checkCode($parame = []){
-
+    public function checkCode($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:5031066d750488238efc7dfab124ce46*/
+    /*api:0f4a8eb21969e97fbc8f536e888c7ff4*/
 
     /*接口扩展*/
 }

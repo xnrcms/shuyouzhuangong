@@ -59,7 +59,7 @@ class Sms extends Base
         return $this->$aName($parame);
     }
 
-    /*api:38a9bd7f2764f6224569544127bba675*/
+    /*api:704cbfb35b0703f4566dbf3277a0eb63*/
     /**
      * * 发送手机验证码
      * @param  [array] $parame 接口参数
@@ -173,9 +173,9 @@ class Sms extends Base
         return ['Code' => '200009', 'Msg'=>lang('200009',[$res[1]])];
     }
 
-    /*api:38a9bd7f2764f6224569544127bba675*/
+    /*api:704cbfb35b0703f4566dbf3277a0eb63*/
 
-    /*api:5031066d750488238efc7dfab124ce46*/
+    /*api:0f4a8eb21969e97fbc8f536e888c7ff4*/
     /**
      * * 验证码校验
      * @param  [array] $parame 接口参数
@@ -200,7 +200,7 @@ class Sms extends Base
         return ['Code' => '200010', 'Msg'=>lang('200010')];
     }
 
-    /*api:5031066d750488238efc7dfab124ce46*/
+    /*api:0f4a8eb21969e97fbc8f536e888c7ff4*/
 
     /*接口扩展*/
 

@@ -23,7 +23,6 @@ class Devproject extends Base
 	public function __construct($parame=[],$className='',$methodName='',$modelName='')
     {
         parent::__construct($parame,$className,$methodName,$modelName);
-        $this->apidoc           = request()->param('apidoc',0);
     }
     
     /**
@@ -36,6 +35,7 @@ class Devproject extends Base
 	public function apiRun()
     {   
         if (!$this->checkData($this->postData)) return json($this->getReturnData());
+        
         //加载验证器
         $this->dataValidate = new \app\api\validate\DataValidate;
         
@@ -45,10 +45,18 @@ class Devproject extends Base
         //接口执行分发
         $methodName     = $this->actionName;
         $data           = $this->$methodName($this->postData);
+
         //设置返回数据
         $this->setReturnData($data);
+
         //接口数据返回
         return json($this->getReturnData());
+    }
+
+    //支持内部调用
+    public function isInside($parame,$aName)
+    {
+        return $this->$aName($parame);
     }
 
     /**
@@ -88,26 +96,27 @@ class Devproject extends Base
 		$modelParame['order']		= 'main.id desc';		
 		
 		//数据分页步长定义
-		$modelParame['limit']		= $this->apidoc == 2 ? 1 : 10;
+		$modelParame['limit']		= isset($parame['limit']) ? $parame['limit'] : 10;
 
 		//数据分页页数定义
 		$modelParame['page']		= (isset($parame['page']) && $parame['page'] > 0) ? $parame['page'] : 1;
 
 		//数据缓存是时间，默认0 不缓存 ,单位秒
-		$modelParame['cacheTime']	= 0;
+		$modelParame['cacheKey']	= [];
 
 		//列表数据
-		$lists 						= $dbModel->getPageList($modelParame);
+		$lists 						= $dbModel->getList($modelParame);
 
 		//数据格式化
 		$data 						= (isset($lists['lists']) && !empty($lists['lists'])) ? $lists['lists'] : [];
 
-    	if (!empty($data)) {
-
+    	if (!empty($data))
+        {
             //自行定义格式化数据输出
-    		//foreach($data as $k=>$v){
+    		/*foreach($data as $k=>$v)
+            {
 
-    		//}
+    		}*/
     	}
 
     	$lists['lists'] 			= $data;
@@ -138,24 +147,15 @@ class Devproject extends Base
         //自行处理数据入库条件
         //...
 		
-        //通过ID判断数据是新增还是更新
-    	if ($id <= 0) {
-
-            //执行新增
-    		$info 									= $dbModel->addData($saveData);
-    	}else{
-
-            //执行更新
-    		$info 									= $dbModel->updateById($id,$saveData);
+        //通过ID判断数据是新增还是更新 定义新增条件下数据
+    	if ($id <= 0)
+        {
+            //$saveData['parame']         = isset($parame['parame']) ? $parame['parame'] : '';
     	}
 
-    	if (!empty($info)) {
+    	$info                                       = $dbModel->saveData($id,$saveData);
 
-    		return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$info];
-    	}else{
-
-    		return ['Code' => '100015', 'Msg'=>lang('100015')];
-    	}
+        return !empty($info) ? ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$info] : ['Code' => '100015', 'Msg'=>lang('100015')];
     }
 
     /**
@@ -173,21 +173,9 @@ class Devproject extends Base
         if ($id <= 0) return ['Code' => '120023', 'Msg'=>lang('120023')];
 
         //数据详情
-    	$info 				= $dbModel->getOneById($id);
+        $info               = $dbModel->getRow($id);
 
-    	if (!empty($info)) {
-    		
-            //格式为数组
-            $info                   = $info->toArray();
-
-            //自行对数据格式化输出
-            //...
-
-    		return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$info];
-    	}else{
-
-    		return ['Code' => '100015', 'Msg'=>lang('100015')];
-    	}
+        return !empty($info) ? ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$info] : ['Code' => '100015', 'Msg'=>lang('100015')];
     }
 
     /**
@@ -205,15 +193,9 @@ class Devproject extends Base
         if ($id <= 0) return ['Code' => '120023', 'Msg'=>lang('120023')];
 
         //根据ID更新数据
-    	$info 				= $dbModel->updateById($id,[$parame['fieldName']=>$parame['updata']]);
+        $info               = $dbModel->saveData($id,[$parame['fieldName']=>$parame['updata']]);
 
-    	if (!empty($info)) {
-
-    		return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['id'=>$id]];
-    	}else{
-
-    		return ['Code' => '100015', 'Msg'=>lang('100015')];
-    	}
+        return !empty($info) ? ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$info] : ['Code' => '100015', 'Msg'=>lang('100015')];
     }
 
     /**
@@ -234,7 +216,7 @@ class Devproject extends Base
         //...
         
         //执行删除操作
-    	$delCount				= $dbModel->delData($id);
+    	$delCount				= $dbModel->deleteData($id);
 
     	return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
     }

@@ -42,7 +42,7 @@ class Usergroup extends Base
         $param      = request()->param();
 
         //初始化模板
-        $listNode   = $this->tpl->showListTpl($this->getTplData('','用户组列表2','list'));
+        $listNode   = $this->tpl->showListTpl($this->getTplData('','用户组列表','list'));
         $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
         $listTag    = isset($listNode['tags']) ? $listNode['tags'] : '';
 

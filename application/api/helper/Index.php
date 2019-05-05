@@ -57,7 +57,7 @@ class Index extends Base
         return $this->$aName($parame);
     }
 
-    /*api:9d8d0a3f638bff38d24ad0477933d071*/
+    /*api:2dcf1a0ebcd7e6de04c2685efbb72b05*/
     /**
      * * 首页综合接口
      * @param  [array] $parame 接口参数
@@ -177,7 +177,7 @@ class Index extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$Data];
     }
 
-    /*api:9d8d0a3f638bff38d24ad0477933d071*/
+    /*api:2dcf1a0ebcd7e6de04c2685efbb72b05*/
 
     /*接口扩展*/
 }

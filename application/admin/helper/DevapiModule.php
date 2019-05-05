@@ -269,7 +269,7 @@ class DevapiModule extends Base
     	return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
     }
 
-    /*api:38a9bd7f2764f6224569544127bba675*/
+    /*api:9b970e254e738a4c48c26d1a92c615db*/
     /**
      * * 接口导出接口
      * @param  [array] $parame 接口参数
@@ -303,9 +303,9 @@ class DevapiModule extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$Data];
     }
 
-    /*api:38a9bd7f2764f6224569544127bba675*/
+    /*api:9b970e254e738a4c48c26d1a92c615db*/
 
-    /*api:5031066d750488238efc7dfab124ce46*/
+    /*api:e395328b9fd150e692a62db9cd0b6cb6*/
     /**
      * * 接口导入接口
      * @param  [array] $parame 接口参数
@@ -360,7 +360,7 @@ class DevapiModule extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$Data];
     }
 
-    /*api:5031066d750488238efc7dfab124ce46*/
+    /*api:e395328b9fd150e692a62db9cd0b6cb6*/
 
     /*接口扩展*/
 }

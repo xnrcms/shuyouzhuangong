@@ -154,8 +154,8 @@ class User extends Base
         $uid    = $id > 0 ? model('user_center')->saveData($parame) : model('user_center')->register($parame);
 
         //更新成功
-        if ($uid >0) {
-
+        if ($uid >0)
+        {
             $data['id']                 = intval($uid);
 
             return ['Code' => '000000', 'Msg'=>lang('200020'),'Data'=>$data];
@@ -232,18 +232,15 @@ class User extends Base
         if ($parame['id'] == $administrator_id) return ['Code' => '200028', 'Msg'=>lang('200028')];
 
         //删除用户详细信息
-        model($this->mainTable)->delDataByUid($parame['id']);
+        model($this->mainTable)->delData($parame['id']);
         
         //执行删除操作
     	$delCount				= $dbModel->delData($parame['id']);
 
-        //删除缓存
-        model($this->mainTable)->delDetailDataCacheByUid($parame['id']);
-
     	return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
     }
 
-    /*api:609ef25eb34f9328b296bf3ba71b8ebd*/
+    /*api:14d21e95293b34d2358478519fba550f*/
     /**
      * * 登录（账号+密码）
      * @param  [array] $parame 接口参数
@@ -270,8 +267,8 @@ class User extends Base
         $userModel  = model('user_center');
         $uid        = $userModel->login($username, $password, $usernameType);
 
-        if ($uid > 0) {
-
+        if ($uid > 0)
+        {
             //根据group_id确定用户是否正确登录
             $login_type     = !empty($parame['login_type']) ? explode(',',$parame['login_type']) :[-1];
             $guid           = model('user_group_access')->getUserGroupAccessListByUid($uid);
@@ -282,16 +279,25 @@ class User extends Base
             $data['uid']                = intval($uid);
             $data['hashid']             = md5($uid.config('extend.uc_auth_key'));
 
+            $userDetailModel            = model('user_detail');
+            $userDetailInfo             = $userDetailModel->getOneById($uid);
+
             //极光ID
-            if (isset($parame['jpushid']) && !empty($parame['jpushid'])) {
-                $userModel   = model('user_detail');
-                $userinfo    = $userModel->getOneById($uid);
-                $userModel->updateById($userinfo['id'],['jpushid'=>$parame['jpushid']]);
-                $userModel->delDetailDataCacheByUid($uid);
+            if (isset($parame['jpushid']) && !empty($parame['jpushid']))
+            {
+                $userModel->updateById($userDetailInfo['id'],['jpushid'=>$parame['jpushid']]);
             }
 
             //日志
             model('Logs')->addLog(['uid'=>$data['uid'],'log_type'=>1,'info'=>lang('1')]);
+
+            //更新登录信息
+            $loginInfo                      = [];
+            $loginInfo['last_login_ip']     = get_client_ip();
+            $loginInfo['last_login_time']   = time();
+            $loginInfo['login']             = isset($userDetailInfo['login']) ? (int)$userDetailInfo['login'] + 1 : 1;
+
+            $userDetailModel->updateById($uid,$loginInfo);
 
             return ['Code' => '000000', 'Msg'=>lang('200008'),'Data'=>$data];
         }
@@ -299,9 +305,9 @@ class User extends Base
         return $this->userMessage($uid);
     }
 
-    /*api:609ef25eb34f9328b296bf3ba71b8ebd*/
+    /*api:14d21e95293b34d2358478519fba550f*/
 
-    /*api:38ed8d3588e7b824c58f55ffb0d70bd5*/
+    /*api:defd702febff8d73420c41546d79bdc9*/
     /**
      * * 用户详情
      * @param  [array] $parame 接口参数
@@ -342,7 +348,7 @@ class User extends Base
         $Data['score']                    = $userDetail['score'];
         $Data['login']                    = $userDetail['login'];
         $Data['last_login_ip']            = $userDetail['last_login_ip'];
-        $Data['last_login_time']          = $userDetail['last_login_time'];
+        $Data['last_login_time']          = !empty($userDetail['last_login_time']) ? date('Y-m-d H:i:s',$userDetail['last_login_time']):'/';
         $Data['urules']                   = $userDetail['rules'];
         $Data['sex']                      = $userDetail['sex'];
         $Data['cash_pwd']                 = !empty($userDetail['cash_pwd']) ? 1 : 2;
@@ -377,9 +383,9 @@ class User extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$Data];
     }
 
-    /*api:38ed8d3588e7b824c58f55ffb0d70bd5*/
+    /*api:defd702febff8d73420c41546d79bdc9*/
 
-    /*api:0b5f2683a378793e00e0d97ea79fe6af*/
+    /*api:f100f8720d7e59ac0f05bfa32482af6c*/
     /**
      * * 用户注册（账号+密码）
      * @param  [array] $parame 接口参数
@@ -458,9 +464,9 @@ class User extends Base
         return $this->userMessage($uid);
     }
 
-    /*api:0b5f2683a378793e00e0d97ea79fe6af*/
+    /*api:f100f8720d7e59ac0f05bfa32482af6c*/
 
-    /*api:4bcc00c182dc71fa6c778dc1dd4d36c6*/
+    /*api:ecb2bdf892632423245c8a89fd211427*/
     /**
      * * 用户资料快捷编辑
      * @param  [array] $parame 接口参数
@@ -490,9 +496,9 @@ class User extends Base
         }
     }
 
-    /*api:4bcc00c182dc71fa6c778dc1dd4d36c6*/
+    /*api:ecb2bdf892632423245c8a89fd211427*/
 
-    /*api:ffe672f3176d54cf499926f98488a54d*/
+    /*api:3b1f712d3cbb6874011b78fc67271ef2*/
     /**
      * * 用户资料更新
      * @param  [array] $parame 接口参数
@@ -521,9 +527,9 @@ class User extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['id'=>$parame['uid']]];
     }
 
-    /*api:ffe672f3176d54cf499926f98488a54d*/
+    /*api:3b1f712d3cbb6874011b78fc67271ef2*/
 
-    /*api:b89be038c9ac7b17fac083805dc9cb01*/
+    /*api:7d96300541a7d53e5a8505e1f5db8a18*/
     /**
      * * 密码找回（手机/邮箱+验证码）
      * @param  [array] $parame 接口参数
@@ -569,8 +575,8 @@ class User extends Base
         //修改密码
         $uid    = model('user_center')->updatePassword($password,$mobile,1);
 
-        if ($uid > 0) {
-
+        if ($uid > 0)
+        {
             //删除验证码
             $this->helper(['id'=>$checkCode['Data']['smsid']],'Api','Sms','delCode');
 
@@ -583,9 +589,9 @@ class User extends Base
         return $this->userMessage($uid);
     }
 
-    /*api:b89be038c9ac7b17fac083805dc9cb01*/
+    /*api:7d96300541a7d53e5a8505e1f5db8a18*/
 
-    /*api:bb65cf95a4fe55e30ad3b9488c58c740*/
+    /*api:b7004d3672538f104606ec6f34ba1d00*/
     /**
      * * 用户头像修改接口
      * @param  [array] $parame 接口参数
@@ -611,9 +617,9 @@ class User extends Base
         return ['Code' => '000000', 'Msg'=>lang('200008'),'Data'=>$data];
     }
 
-    /*api:bb65cf95a4fe55e30ad3b9488c58c740*/
+    /*api:b7004d3672538f104606ec6f34ba1d00*/
 
-    /*api:5056ecf32e45e6403c2a59f70f68d7d8*/
+    /*api:026ea8a777269ba40b5233d8e5403c67*/
     /**
      * * 用户更换手机号
      * @param  [array] $parame 接口参数
@@ -663,9 +669,9 @@ class User extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$Data];
     }
 
-    /*api:5056ecf32e45e6403c2a59f70f68d7d8*/
+    /*api:026ea8a777269ba40b5233d8e5403c67*/
 
-    /*api:e6e7456ef699ba5cab2a332d6217f2fa*/
+    /*api:2210e99bea736d7033c64a490a033cd2*/
     /**
      * * 用户密码修改（通过原始密码）
      * @param  [array] $parame 接口参数
@@ -675,21 +681,26 @@ class User extends Base
     {
         //主表数据库模型
         $dbModel                = model('user_center');
-        $userinfo               = $dbModel->getOneById($parame['uid']);
+
+        //获取用户ID
+        $safeid                 = isset($parame['safeid']) ? $parame['safeid'] : '';
+        $uid                    = !empty($safeid) ? (int)string_encryption_decrypt($safeid,'DECODE') : 0;
+        $userinfo               = $dbModel->getOneById($uid);
 
         //用户不存在
         if (empty($userinfo))  return $this->userMessage(-1);
 
-        $oldpwd                 = isset($parame['oldpwd']) ? $parame['oldpwd'] : '';
-        $newpwd                 = isset($parame['newpwd']) ? $parame['newpwd'] : '';
-        $reppwd                 = isset($parame['reppwd']) ? $parame['reppwd'] : '';
+        $oldpwd                 = isset($parame['old_password']) ? $parame['old_password'] : '';
+        $newpwd                 = isset($parame['new_password']) ? $parame['new_password'] : '';
+        $reppwd                 = isset($parame['confirm_password']) ? $parame['confirm_password'] : '';
 
         if (empty($newpwd) || md5($newpwd) !== md5($reppwd) )
         return ['Code' => '200012', 'Msg'=>lang('200012')];
 
         //修改密码
         $uid    = model('user_center')->updatePassword($newpwd,$parame['uid'],3,$oldpwd);
-        if ($uid > 0) {
+        if ($uid > 0)
+        {
             //返回数据
             return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['res_status'=>'ok']];
         }
@@ -698,9 +709,9 @@ class User extends Base
         return $this->userMessage($uid);
     }
 
-    /*api:e6e7456ef699ba5cab2a332d6217f2fa*/
+    /*api:2210e99bea736d7033c64a490a033cd2*/
 
-    /*api:ba629fe42524433e1728de3cac2327cd*/
+    /*api:8d4fe31070a5465e54248cfca5255ab4*/
     /**
      * * 用户独立权限设置
      * @param  [array] $parame 接口参数
@@ -724,7 +735,7 @@ class User extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$Data];
     }
 
-    /*api:ba629fe42524433e1728de3cac2327cd*/
+    /*api:8d4fe31070a5465e54248cfca5255ab4*/
 
     /*接口扩展*/
 
@@ -826,6 +837,7 @@ class User extends Base
             case -15: return ['Code' => '200036', 'Msg'=>lang('200036')];
             case -16: return ['Code' => '200037', 'Msg'=>lang('200037')];
             case -17: return ['Code' => '200038', 'Msg'=>lang('200038')];
+            case -18: return ['Code' => '200025', 'Msg'=>lang('200025')];
             default: return ['Code' => '200007', 'Msg'=>lang('200007')];
         }
     }

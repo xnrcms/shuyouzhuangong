@@ -14,8 +14,8 @@ class Index extends Base
 	 */
 	public function index()
 	{
-		if($this->uid){
-			
+		if($this->uid)
+		{	
 			$pageData['topMenu'] = $this->formatMenu($this->menu);
 
 			$this->assignData($pageData);

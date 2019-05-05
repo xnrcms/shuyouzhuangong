@@ -83,8 +83,8 @@ class AccountLog extends Base
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function listDataForAdmin($parame = []){
-
+    public function listDataForAdmin($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }

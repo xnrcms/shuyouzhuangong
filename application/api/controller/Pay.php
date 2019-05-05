@@ -83,8 +83,8 @@ class Pay extends Base
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function recharge($parame = []){
-
+    public function recharge($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
@@ -98,8 +98,8 @@ class Pay extends Base
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function substitute($parame = []){
-
+    public function substitute($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }

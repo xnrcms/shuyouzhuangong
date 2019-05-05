@@ -309,7 +309,7 @@ class Devapi extends Base
         return ['Code' => '200001', 'Msg'=>lang('200001')];
     }
 
-    /*api:3efdcbdb6de2bf599b5c160050b2138e*/
+    /*api:1f6567eddb5f784c4533ff60fd45f866*/
     /**
      * * 功能接口发布接口
      * @param  [array] $parame 接口参数
@@ -345,7 +345,6 @@ class Devapi extends Base
             $cName          = $apiUrl[1];
             $aName          = $apiUrl[2];
             $apiCode        = md5(strtolower($mName.formatStringToHump($cName).$aName));
-            $methodCode     = md5('apiCode'.$apiid);
 
             //生成接口参数文件
             $this->make_parame_file($apiid,$apiCode);
@@ -355,14 +354,14 @@ class Devapi extends Base
             if (!file_exists($cpath))  $this->mark_controller_file($cpath,$mName,$cName,$aName);
 
             //添加Controller文件内接口方法 系统默认不能修改
-            if (!in_array($aName, $this->defaultAction)) $this->add_controller_action($cpath,$aName,$apiInfo);
+            if (!in_array($aName, $this->defaultAction)) add_controller_action($cpath,$aName,$apiInfo);
             
             //Helper文件,文件没有则创建并生成基础代码
             $hpath          = \Env::get('APP_PATH') . strtolower($mName).'/helper/'. formatStringToHump($cName) . '.php';
             if (!file_exists($hpath))  $this->mark_helper_file($hpath,$mName,$cName,$aName);
 
             //添加Helper文件内接口方法 系统默认不能修改
-            if (!in_array($aName, $this->defaultAction)) $this->add_helper_action($hpath,$aName,$apiInfo);
+            if (!in_array($aName, $this->defaultAction)) add_helper_action($hpath,$aName,$apiInfo);
 
             //创建数据模型文件
             $this->mark_model_file();
@@ -380,9 +379,9 @@ class Devapi extends Base
         return ['Code' => '200001', 'Msg'=>lang('200001')];
     }
 
-    /*api:3efdcbdb6de2bf599b5c160050b2138e*/
+    /*api:1f6567eddb5f784c4533ff60fd45f866*/
 
-    /*api:075bbc49f3869cbb3a569eb9740f637e*/
+    /*api:da0c33cedc0ec6f4033357bd8fa36dd6*/
     /**
      * * 获取接口错误码接口
      * @param  [array] $parame 接口参数
@@ -424,9 +423,9 @@ class Devapi extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['error_code'=>json_encode($lang)]];
     }
 
-    /*api:075bbc49f3869cbb3a569eb9740f637e*/
+    /*api:da0c33cedc0ec6f4033357bd8fa36dd6*/
 
-    /*api:9d8d0a3f638bff38d24ad0477933d071*/
+    /*api:133fa7a972d6f258444a5a3673722c78*/
     /**
      * * 基础API一键添加
      * @param  [array] $parame 接口参数
@@ -504,7 +503,7 @@ class Devapi extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$Data];
     }
 
-    /*api:9d8d0a3f638bff38d24ad0477933d071*/
+    /*api:133fa7a972d6f258444a5a3673722c78*/
 
     /*接口扩展*/
 
@@ -1037,108 +1036,6 @@ class Devapi extends Base
             }
 
             $dbModel->saveAll($updata);
-        }
-    }
-
-    //添加或修改Controller内的接口方法
-    private function add_controller_action($cpath,$aName,$apiInfo)
-    {
-        //接口唯一标识
-        $methodCode             = md5('apiCode'.$apiInfo['id']);
-        //获取控制器文件内容
-        $controllerContent      = file_get_contents($cpath);
-
-        $description1           = '* '.$apiInfo['title'];
-        $description2           = '* '.$apiInfo['description'];
-    
-        $methodContent          = '/*api:'.$methodCode.'*/
-    /**
-     '.$description1.'
-     * @access public
-     * @param  [array] $parame 扩展参数
-     * @return [json]          接口数据输出
-    */
-    public function '.$aName.'($parame = []){
-
-        //执行接口调用
-        return $this->execApi($parame);
-    }
-
-    /*api:'.$methodCode.'*/';
-
-        if (strpos($controllerContent, $methodCode) === false) {
-            
-            $methodContent  .= '
-
-    /*接口扩展*/';
-    
-            $replace1       = [
-            '/*接口扩展*/',
-            ];
-            $replace2       = [$methodContent];
-
-            $fileContent    = str_replace($replace1,$replace2, $controllerContent);
-
-            file_put_contents($cpath,$fileContent);
-        }else{
-
-            $fileContent = preg_replace('/\/\*api:'.$methodCode.'\*\/(.*)\/\*api:'.$methodCode.'\*\//Usi',$methodContent,$controllerContent);
-
-            file_put_contents($cpath,$fileContent);
-        }
-    }
-
-    //添加或修改Helper内的接口方法
-    private function add_helper_action($cpath,$aName,$apiInfo)
-    {
-        //接口唯一标识
-        $methodCode             = md5('apiCode'.$apiInfo['id']);
-        //获取控制器文件内容
-        $controllerContent      = file_get_contents($cpath);
-
-        $description1           = '* '.$apiInfo['title'];
-        $description2           = '* '.$apiInfo['description'];
-    
-        $methodContent          = '/*api:'.$methodCode.'*/
-    /**
-     * '.$description1.'
-     * @param  [array] $parame 接口参数
-     * @return [array]         接口输出数据
-     */
-    private function '.$aName.'($parame)
-    {
-        //主表数据库模型
-        $dbModel                = model($this->mainTable);
-
-        //自行书写业务逻辑代码
-
-        //需要返回的数据体
-        $Data                   = [\'TEST\'];
-
-        return [\'Code\' => \'000000\', \'Msg\'=>lang(\'000000\'),\'Data\'=>$Data];
-    }
-
-    /*api:'.$methodCode.'*/';
-
-        if (strpos($controllerContent, $methodCode) === false) {
-            
-            $methodContent  .= '
-
-    /*接口扩展*/';
-    
-            $replace1       = [
-            '/*接口扩展*/',
-            ];
-            $replace2       = [$methodContent];
-
-            $fileContent    = str_replace($replace1,$replace2, $controllerContent);
-
-            file_put_contents($cpath,$fileContent);
-        }else{
-            //暂不支持Helper的代码编辑
-            /*$fileContent = preg_replace('/\/\*api:'.$methodCode.'\*\/(.*)\/\*api:'.$methodCode.'\*\//Usi',$methodContent,$controllerContent);
-
-            file_put_contents($cpath,$fileContent);*/
         }
     }
 

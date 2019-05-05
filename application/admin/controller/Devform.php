@@ -76,50 +76,50 @@ class Devform extends Base
         return $this->execApi($parame);
     }
 
-    /*api:53dd2a2a45300aa718938e0f2b895fdd*/
+    /*api:6d85a74742f0718de2bfd3d994955525*/
     /**
      * 表单模板克隆接口
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function saveClone($parame = []){
-
+    public function saveClone($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:53dd2a2a45300aa718938e0f2b895fdd*/
+    /*api:6d85a74742f0718de2bfd3d994955525*/
 
-    /*api:9a75399e1b0d44e644387af123875a99*/
+    /*api:d23bb21d40e0fa32e9c5ab7fc21f9f6a*/
     /**
      * 表单模板发布接口
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function releaseData($parame = []){
-
+    public function releaseData($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:9a75399e1b0d44e644387af123875a99*/
+    /*api:d23bb21d40e0fa32e9c5ab7fc21f9f6a*/
 
-    /*api:3d6090d59fddd4c6bf9a577db2e4babf*/
+    /*api:3a6f32c1317c6b3070e395aaf910a89a*/
     /**
      * 表单模板初始化接口
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function initFormData($parame = []){
-
+    public function initFormData($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:3d6090d59fddd4c6bf9a577db2e4babf*/
+    /*api:3a6f32c1317c6b3070e395aaf910a89a*/
 
     /*接口扩展*/
 }

@@ -20,20 +20,20 @@ class Index extends Base
         parent::__construct();
     }
 
-    /*api:9d8d0a3f638bff38d24ad0477933d071*/
+    /*api:2dcf1a0ebcd7e6de04c2685efbb72b05*/
     /**
      * 首页综合接口
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function index($parame = []){
-
+    public function index($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:9d8d0a3f638bff38d24ad0477933d071*/
+    /*api:2dcf1a0ebcd7e6de04c2685efbb72b05*/
 
     /*接口扩展*/
 }

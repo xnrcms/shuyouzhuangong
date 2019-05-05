@@ -218,12 +218,14 @@ class UserCenter extends Base
                 break;
             case 3://通过ID+原始密码
                 $oldpwd  = data_md5($oldpwd, config('extend.uc_auth_key'));
-                $uid     = $this->where([['id','=',$account],['password','=',$oldpwd]])->value('id');
+                $id      = $this->where([['id','=',$account],['password','=',$oldpwd]])->value('id');
+                $uid     = (int)$id > 0 ? (int)$id : -18;//原始密码错误
                 break;
             default: return -1;break;
         }
 
-        if ($uid > 0 && !empty($pwd)) {
+        if ($uid > 0 && !empty($pwd))
+        {
             $this->updateById($uid,['password'=>data_md5($pwd, config('extend.uc_auth_key'))]);
         }
 

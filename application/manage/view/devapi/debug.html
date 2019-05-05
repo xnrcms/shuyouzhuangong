@@ -39,12 +39,13 @@
                                 <label>接口地址(此处区分开发环境)：</label>
                                 <select class="form-control" name="api[domain]">
                                     {foreach $envs as $k=>$env}
-                                    {php}$env_url = $env . trim($info["apiurl"]);{/php}
-                                    <option value="{$k}" {if $k == 0}selected="selected"{/if}>{$env_url}</option>
+                                    {php}$env_url = trim($env["domain"],'/') . '/' . trim($info["apiurl"],'/');{/php}
+                                    <option value="{$k}" {if $k == 1}selected="selected"{/if}>{$env_url}</option>
                                     {/foreach}
                                 </select>
                             </div>
                             <input type="hidden" name="id" value="{$info.id}">
+                            <input name="project_id" type="hidden" value="{$project.id}">
 
                             {foreach $request_fields as $request_field}
                             <div class="form-group">
@@ -110,12 +111,13 @@ $(function(){
           var name    = field.name;
           var value   = field.value;
 
-          if(name.indexOf("[") != -1){
-            name=name.replace("[","");
-            name=name.replace("]","");
-          }
+            if(name.indexOf("[") != -1){
+              name=name.replace("[","");
+              name=name.replace("]","");
+            }
 
           //数据校验从这里开始
+
           if ($("#id_"+name+" dt[class='tit']").find("em").length > 0) {
 
             if(!CheckJs.required(value)){

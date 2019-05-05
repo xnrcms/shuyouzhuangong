@@ -76,35 +76,35 @@ class Upload extends Base
         return $this->execApi($parame);
     }
 
-    /*api:d7c4296d1696dcfe9a20a1d2fdc06dbe*/
+    /*api:ae7ee4e7785682324a198e14887e98f6*/
     /**
      * 图片上传接口
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function uploadImg($parame = []){
-
+    public function uploadImg($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:d7c4296d1696dcfe9a20a1d2fdc06dbe*/
+    /*api:ae7ee4e7785682324a198e14887e98f6*/
 
-    /*api:756ae49353a6ad33895a2e538625715f*/
+    /*api:f4a1c26f65b071cd7abb7537fc335e0c*/
     /**
      * H5单图上传
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function uploadImgForH5($parame = []){
-
+    public function uploadImgForH5($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:756ae49353a6ad33895a2e538625715f*/
+    /*api:f4a1c26f65b071cd7abb7537fc335e0c*/
 
     /*接口扩展*/
 }

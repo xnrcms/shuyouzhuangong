@@ -247,7 +247,7 @@ class UserGroup extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
     }
 
-    /*api:5d336bd00991bd597d9cd8a913e33b81*/
+    /*api:7e4c48b4dc57e8859f642e2eaaaa341f*/
     /**
      * * 获取用户组列表（用户组设置）
      * @param  [array] $parame 接口参数
@@ -278,7 +278,7 @@ class UserGroup extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$lists];
     }
 
-    /*api:5d336bd00991bd597d9cd8a913e33b81*/
+    /*api:7e4c48b4dc57e8859f642e2eaaaa341f*/
 
     /*接口扩展*/
 }

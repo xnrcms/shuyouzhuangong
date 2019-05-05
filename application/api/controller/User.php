@@ -76,155 +76,155 @@ class User extends Base
         return $this->execApi($parame);
     }
 
-    /*api:609ef25eb34f9328b296bf3ba71b8ebd*/
+    /*api:14d21e95293b34d2358478519fba550f*/
     /**
      * 登录（账号+密码）
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function passwordLogin($parame = []){
-
+    public function passwordLogin($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:609ef25eb34f9328b296bf3ba71b8ebd*/
+    /*api:14d21e95293b34d2358478519fba550f*/
 
-    /*api:38ed8d3588e7b824c58f55ffb0d70bd5*/
+    /*api:defd702febff8d73420c41546d79bdc9*/
     /**
      * 用户详情
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function userDetail($parame = []){
-
+    public function userDetail($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:38ed8d3588e7b824c58f55ffb0d70bd5*/
+    /*api:defd702febff8d73420c41546d79bdc9*/
 
-    /*api:0b5f2683a378793e00e0d97ea79fe6af*/
+    /*api:f100f8720d7e59ac0f05bfa32482af6c*/
     /**
      * 用户注册（账号+密码）
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function usernameRegister($parame = []){
-
+    public function usernameRegister($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:0b5f2683a378793e00e0d97ea79fe6af*/
+    /*api:f100f8720d7e59ac0f05bfa32482af6c*/
 
-    /*api:4bcc00c182dc71fa6c778dc1dd4d36c6*/
+    /*api:ecb2bdf892632423245c8a89fd211427*/
     /**
      * 用户资料快捷编辑
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function quickEditUserDetailData($parame = []){
-
+    public function quickEditUserDetailData($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:4bcc00c182dc71fa6c778dc1dd4d36c6*/
+    /*api:ecb2bdf892632423245c8a89fd211427*/
 
-    /*api:ffe672f3176d54cf499926f98488a54d*/
+    /*api:3b1f712d3cbb6874011b78fc67271ef2*/
     /**
      * 用户资料更新
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function saveUserDetailData($parame = []){
-
+    public function saveUserDetailData($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:ffe672f3176d54cf499926f98488a54d*/
+    /*api:3b1f712d3cbb6874011b78fc67271ef2*/
 
-    /*api:b89be038c9ac7b17fac083805dc9cb01*/
+    /*api:7d96300541a7d53e5a8505e1f5db8a18*/
     /**
      * 密码找回（手机/邮箱+验证码）
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function forgetPasswordByCode($parame = []){
-
+    public function forgetPasswordByCode($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:b89be038c9ac7b17fac083805dc9cb01*/
+    /*api:7d96300541a7d53e5a8505e1f5db8a18*/
 
-    /*api:bb65cf95a4fe55e30ad3b9488c58c740*/
+    /*api:b7004d3672538f104606ec6f34ba1d00*/
     /**
      * 用户头像修改接口
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function updateHeadImage($parame = []){
-
+    public function updateHeadImage($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:bb65cf95a4fe55e30ad3b9488c58c740*/
+    /*api:b7004d3672538f104606ec6f34ba1d00*/
 
-    /*api:5056ecf32e45e6403c2a59f70f68d7d8*/
+    /*api:026ea8a777269ba40b5233d8e5403c67*/
     /**
      * 用户更换手机号
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function updateMobile($parame = []){
-
+    public function updateMobile($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:5056ecf32e45e6403c2a59f70f68d7d8*/
+    /*api:026ea8a777269ba40b5233d8e5403c67*/
 
-    /*api:e6e7456ef699ba5cab2a332d6217f2fa*/
+    /*api:2210e99bea736d7033c64a490a033cd2*/
     /**
      * 用户密码修改（通过原始密码）
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function updatePasswordByOld($parame = []){
-
+    public function updatePasswordByOld($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:e6e7456ef699ba5cab2a332d6217f2fa*/
+    /*api:2210e99bea736d7033c64a490a033cd2*/
 
-    /*api:ba629fe42524433e1728de3cac2327cd*/
+    /*api:8d4fe31070a5465e54248cfca5255ab4*/
     /**
      * 用户独立权限设置
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function setUserPrivilege($parame = []){
-
+    public function setUserPrivilege($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:ba629fe42524433e1728de3cac2327cd*/
+    /*api:8d4fe31070a5465e54248cfca5255ab4*/
 
     /*接口扩展*/
 }

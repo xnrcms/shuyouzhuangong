@@ -270,7 +270,7 @@ class Devform extends Base
     	return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
     }
 
-    /*api:53dd2a2a45300aa718938e0f2b895fdd*/
+    /*api:6d85a74742f0718de2bfd3d994955525*/
     /**
      * * 表单模板克隆接口
      * @param  [array] $parame 接口参数
@@ -409,9 +409,9 @@ class Devform extends Base
         return ['Code' => '200010', 'Msg'=>lang('200010')];
     }
 
-    /*api:53dd2a2a45300aa718938e0f2b895fdd*/
+    /*api:6d85a74742f0718de2bfd3d994955525*/
 
-    /*api:9a75399e1b0d44e644387af123875a99*/
+    /*api:d23bb21d40e0fa32e9c5ab7fc21f9f6a*/
     /**
      * * 表单模板发布接口
      * @param  [array] $parame 接口参数
@@ -443,7 +443,7 @@ class Devform extends Base
             
             if ($releaseCount <= 0) return ['Code' => '200014', 'Msg'=>lang('200014')];
 
-            set_release_data($data,md5(strtolower($info['cname'])),'form');
+            set_release_data($data,$info['cname'],'form');
 
             return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$releaseCount]];
         }
@@ -451,9 +451,9 @@ class Devform extends Base
         return ['Code' => '200014', 'Msg'=>lang('200014')];
     }
 
-    /*api:9a75399e1b0d44e644387af123875a99*/
+    /*api:d23bb21d40e0fa32e9c5ab7fc21f9f6a*/
 
-    /*api:3d6090d59fddd4c6bf9a577db2e4babf*/
+    /*api:3a6f32c1317c6b3070e395aaf910a89a*/
     /**
      * * 表单模板初始化接口
      * @param  [array] $parame 接口参数
@@ -515,7 +515,7 @@ class Devform extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$Data];
     }
 
-    /*api:3d6090d59fddd4c6bf9a577db2e4babf*/
+    /*api:3a6f32c1317c6b3070e395aaf910a89a*/
 
     /*接口扩展*/
 }

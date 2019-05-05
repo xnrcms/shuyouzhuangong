@@ -76,50 +76,50 @@ class Devapi extends Base
         return $this->execApi($parame);
     }
 
-    /*api:3efdcbdb6de2bf599b5c160050b2138e*/
+    /*api:1f6567eddb5f784c4533ff60fd45f866*/
     /**
      * 功能接口发布接口
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function apiRelease($parame = []){
-
+    public function apiRelease($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:3efdcbdb6de2bf599b5c160050b2138e*/
+    /*api:1f6567eddb5f784c4533ff60fd45f866*/
 
-    /*api:075bbc49f3869cbb3a569eb9740f637e*/
+    /*api:da0c33cedc0ec6f4033357bd8fa36dd6*/
     /**
      * 获取接口错误码接口
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function getErrorCode($parame = []){
-
+    public function getErrorCode($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:075bbc49f3869cbb3a569eb9740f637e*/
+    /*api:da0c33cedc0ec6f4033357bd8fa36dd6*/
 
-    /*api:9d8d0a3f638bff38d24ad0477933d071*/
+    /*api:133fa7a972d6f258444a5a3673722c78*/
     /**
      * 基础API一键添加
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function addBaseapi($parame = []){
-
+    public function addBaseapi($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:9d8d0a3f638bff38d24ad0477933d071*/
+    /*api:133fa7a972d6f258444a5a3673722c78*/
 
     /*接口扩展*/
 }

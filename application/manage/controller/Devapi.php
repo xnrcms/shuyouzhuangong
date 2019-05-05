@@ -50,24 +50,7 @@ class Devapi extends Base
         $this->apiUrl['editmodule_save']            = 'admin/DevapiModule/saveData';
         $this->apiUrl['delmodule']                  = 'admin/DevapiModule/delData';
 
-        //项目ID
-        $this->project_id   = 1;
-        $this->user_id      = 1;
-
-        $api_sign_id        = config('dev_config.api_sign_id');
-        $api_sign_key       = config('dev_config.api_sign_key');
-        $api_debug_url      = config('dev_config.api_debug_url');
-        $product_name       = config('extend.xnrcms_name');
-        $api_debug_url      = !empty($api_debug_url) ? explode("\n", $api_debug_url) : [];
-        foreach ($api_debug_url as $ukey => $uvalue) {
-            $api_debug_url[$ukey] = trim($uvalue);
-        }
-
-        //项目info
-        $this->project_info['web_url']      = json_encode($api_debug_url);
-        $this->project_info['product_name'] = $product_name;
-        $this->project_info['api_key']      = $api_sign_key;
-        $this->project_info['api_id']       = $api_sign_id;
+        $this->project_info                         = $this->getProjectInfo();
     }
 
 	//列表页面
@@ -94,7 +77,7 @@ class Devapi extends Base
         //初始化接口列表ID
         session('api_list_ids_to_release',null);
 
-        $search['project_id']   = $this->project_id;
+        $search['project_id']   = $this->project_info['id'];
 
         //模块列表
         $parame             = [];
@@ -155,7 +138,7 @@ class Devapi extends Base
             $listData   	= $data['lists'];
         }
 
-        $project_name           = !empty($this->project_info['product_name'])?'【<font color="red">'.$this->project_info['product_name'].'</font>】项目':'';
+        $project_name           = !empty($this->project_info['title'])?'【<font color="red">'.$this->project_info['title'].'</font>】项目':'';
         
         //页面头信息设置
         $pageData['isback']     = 0;
@@ -218,8 +201,8 @@ class Devapi extends Base
         $apidoc_name                    = session('apidoc_user_auth.apidoc_name');
         $info['author']                 = !empty($apidoc_name) ? $apidoc_name : '';
         $info['module_id']              = intval(input('module_id'));
-        $info['project_id']             = $this->project_id;
-        $info['user_id']                = $this->uid;
+        $info['project_id']             = $this->project_info['id'];
+        $info['user_id']                = $this->project_info['user_id'];
         
         //页面数据
         $pageData                       = [];
@@ -258,7 +241,7 @@ class Devapi extends Base
         $apidoc_name                    = session('apidoc_user_auth.apidoc_name');
         $info['author']                 = !empty($apidoc_name) ? $apidoc_name : '';
         $info['module_id']              = intval(input('module_id'));
-        $info['project_id']             = $this->project_id;
+        $info['project_id']             = $this->project_info['id'];
 
         //页面数据
         $pageData                       = [];
@@ -423,8 +406,7 @@ class Devapi extends Base
         session("debug_parame_detail_".$id,null);
         session("debug_get_devapi_parame_".$id,null);
 
-        $envs               = json_decode($this->project_info['web_url'], true);
-
+        $envs               = $this->project_info['envs'];
         $info               = $this->getDetail($id);
         $request_fields     = $this->get_devapi_parame(1,$id);
         $request_fields     = !empty($request_fields[0]) ? $request_fields[0] : [];
@@ -432,18 +414,15 @@ class Devapi extends Base
         session("debug_parame_detail_".$id,$info);
         session("debug_get_devapi_parame_".$id,$request_fields);
 
-        if (!empty($request_fields)) {
-
-            foreach ($request_fields as $key => $value) {
-
+        if (!empty($request_fields))
+        {
+            foreach ($request_fields as $key => $value)
+            {
                 if (in_array($value['tag'],['uid','hashid'])) 
                 $request_fields[$key]['default_value'] = session('api_'.$value['tag']);
                 
                 if (!in_array($value['tag'],['uid','hashid']) && $value['default_value'] == '/') 
                 $request_fields[$key]['default_value'] = '';
-
-                if (in_array($value['tag'],['api_token'])) 
-                $request_fields[$key]['default_value'] = session('api_token');
             }
         }
 
@@ -474,67 +453,66 @@ class Devapi extends Base
 
         if (empty($info))  $this->error('抱歉，接口不存在');
 
-        $apiName                = !empty($info['apiurl']) ? explode('/',trim($info['apiurl'],'/')) : [];
-        $mName                  = isset($apiName[0]) ? $apiName[0] : '';
-        $cName                  = isset($apiName[1]) ? humpToLine($apiName[1]) : '';
-        $aName                  = isset($apiName[2]) ? $apiName[2] : '';
+        $apiName        = !empty($info['apiurl']) ? explode('/',trim($info['apiurl'],'/')) : [];
+        $mName          = isset($apiName[0]) ? $apiName[0] : '';
+        $cName          = isset($apiName[1]) ? humpToLine($apiName[1]) : '';
+        $aName          = isset($apiName[2]) ? $apiName[2] : '';
+
         if (empty($mName) || empty($cName) || empty($aName))
         $this->error('接口名称格式错误');
 
         $apiName                = $mName . '/' . $cName . '/' . $aName;
-        $envs                   = json_decode($this->project_info['web_url'], true);
+        $envs                   = $this->project_info['envs'];
 
-        //if (empty($request_fields))  $this->error('未发现接口参数');
+        if (empty($request_fields))  $this->error('未发现接口参数');
 
         $parame         = [];
-        if (!empty($request_fields)){
-            foreach ($request_fields as $val)
+        foreach ($request_fields as $val)
+        {
+            //必填
+            if ($val['is_required'] == 1)
             {
-                //必填
-                if ($val['is_required'] == 1) {
-
-                   if (!isset($apiData[$val['tag']])) $this->error('抱歉，缺少【'.$val['tag'].'】参数');
-                   if (empty($apiData[$val['tag']])) $this->error('抱歉，【'.$val['title'].'】不能为空');
-                }
-                else{
-                    if (!isset($apiData[$val['tag']]) || empty($apiData[$val['tag']]))
-                    $apiData[$val['tag']]          = '';//$defaultDataType[$apiData['type']];
-                }
-
-                $parame[$val['tag']]          = $apiData[$val['tag']];
+               if (!isset($apiData[$val['tag']])) $this->error('抱歉，缺少【'.$val['tag'].'】参数');
+               if (empty($apiData[$val['tag']])) $this->error('抱歉，【'.$val['title'].'】不能为空');
             }
+            else
+            {
+                if (!isset($apiData[$val['tag']]) || empty($apiData[$val['tag']]))
+                $apiData[$val['tag']]          = '';//$defaultDataType[$apiData['type']];
+            }
+
+            $parame[$val['tag']]          = $apiData[$val['tag']];
         }
 
         $api_auth_id            = $this->project_info['api_id'];
         $api_auth_key           = $this->project_info['api_key'];
-        $api_auth_url           = trim($envs[$apiData['domain']]);
+        $api_auth_url           = trim($envs[$apiData['domain']]['domain']);
 
         $apiRequest             = new \xnrcms\ApiRequest($api_auth_url, $api_auth_id, $api_auth_key);
         $backData               = $apiRequest->postData($parame,$apiName);
         $errorInfo              = $apiRequest->getError();
 
-        if(empty($errorInfo)){
-
+        if(empty($errorInfo))
+        {
             $backInfo           = json_decode($backData,true);
             //$backData           = json_encode($backInfo);
-            if ($backInfo) {
-
-                if ( isset($backInfo['code']) && $backInfo['code'] == "200"){
-
-                    if (strpos(strtolower($info['apiurl']).'@','get_token')){
-                        session('api_token',$backInfo['data']['api_token']);
-                       /* session('api_uid',$backInfo['Data']['uid']);
-                        session('api_hashid',$backInfo['Data']['hashid']);*/
+            if ($backInfo)
+            {
+                if ($backInfo['Code'] === "000000")
+                {
+                    if (strpos(strtolower($info['apiurl']).'@','login'))
+                    {
+                        session('api_uid',$backInfo['Data']['uid']);
+                        session('api_hashid',$backInfo['Data']['hashid']);
                     }
 
                     //正确数据事例
                     request()->post(['fieldName'=>'demo_success']);
                     request()->post(['dataId'=>$info['id']]);
                     request()->post(['value'=>$backData]);
+
                     $this->questBaseEdit($this->apiUrl['quickedit']);
                 }
-            }else{
-                $this->error('请求失败');
             }
         }else{
             $backData           = json_encode($errorInfo);
@@ -554,14 +532,13 @@ class Devapi extends Base
             $arr['ApiUrl']      = str_replace('/xnrcms',trim($api_auth_url,'/').'/'.trim($info['apiurl'],'/'),trim($urls,'&'));
             $arr['Data']        = $apiRequest->getApiData();
             $backData           = json_encode($arr);
-        } */
+        }*/ 
 
         $this->success('请求成功','',$backData);
     }
 
     private function get_devapi_parame($method = 0,$apiid=0)
     {
-
         $search['method']   = $method;
         $search['api_id']   = $apiid;
 
@@ -569,7 +546,7 @@ class Devapi extends Base
         $parame['uid']      = $this->uid;
         $parame['hashid']   = $this->hashid;
         $parame['page']     = input('page',1);
-        $parame['search']   = !empty($search) ? json_encode($search) : '' ; ;
+        $parame['search']   = !empty($search) ? json_encode($search) : '' ;
 
         //请求数据
         if (!isset($this->apiUrl['setparame']) || empty($this->apiUrl['setparame']))
@@ -580,14 +557,16 @@ class Devapi extends Base
 
         $listData           = [];
 
-        if ($res){
-
+        if ($res)
+        {
             $listData       = $data['lists'];
         }
 
         $delIds             = [];
-        if (!empty($listData)) {
-            foreach ($listData as $key => $value) {
+        if (!empty($listData))
+        {
+            foreach ($listData as $key => $value)
+            {
                 $delIds[$value['id']] = $value['id'];
             }
         }
@@ -607,17 +586,17 @@ class Devapi extends Base
         $apiid          = trim(input('apiid',''));
         $addType        = intval(input('addType'));
         $parentId       = intval(input('parentId'));
-        $user_id        = session('apidoc_user_auth.apidoc_uid');
+        $user_id        = $this->project_info['user_id'];
 
-        if ($dataId == -1 && !empty($apiid) && !empty($value)) {
-
+        if ($dataId == -1 && !empty($apiid) && !empty($value))
+        {
             $value      = $value.'|@'.$apiid.'|@'.$addType.'|@'.$parentId.'|@'.$user_id;
             request()->post(['value'=>$value]);
 
             $id          = $this->questBaseEdit($this->apiUrl[request()->action()]);
 
-            if ($id) {
-
+            if ($id)
+            {
                 $this->success('添加成功','',$id);
             }
         }
@@ -625,8 +604,8 @@ class Devapi extends Base
         $id          = $this->questBaseEdit($this->apiUrl[request()->action()]);
         
         //接口调用
-        if ($id){
-
+        if ($id)
+        {
             $this->success('更新成功','',$id);
         }
         
@@ -653,11 +632,10 @@ class Devapi extends Base
         $res       = $this->apiData($parame,$this->apiUrl[request()->action()]) ;
         $data      = $this->getApiData() ;
 
-        if($res == true){
-
+        if($res)
+        {
             $this->success('删除成功',url('index')) ;
         }else{
-            
             $this->error($this->getApiError()) ;
         }
     }
@@ -734,7 +712,7 @@ class Devapi extends Base
         //数据提交
         if (request()->isPost()) $this->startExportApi();
 
-        $proid                  = $this->project_id;
+        $proid                  = $this->project_info['id'];
 
         //模块列表
         $search                 = [];
@@ -753,14 +731,16 @@ class Devapi extends Base
         session("exportApi_moduleList",null);
         session("exportApi_moduleId",null);
 
-        if ($res) {
-            
+        if ($res)
+        {    
             $apiData        = $this->getApiData() ;
             $moduleList     = $apiData['lists'];
             $moduleId       = [];
 
-            if (!empty($moduleList)) {
-                foreach ($moduleList as $key => $value) {
+            if (!empty($moduleList))
+            {
+                foreach ($moduleList as $key => $value)
+                {
                     $moduleList[$key]['api_list'] = $this->get_api_list($value['id']);
                     $moduleId[]     = $value['id'];
                 }
@@ -770,7 +750,7 @@ class Devapi extends Base
             $assignData['moduleList']       = $moduleList;
             $assignData['modelid']          = 0;
 
-            $envs                           = json_decode($this->project_info['web_url'], true);
+            $envs                           = $this->project_info['envs'];
             $assignData['envs']             = $envs;
 
             $this->assignData($assignData);
@@ -800,7 +780,7 @@ class Devapi extends Base
         $moduleList = session("exportApi_moduleList");
         $moduleId   = session("exportApi_moduleId");
         $nums       = input('nums',1);
-        $proid      = $this->project_id;
+        $proid      = $this->project_info['id'];
 
         if (!empty($moduleList))
         {
@@ -829,7 +809,7 @@ class Devapi extends Base
                         $request_parame     = $this->get_devapi_parame(1,$av['id']);
                         $back_parame        = $this->get_devapi_parame(2,$av['id']);
                         $back               = $this->toLevel($back_parame[0],'&nbsp;&nbsp;&nbsp;&nbsp;');
-                        $envs               = json_decode($this->project_info['web_url'], true);
+                        $envs               = $this->project_info['envs'];
 
                         $assignData['project']          = $this->project_info;
                         $assignData['moduleList']       = $moduleList;
@@ -878,8 +858,6 @@ class Devapi extends Base
         return $listData;
     }
 
-
-
     //新增接口模块
     public function addModule()
     {
@@ -897,8 +875,8 @@ class Devapi extends Base
 
         //数据详情
         $info                           = $this->getDetail(0);
-        $info['project_id']             = $this->project_id;
-        $info['user_id']                = $this->uid;
+        $info['project_id']             = $this->project_info['id'];
+        $info['user_id']                = $this->project_info['user_id'];
 
         //页面数据
         $pageData                       = [];
@@ -937,8 +915,8 @@ class Devapi extends Base
 
         //数据详情
         $info                           = $this->getDetail($id);
-        $info['project_id']             = $this->project_id;
-        $info['user_id']                = $this->uid;
+        $info['project_id']             = $this->project_info['id'];
+        $info['user_id']                = $this->project_info['user_id'];
 
         //页面数据
         $pageData                       = [];
@@ -1164,7 +1142,7 @@ class Devapi extends Base
                         $parame['uid']          = $this->uid;
                         $parame['hashid']       = $this->hashid;
                         $parame['importData']   = $importData;
-                        $parame['project_id']   = $this->project_id;
+                        $parame['project_id']   = $this->project_info['id'];
                         $parame['module_id']    = $data['module_id'];
 
                         //请求数据
@@ -1189,6 +1167,39 @@ class Devapi extends Base
         }
         
         $this->error('未设置接口地址');
+    }
+
+    //临时固定写死项目信息，后期完善项目方面的管理
+    private function getProjectInfo()
+    {
+        $api_sign_id        = config('dev_config.api_sign_id');
+        $api_sign_key       = config('dev_config.api_sign_key');
+        $product_name       = config('extend.xnrcms_name');
+        $api_url            = config('dev_config.api_debug_url');
+        $api_url            = !empty($api_url) ? explode("\n", $api_url) : [];
+
+        $envs               = 
+        [
+            ['name'=>'product','title'=>'生产环境','domain'=>isset($api_url[0]) ? $api_url[0] : ''],
+            ['name'=>'develop','title'=>'开发环境','domain'=>isset($api_url[1]) ? $api_url[1] : ''],
+        ];
+
+        $project_info       =
+        [
+            'id'            => 1,
+            'user_id'       => 1,
+            'title'         => $product_name,
+            'description'   => '',
+            'envs'          => $envs,
+            'allow_search'  => 1,
+            'create_time'   => '2018-05-10 14:02:15',
+            'update_time'   => '2018-05-10 14:02:15',
+            'sort'          => 1,
+            'api_id'        => $api_sign_id,
+            'api_key'       => $api_sign_key,
+        ];
+
+        return $project_info;
     }
 }
 ?>

@@ -157,7 +157,8 @@ if(!function_exists('formatMenuByPidAndPos'))
 	 * @param  [type]  $menu 需要格式化的菜单数据
 	 * @return [type]        已格式化后的菜单数据
 	 */
-	function formatMenuByPidAndPos($pid=0,$pos=0,$menu=[]){
+	function formatMenuByPidAndPos($pid=0,$pos=0,$menu=[])
+	{
 		$arr  = [];
 
 		if (!empty($menu)) {
@@ -182,7 +183,8 @@ if (!function_exists('threePartyplugLoadNum'))
 
 		foreach($threePartyplug as $key=>$val)
 		{	
-			if(in_array($type,['image','images','file'])){
+			if(in_array($type,['image','images','file']))
+			{
 				$threePartyplug['uploads'] = (isset($threePartyplug['uploads'])?$threePartyplug['uploads']:0) + 1;
 				break;
 			}else{
@@ -196,7 +198,8 @@ if (!function_exists('threePartyplugLoadNum'))
 
 if (!function_exists('get_domain'))
 {
-	function get_domain(){
+	function get_domain()
+	{
 		return request()->scheme() .'://' . trim($_SERVER['HTTP_HOST'],'/');
 	}
 }
@@ -225,7 +228,8 @@ if (!function_exists('get_cover'))
 	 * @param string $field
 	 * @return 完整的数据  或者  指定的$field字段值
 	 */
-	function get_cover($id = 0,$field=''){
+	function get_cover($id = 0,$field='')
+	{
 		$path 		= '';
 		$id 		= intval($id);
 
@@ -240,57 +244,73 @@ if (!function_exists('get_cover'))
 			$info['path']	 = $info['img_type'] == 2 ? $info['path'] : trim(get_domain(),'/') . '/' . trim($info['path'],'/');
 		} 
 
-		if (!empty($field)) {
-			
+		if (!empty($field))
+		{	
 			return isset($info[$field]) ? $info[$field] : '';
 		}
+
 		return !empty($info) ? $info : [];
 	}
 }
 
-//手机号格式验证
-function Mobile_check($mobile,$type = array())
+if (!function_exists('Mobile_check'))
 {
-	$res[1]	= preg_match('/^1(3[0-9]|5[0-35-9]|7[0-9]|8[0-9])\\d{8}$/', $mobile);//手机号码 移动|联通|电信
-	$res[2]	= preg_match('/^1(34[0-8]|(3[5-9]|5[017-9]|8[0-9])\\d)\\d{7}$/', $mobile);//中国移动
-	$res[3]	= preg_match('/^1(3[0-2]|5[256]|8[56])\\d{8}$/', $mobile);//中国联通
-	$res[4]	= preg_match('/^1((33|53|8[09])[0-9]|349)\\d{7}$/', $mobile);//中国电信
-	$res[5]	= preg_match('/^0(10|2[0-5789]|\\d{3})-\\d{7,8}$/', $mobile);//大陆地区固话及小灵通
-	$type	= empty($type) ? array(1,2,3,4,5) : $type;
-	$ok 	= false;
-	foreach ($type as $key=>$val)
+	//手机号格式验证
+	function Mobile_check($mobile,$type = array())
 	{
-		if ($res[$val]) $ok = true;
-		continue;
-	}
-
-	return ($mobile && $ok) ? true : false;
-}
-
-//邮箱格式验证
-function Email_check($email)
-{
-	return (!preg_match('#[a-z0-9&\-_.]+@[\w\-_]+([\w\-.]+)?\.[\w\-]+#is', $email) || !$email) ? false : true;
-}
-
-//用户名格式验证
-function Username_check($email)
-{
-	return true;
-}
-
-//字段处理
-function get_fields_string($fields,$pre=''){
-	$arr = array();
-	if (!empty($fields))
-	{
-		foreach ($fields as $key=>$val)
+		$res[1]	= preg_match('/^1(3[0-9]|5[0-35-9]|7[0-9]|8[0-9])\\d{8}$/', $mobile);//手机号码 移动|联通|电信
+		$res[2]	= preg_match('/^1(34[0-8]|(3[5-9]|5[017-9]|8[0-9])\\d)\\d{7}$/', $mobile);//中国移动
+		$res[3]	= preg_match('/^1(3[0-2]|5[256]|8[56])\\d{8}$/', $mobile);//中国联通
+		$res[4]	= preg_match('/^1((33|53|8[09])[0-9]|349)\\d{7}$/', $mobile);//中国电信
+		$res[5]	= preg_match('/^0(10|2[0-5789]|\\d{3})-\\d{7,8}$/', $mobile);//大陆地区固话及小灵通
+		$type	= empty($type) ? array(1,2,3,4,5) : $type;
+		$ok 	= false;
+		foreach ($type as $key=>$val)
 		{
-			$arr[$val['field'][0]] = $pre != '' ? $pre.'.'.$val['field'][0] : $val['field'][0];
+			if ($res[$val]) $ok = true;
+			continue;
 		}
-		return implode(',', $arr);
+
+		return ($mobile && $ok) ? true : false;
 	}
-	return '';
+}
+
+if (!function_exists('Email_check'))
+{
+	//邮箱格式验证
+	function Email_check($email)
+	{
+		return (!preg_match('#[a-z0-9&\-_.]+@[\w\-_]+([\w\-.]+)?\.[\w\-]+#is', $email) || !$email) ? false : true;
+	}
+}
+
+if (!function_exists('Username_check'))
+{
+	//用户名格式验证
+	function Username_check($email)
+	{
+		return true;
+	}
+}
+
+if (!function_exists('get_fields_string'))
+{
+	//字段处理
+	function get_fields_string($fields,$pre='')
+	{
+		$arr = array();
+		if (!empty($fields))
+		{
+			foreach ($fields as $key=>$val)
+			{
+				$arr[$val['field'][0]] = $pre != '' ? $pre.'.'.$val['field'][0] : $val['field'][0];
+			}
+
+			return implode(',', $arr);
+		}
+
+		return '';
+	}
 }
 
 if (!function_exists('wr'))
@@ -314,193 +334,236 @@ if (!function_exists('dblog'))
 	}
 }
 
-
-/**
- * 生成随机数
- * @param number $length 字符串长度
- * @param number $type 字符串类型
- * @return string
- */
-function randomString($length, $type = 0) {
-	$arr  = array(
-	0 => '123456789',
-	1 => 'abcdefghjkmnpqrstuxy',
-	2 => 'ABCDEFGHJKMNPQRSTUXY',
-	3 => '123456789abcdefghjkmnpqrstuxy',
-	4 => '123456789ABCDEFGHJKMNPQRSTUXY',
-	5 => 'abcdefghjkmnpqrstuxyABCDEFGHJKMNPQRSTUXY',
-	6 => '123456789abcdefghjkmnpqrstuxyABCDEFGHJKMNPQRSTUXY',
-	7 => '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
-	);
-	$chars = $arr[$type] ? $arr[$type] : $arr[7];
-	$hash  = '';
-	$max   = strlen($chars) - 1;
-	for($i = 0; $i < $length; $i++) {
-		$hash .= $chars[mt_rand(0, $max)];
-	}
-	return $hash;
-}
-
-/**
- * Curl请求
- * @param number $url 请求的URL
- * @param number $body 字符串类型
- * @return string
- */
-function CurlHttp($url,$body='',$method='DELETE',$headers=array()){
-	$httpinfo=array();
-	$ci=curl_init();
-	/* Curl settings */
-	curl_setopt($ci,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_1_0);
-	//curl_setopt($ci,CURLOPT_USERAGENT,'toqi.net');
-	curl_setopt($ci,CURLOPT_CONNECTTIMEOUT,30);
-	curl_setopt($ci,CURLOPT_TIMEOUT,30);
-	curl_setopt($ci,CURLOPT_RETURNTRANSFER,TRUE);
-	curl_setopt($ci,CURLOPT_ENCODING,'');
-	curl_setopt($ci,CURLOPT_SSL_VERIFYPEER,FALSE);
-	curl_setopt($ci,CURLOPT_HEADER,FALSE);
-	switch($method){
-		case 'POST':
-			curl_setopt($ci,CURLOPT_POST,TRUE);
-			if(!empty($body)){
-				curl_setopt($ci,CURLOPT_POSTFIELDS,http_build_query($body));
-			}
-			break;
-		case 'DELETE':
-			curl_setopt($ci,CURLOPT_CUSTOMREQUEST,'DELETE');
-			if(!empty($body)){
-				$url=$url.'?'.str_replace('amp;', '', http_build_query($body));
-			}
-	}
-	curl_setopt($ci,CURLOPT_URL,$url);
-	curl_setopt($ci,CURLOPT_HTTPHEADER,$headers);
-	curl_setopt($ci,CURLINFO_HEADER_OUT,TRUE);
-	$response=curl_exec($ci);
-	$httpcode=curl_getinfo($ci,CURLINFO_HTTP_CODE);
-	$httpinfo=array_merge($httpinfo,curl_getinfo($ci));
-	curl_close($ci);
-	return $response;
-}
-
-/**
- * 系统非常规MD5加密方法
- * @param  string $str 要加密的字符串
- * @return string 
- */
-function data_md5($str, $key = 'XNRCMS'){
-	return '' === $str ? '' : md5(sha1($str) . $key);
-}
-
-/**
- * 获取客户端IP
- * @return [string] IP地址
- */
-function get_client_ip() {
-    static $ip = NULL;
-    if ($ip !== NULL)
-        return $ip;
-    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        $arr = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-        $pos = array_search('unknown', $arr);
-        if (false !== $pos)
-            unset($arr[$pos]);
-        $ip = trim($arr[0]);
-    }elseif (isset($_SERVER['HTTP_CLIENT_IP'])) {
-        $ip = $_SERVER['HTTP_CLIENT_IP'];
-    } elseif (isset($_SERVER['REMOTE_ADDR'])) {
-        $ip = $_SERVER['REMOTE_ADDR'];
-    }
-    
-    // IP地址合法验证
-    $ip = (false !== ip2long($ip)) ? $ip : '0.0.0.0';
-
-    return $ip;
-}
-
-/**
- * [is_json 判断是否是json格式数据]
- * @param  [type]  $string [json字符串]
- * @return boolean
- */
-function is_json($string) {
-	
-	 json_decode($string);
-	 
-	 return (json_last_error() == JSON_ERROR_NONE);
-}
-
-function merge_config(){
-	
-	//合并系统配置
-	$config				=  model('config')->getConfigData();
-	if (!empty($config)) {
-		
-		foreach ($config as $key => $value) config($value,$key);
-	}
-}
-
-function formatUploadFileName(){
-
-    return date('Y-m-d') . '/' . md5(microtime(true).randomString(10));
-}
-
-// 递归删除文件夹
-function delFile($path,$delDir = FALSE)
+if (!function_exists('randomString'))
 {
-    if(!is_dir($path)) return FALSE;
-
-	$handle = @opendir($path);
-
-	if ($handle)
+	/**
+	 * 生成随机数
+	 * @param number $length 字符串长度
+	 * @param number $type 字符串类型
+	 * @return string
+	 */
+	function randomString($length, $type = 0)
 	{
-		while (false !== ( $item = readdir($handle) ))
+		$arr  = [
+			0 => '123456789',
+			1 => 'abcdefghjkmnpqrstuxy',
+			2 => 'ABCDEFGHJKMNPQRSTUXY',
+			3 => '123456789abcdefghjkmnpqrstuxy',
+			4 => '123456789ABCDEFGHJKMNPQRSTUXY',
+			5 => 'abcdefghjkmnpqrstuxyABCDEFGHJKMNPQRSTUXY',
+			6 => '123456789abcdefghjkmnpqrstuxyABCDEFGHJKMNPQRSTUXY',
+			7 => '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+		];
+
+		$chars = $arr[$type] ? $arr[$type] : $arr[7];
+		$hash  = '';
+		$max   = strlen($chars) - 1;
+
+		for($i = 0; $i < $length; $i++)
 		{
-			if ($item != "." && $item != ".." && $item != '.svn')
-			is_dir("$path/$item") ? delFile("$path/$item", $delDir) : unlink("$path/$item");
+			$hash .= $chars[mt_rand(0, $max)];
 		}
 
-		closedir($handle);
-
-		if ($delDir) return rmdir($path);
-	}else {
-		if (file_exists($path)) {
-			return unlink($path);
-		} else {
-			return FALSE;
-		}
+		return $hash;
 	}
 }
 
-/**
- * 将字符串格式化为驼峰命名法
- * @param  string $string  被格式化的字符串
- * @param  string $delimiter 字符串分隔符
- * @return string            格式化后的新字符串
- */
-function formatStringToHump($string ='',$delimiter='_')
+if (!function_exists('CurlHttp'))
 {
-	$str  	= '';
-
-	if (is_string($string) && !empty($string) && !empty($delimiter))
+	/**
+	 * Curl请求
+	 * @param number $url 请求的URL
+	 * @param number $body 字符串类型
+	 * @return string
+	 */
+	function CurlHttp($url,$body='',$method='DELETE',$headers=array())
 	{
-		//以下划线分割
-        $arr   	= explode($delimiter,$string);
+		$httpinfo=array();
+		$ci=curl_init();
+		/* Curl settings */
+		curl_setopt($ci,CURLOPT_HTTP_VERSION,CURL_HTTP_VERSION_1_0);
+		//curl_setopt($ci,CURLOPT_USERAGENT,'toqi.net');
+		curl_setopt($ci,CURLOPT_CONNECTTIMEOUT,30);
+		curl_setopt($ci,CURLOPT_TIMEOUT,30);
+		curl_setopt($ci,CURLOPT_RETURNTRANSFER,TRUE);
+		curl_setopt($ci,CURLOPT_ENCODING,'');
+		curl_setopt($ci,CURLOPT_SSL_VERIFYPEER,FALSE);
+		curl_setopt($ci,CURLOPT_HEADER,FALSE);
 
-        if (!empty($arr))
-        {
-            foreach ($arr as $v)
-            {
-                $str .= ucwords($v);
-            }
-        }
-	}else{
+		switch($method)
+		{
+			case 'POST':
+				curl_setopt($ci,CURLOPT_POST,TRUE);
+				if(!empty($body))
+				{
+					curl_setopt($ci,CURLOPT_POSTFIELDS,http_build_query($body));
+				}
+				break;
+			case 'DELETE':
+				curl_setopt($ci,CURLOPT_CUSTOMREQUEST,'DELETE');
+				if(!empty($body))
+				{
+					$url=$url.'?'.str_replace('amp;', '', http_build_query($body));
+				}
+		}
 
-		$str 		= $string;
+		curl_setopt($ci,CURLOPT_URL,$url);
+		curl_setopt($ci,CURLOPT_HTTPHEADER,$headers);
+		curl_setopt($ci,CURLINFO_HEADER_OUT,TRUE);
+		$response=curl_exec($ci);
+		$httpcode=curl_getinfo($ci,CURLINFO_HTTP_CODE);
+		$httpinfo=array_merge($httpinfo,curl_getinfo($ci));
+		curl_close($ci);
+		return $response;
 	}
-
-	return $str;
 }
 
+if (!function_exists('data_md5'))
+{
+	/**
+	 * 系统非常规MD5加密方法
+	 * @param  string $str 要加密的字符串
+	 * @return string 
+	 */
+	function data_md5($str, $key = 'XNRCMS')
+	{
+		return '' === $str ? '' : md5(sha1($str) . $key);
+	}
+}
+
+if (!function_exists('get_client_ip'))
+{
+	/**
+	 * 获取客户端IP
+	 * @return [string] IP地址
+	 */
+	function get_client_ip()
+	{
+	    static $ip = NULL;
+	    if ($ip !== NULL)
+	        return $ip;
+	    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+	        $arr = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+	        $pos = array_search('unknown', $arr);
+	        if (false !== $pos)
+	            unset($arr[$pos]);
+	        $ip = trim($arr[0]);
+	    }elseif (isset($_SERVER['HTTP_CLIENT_IP'])) {
+	        $ip = $_SERVER['HTTP_CLIENT_IP'];
+	    } elseif (isset($_SERVER['REMOTE_ADDR'])) {
+	        $ip = $_SERVER['REMOTE_ADDR'];
+	    }
+	    
+	    // IP地址合法验证
+	    $ip = (false !== ip2long($ip)) ? $ip : '0.0.0.0';
+
+	    return $ip;
+	}
+}
+
+if (!function_exists('is_json'))
+{
+	/**
+	 * [is_json 判断是否是json格式数据]
+	 * @param  [type]  $string [json字符串]
+	 * @return boolean
+	 */
+	function is_json($string)
+	{
+		 json_decode($string);
+		 
+		 return (json_last_error() == JSON_ERROR_NONE);
+	}
+}
+
+if (!function_exists('merge_config'))
+{
+	function merge_config()
+	{	
+		//合并系统配置
+		$config				=  model('config')->getConfigData();
+		if (!empty($config))
+		{	
+			foreach ($config as $key => $value) config($value,$key);
+		}
+	}
+}
+
+if (!function_exists('formatUploadFileName'))
+{
+	function formatUploadFileName()
+	{
+	    return date('Y-m-d') . '/' . md5(microtime(true).randomString(10));
+	}
+}
+
+if (!function_exists('delFile'))
+{
+	/**
+	 * [递归删除文件夹]
+	 * @param  [string]  $path   [文件路径]
+	 * @param  [bool] 	 $delDir [是否删除目录]
+	 * @return [bool]	 
+	 */
+	function delFile($path,$delDir = FALSE)
+	{
+	    if(!is_dir($path)) return FALSE;
+
+		$handle = @opendir($path);
+
+		if ($handle)
+		{
+			while (false !== ( $item = readdir($handle) ))
+			{
+				if ($item != "." && $item != ".." && $item != '.svn')
+				is_dir("$path/$item") ? delFile("$path/$item", $delDir) : unlink("$path/$item");
+			}
+
+			closedir($handle);
+
+			if ($delDir) return rmdir($path);
+		}else {
+			if (file_exists($path)) {
+				return unlink($path);
+			} else {
+				return FALSE;
+			}
+		}
+	}
+}
+
+if (!function_exists('formatStringToHump'))
+{
+	/**
+	 * 将字符串格式化为驼峰命名法
+	 * @param  string $string  被格式化的字符串
+	 * @param  string $delimiter 字符串分隔符
+	 * @return string            格式化后的新字符串
+	 */
+	function formatStringToHump($string ='',$delimiter='_')
+	{
+		$str  	= '';
+
+		if (is_string($string) && !empty($string) && !empty($delimiter))
+		{
+			//以下划线分割
+	        $arr   	= explode($delimiter,$string);
+
+	        if (!empty($arr))
+	        {
+	            foreach ($arr as $v)
+	            {
+	                $str .= ucwords($v);
+	            }
+	        }
+		}else{
+
+			$str 		= $string;
+		}
+
+		return $str;
+	}
+}
 
 if (!function_exists('toLevel'))
 {
@@ -662,7 +725,6 @@ if(!function_exists('convertUnderline'))
 	}
 }
 
-
 if(!function_exists('lineToHump'))
 {
 	/**
@@ -689,20 +751,6 @@ if(!function_exists('humpToLine'))
 	{
 		return strtolower(preg_replace('/([a-z])([A-Z])/', "$1" . $delimiter . "$2", $str));
 	}
-}
-
-//接口文档授权登录执行
-function apidocReq($parame,$apiName,$headers=[])
-{
-	$ApiUrl					= config('extend.apidoc_url');
-	$ApiId 					= config('extend.api_auth_id');
-	$ApiKey					= config('extend.api_auth_key');
-
-	$ApiRequest 			= new \xnrcms\ApiRequest($ApiUrl, $ApiId, $ApiKey);
-
-	$backData 				= $ApiRequest->postData($parame,$apiName,$headers);
-
-	return json_decode($backData,true);
 }
 
 //url 安全base64加密
@@ -803,6 +851,124 @@ if (!function_exists('msubstr'))
 
 		return $suffix ? $slice.'...' : $slice;
 	}
+}
+
+if (!function_exists('add_controller_action'))
+{
+	/**
+	 * [添加控制器模板]
+	 * @param [type] $cpath   文件路径
+	 * @param [type] $aName   控制器方法名称
+	 * @param [type] $apiInfo 接口数据
+	 */
+	function add_controller_action($cpath,$aName,$apiInfo)
+    {
+        //接口唯一标识
+        $methodCode             = md5('apiCode'.strtolower($apiInfo['apiurl']));
+        //获取控制器文件内容
+        $controllerContent      = file_get_contents($cpath);
+
+        $description1           = '* '.$apiInfo['title'];
+        $description2           = '* '.$apiInfo['description'];
+    
+        $methodContent          = '/*api:'.$methodCode.'*/
+    /**
+     '.$description1.'
+     * @access public
+     * @param  [array] $parame 扩展参数
+     * @return [json]          接口数据输出
+    */
+    public function '.$aName.'($parame = [])
+    {
+        //执行接口调用
+        return $this->execApi($parame);
+    }
+
+    /*api:'.$methodCode.'*/';
+
+        if (strpos($controllerContent, $methodCode) === false) {
+            
+            $methodContent  .= '
+
+    /*接口扩展*/';
+    
+            $replace1       = [
+            '/*接口扩展*/',
+            ];
+            $replace2       = [$methodContent];
+
+            $fileContent    = str_replace($replace1,$replace2, $controllerContent);
+
+            file_put_contents($cpath,$fileContent);
+        }else{
+
+            $fileContent = preg_replace('/\/\*api:'.$methodCode.'\*\/(.*)\/\*api:'.$methodCode.'\*\//Usi',$methodContent,$controllerContent);
+
+            file_put_contents($cpath,$fileContent);
+        }
+    }
+}
+
+if (!function_exists('add_helper_action'))
+{
+	/**
+	 * [添加Helper层模板]
+	 * @param [type] $cpath   文件路径
+	 * @param [type] $aName   控制器方法名称
+	 * @param [type] $apiInfo 接口数据
+	 */
+	function add_helper_action($cpath,$aName,$apiInfo)
+    {
+        //接口唯一标识
+        $methodCode             = md5('apiCode'.strtolower($apiInfo['apiurl']));
+        //获取控制器文件内容
+        $controllerContent      = file_get_contents($cpath);
+
+        $description1           = '* '.$apiInfo['title'];
+        $description2           = '* '.$apiInfo['description'];
+    
+        $methodContent          = '/*api:'.$methodCode.'*/
+    /**
+     * '.$description1.'
+     * @param  [array] $parame 接口参数
+     * @return [array]         接口输出数据
+     */
+    private function '.$aName.'($parame)
+    {
+        //主表数据库模型
+        $dbModel                = model($this->mainTable);
+
+        //自行书写业务逻辑代码
+
+        //需要返回的数据体
+        $Data                   = [\'TEST\'];
+
+        return [\'Code\' => \'000000\', \'Msg\'=>lang(\'000000\'),\'Data\'=>$Data];
+    }
+
+    /*api:'.$methodCode.'*/';
+
+        if (strpos($controllerContent, $methodCode) === false)
+        {    
+            $methodContent  .= '
+
+    /*接口扩展*/';
+    
+            $replace1       = [
+            '/*接口扩展*/',
+            ];
+            $replace2       = [$methodContent];
+
+            $fileContent    = str_replace($replace1,$replace2, $controllerContent);
+
+            file_put_contents($cpath,$fileContent);
+        }else{
+            //暂不支持Helper的代码编辑
+            /*$fileContent = preg_replace('/\/\*api:'.$methodCode.'\*\/(.*)\/\*api:'.$methodCode.'\*\//Usi',$methodContent,$controllerContent);
+
+            file_put_contents($cpath,$fileContent);*/
+        }
+    }
 }
 
 if(!function_exists('get_release_data'))

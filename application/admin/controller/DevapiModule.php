@@ -76,35 +76,35 @@ class DevapiModule extends Base
         return $this->execApi($parame);
     }
 
-    /*api:38a9bd7f2764f6224569544127bba675*/
+    /*api:9b970e254e738a4c48c26d1a92c615db*/
     /**
      * 接口导出接口
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function exportData($parame = []){
-
+    public function exportData($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:38a9bd7f2764f6224569544127bba675*/
+    /*api:9b970e254e738a4c48c26d1a92c615db*/
 
-    /*api:5031066d750488238efc7dfab124ce46*/
+    /*api:e395328b9fd150e692a62db9cd0b6cb6*/
     /**
      * 接口导入接口
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function importData($parame = []){
-
+    public function importData($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:5031066d750488238efc7dfab124ce46*/
+    /*api:e395328b9fd150e692a62db9cd0b6cb6*/
 
     /*接口扩展*/
 }

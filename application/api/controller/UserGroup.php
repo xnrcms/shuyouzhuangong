@@ -76,20 +76,20 @@ class UserGroup extends Base
         return $this->execApi($parame);
     }
 
-    /*api:5d336bd00991bd597d9cd8a913e33b81*/
+    /*api:7e4c48b4dc57e8859f642e2eaaaa341f*/
     /**
      * 获取用户组列表（用户组设置）
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function glistData($parame = []){
-
+    public function glistData($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:5d336bd00991bd597d9cd8a913e33b81*/
+    /*api:7e4c48b4dc57e8859f642e2eaaaa341f*/
 
     /*接口扩展*/
 }

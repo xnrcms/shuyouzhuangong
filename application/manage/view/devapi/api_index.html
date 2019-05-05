@@ -158,7 +158,7 @@
                         <p class="text-muted"><label><label style="width: 24px;"></label>项目名称：</label>{$project.title}</p>
                         <p class="text-muted"><label><label style="width: 42px;"></label>APIID：</label>{$project.api_id}&nbsp;<button type="button" data-clipboard-text="{$project.api_id}" class="btn btn-xs btn-success js_copyApiInfo">复制</button></p>
                         <p class="text-muted"><label><label style="width: 26px;"></label>APIKEY：</label>{$project.api_key} &nbsp;<button type="button" data-clipboard-text="{$project.api_key}" class="btn btn-xs btn-success js_copyApiInfo">复制</button></p>
-                        <p class="text-muted"><label><label style="width: 7px;"></label>项目创建人：</label>{$project.uid}</p>
+                        <p class="text-muted"><label><label style="width: 7px;"></label>项目创建人：</label>{$project.user_id}</p>
                         <p class="text-muted"><label><label style="width: 20px;"></label>创建时间：</label>{$project.create_time}</p>
                         <p class="text-muted"><label><label style="width: 20px;"></label>更新时间：</label>{$project.update_time}</p>
 
@@ -176,8 +176,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                    {php}$weburl = json_decode($project['web_url'],true);{/php}
-                                    {foreach $weburl as $module}
+                                    {foreach $project['envs'] as $module}
                                     <tr>
                                         <td>{$module.name}</td>
                                         <td>{$module.title}</td>

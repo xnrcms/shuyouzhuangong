@@ -76,50 +76,50 @@ class Devlist extends Base
         return $this->execApi($parame);
     }
 
-    /*api:e2261b8f76e5c7c628d25cdccf3890ac*/
+    /*api:41859b72c709045e8aed6e83e4c39ada*/
     /**
      * 列表模板克隆接口
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function saveClone($parame = []){
-
+    public function saveClone($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:e2261b8f76e5c7c628d25cdccf3890ac*/
+    /*api:41859b72c709045e8aed6e83e4c39ada*/
 
-    /*api:f7cbd4d84eec5b63f3edb55034775e00*/
+    /*api:be2090f6ed5ea8eb382c93241a8f12ef*/
     /**
      * 列表模板发布接口
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function releaseData($parame = []){
-
+    public function releaseData($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:f7cbd4d84eec5b63f3edb55034775e00*/
+    /*api:be2090f6ed5ea8eb382c93241a8f12ef*/
 
-    /*api:3fe5b175000c2be3c357b421ec984081*/
+    /*api:44afc1012eeec0faba90927299896f19*/
     /**
      * 列表模板初始化接口
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function initListData($parame = []){
-
+    public function initListData($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:3fe5b175000c2be3c357b421ec984081*/
+    /*api:44afc1012eeec0faba90927299896f19*/
 
     /*接口扩展*/
 }

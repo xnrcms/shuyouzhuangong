@@ -196,68 +196,6 @@
         });
     });
 </script>
-<script type="text/javascript">
-var CommonJs = {
-        Loading:false,//数据加载标识
-
-        DoneID:[],
-
-        JsStatus:function(delid,url,actionName){
-
-            if(CommonJs.Loading){
-                layer.msg('有操作在进行，请稍等...',{icon: 0,time:2000});return false;
-            }
-
-            CommonJs.Loading    = true;
-
-            layer.confirm('确认要'+actionName+'吗？',function(index){
-                var ids         = [];
-
-                    if(delid > 0){
-
-                        //单个数据处理
-                        ids.push(delid);
-                    }else {
-
-                        //批量数据处理
-                        ids = CommonJs.DoneID ;
-                    }
-
-                    if(ids.length <= 0){
-
-                        layer.msg('请选择要'+actionName+'的数据!',{icon: 3,time:2000});return false;
-                    }
-
-                    layer.msg('请求处理中，请稍等...',{icon: 16,time:1000000});
-
-                    $.post(url, {'ids':ids}, function(data){
-
-                        CommonJs.Loading    = false;
-
-                        layer.msg(data.msg,{icon: 6,time:2500},function(){
-
-                            if(data.url != '') window.location.reload();
-                            
-                        });
-
-                    }, "json");
-
-                    return false;
-            },function(){
-                CommonJs.Loading    = false;
-            });
-        },
-
-        //调试用
-        WO:function (obj){
-              var description = "";
-              for(var i in obj){  
-                  var property=obj[i];  
-                  description+=i+" = "+property+"\n";  
-              }  
-              alert(description);
-        }
-};
-</script>
+{include file="public/commonjs" /}
 </body>
 </html>

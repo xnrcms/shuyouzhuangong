@@ -268,7 +268,7 @@ class Devmenu extends Base
     	return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
     }
 
-    /*api:cb115b3f0116f9cabf9c46503a23027d*/
+    /*api:3fb60204afa7d463d2e65238cc913f37*/
     /**
      * * 菜单发布
      * @param  [array] $parame 接口参数
@@ -292,7 +292,7 @@ class Devmenu extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$Data];
     }
 
-    /*api:cb115b3f0116f9cabf9c46503a23027d*/
+    /*api:3fb60204afa7d463d2e65238cc913f37*/
 
     /*接口扩展*/
 }

@@ -28,12 +28,12 @@ class User extends Base
         $this->tpl                                  = new \xnrcms\DevTpl();
         $this->apiUrl['index']                      = 'api/User/listData';
         $this->apiUrl['edit']                       = 'api/User/userDetail';
-        $this->apiUrl['add_save']                   = 'api/User/saveData';
-        $this->apiUrl['edit_save']                  = 'api/User/saveData';
+        $this->apiUrl['save_data']                  = 'api/User/saveData';
         $this->apiUrl['quickedit']                  = 'api/User/quickEditData';
         $this->apiUrl['del']                        = 'api/User/delData';
         $this->apiUrl['quickEditUserDetailData']    = 'api/User/quickEditUserDetailData';
         $this->apiUrl['setUserPrivilege']           = 'api/User/setUserPrivilege';
+        $this->apiUrl['updatepassword']             = 'api/User/updatePasswordByOld';
     }
 
     //所有用户，不按用户组划分
@@ -302,6 +302,50 @@ class User extends Base
         $this->error('更新失败');
     }
 
+    //密码修改
+    public function updatePassword($id = 0)
+    {
+        //数据提交
+        if (request()->isPost()) $this->updatePasswordByOld();
+
+        //参数数据接收
+        $param      = request()->param();
+
+        //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('','用户密码修改表单','form'),1);
+        $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
+        $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
+        $formList   = isset($formNode['list']) ? $formNode['list'] : [];
+
+        $id         = (int)$id <= 0 ? $this->uid : (int)$id;
+
+        //数据详情
+        $info                           = [];
+        $info['safeid']                 = string_encryption_decrypt($id);
+
+        //页面头信息设置
+        $pageData['isback']             = 0;
+        $pageData['title1']             = '';
+        $pageData['title2']             = '';
+        $pageData['notice']             = [];
+        
+        //记录当前列表页的cookie
+        cookie('__forward__',$_SERVER['REQUEST_URI']);
+        cookie('__formtag__',$formTag);
+
+        //渲染数据到页面模板上
+        $assignData['formId']           = $formId;
+        $assignData['formTag']          = $formTag;
+        $assignData['formFieldList']    = $formList;
+        $assignData['info']             = $info;
+        $assignData['defaultData']      = $this->getDefaultParameData();
+        $assignData['pageData']         = $pageData;
+        $this->assignData($assignData);
+
+        //加载视图模板
+        return view('addedit');
+    }
+
     //处理提交新增或编辑的数据
     private function update()
     {
@@ -317,10 +361,10 @@ class User extends Base
         $signData['hashid']         = $this->hashid;
     
         //请求数据
-        if (!isset($this->apiUrl[request()->action().'_save'])||empty($this->apiUrl[request()->action().'_save'])) 
+        if (!isset($this->apiUrl['save_data'])||empty($this->apiUrl['save_data'])) 
         $this->error('未设置接口地址');
 
-        $res       = $this->apiData($signData,$this->apiUrl[request()->action().'_save']) ;
+        $res       = $this->apiData($signData,$this->apiUrl['save_data']) ;
         $data      = $this->getApiData() ;
 
         if($res){
@@ -332,6 +376,35 @@ class User extends Base
         }
     }
     
+    private function updatePasswordByOld()
+    {
+        //表单数据
+        $postData                   = request()->param();
+
+        //表单模板
+        if(!$this->tpl->checkFormTpl($postData)) $this->error('表单模板数据不存在');
+
+        //接口数据
+        $signData                   = $this->tpl->getFormTplData($postData);
+        $signData['uid']            = $this->uid;
+        $signData['hashid']         = $this->hashid;
+ 
+        //请求数据
+        if (!isset($this->apiUrl[request()->action()])||empty($this->apiUrl[request()->action()])) 
+        $this->error('未设置接口地址');
+
+        $res       = $this->apiData($signData,$this->apiUrl[request()->action()]) ;
+        $data      = $this->getApiData() ;
+
+        if($res)
+        {
+            $this->success('修改成功',Cookie('__forward__')) ;
+        }else{
+
+            $this->error($this->getApiError()) ;
+        }
+    }
+
     //获取数据详情
     private function getDetail($id = 0)
     {

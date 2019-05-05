@@ -76,20 +76,20 @@ class Devmenu extends Base
         return $this->execApi($parame);
     }
 
-    /*api:cb115b3f0116f9cabf9c46503a23027d*/
+    /*api:3fb60204afa7d463d2e65238cc913f37*/
     /**
      * 菜单发布
      * @access public
      * @param  [array] $parame 扩展参数
      * @return [json]          接口数据输出
     */
-    public function releaseData($parame = []){
-
+    public function releaseData($parame = [])
+    {
         //执行接口调用
         return $this->execApi($parame);
     }
 
-    /*api:cb115b3f0116f9cabf9c46503a23027d*/
+    /*api:3fb60204afa7d463d2e65238cc913f37*/
 
     /*接口扩展*/
 }

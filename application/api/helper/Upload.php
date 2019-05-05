@@ -280,7 +280,7 @@ class Upload extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
     }
 
-    /*api:d7c4296d1696dcfe9a20a1d2fdc06dbe*/
+    /*api:ae7ee4e7785682324a198e14887e98f6*/
     /**
      * * 图片上传接口
      * @param  [array] $parame 接口参数
@@ -363,9 +363,9 @@ class Upload extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['data'=>json_encode($data)]];
     }
 
-    /*api:d7c4296d1696dcfe9a20a1d2fdc06dbe*/
+    /*api:ae7ee4e7785682324a198e14887e98f6*/
 
-    /*api:756ae49353a6ad33895a2e538625715f*/
+    /*api:f4a1c26f65b071cd7abb7537fc335e0c*/
     /**
      * * H5单图上传
      * @param  [array] $parame 接口参数
@@ -440,7 +440,7 @@ class Upload extends Base
         }return ['Code' => '120000', 'Msg'=>'上传失败，请稍后再试'];
     }
 
-    /*api:756ae49353a6ad33895a2e538625715f*/
+    /*api:f4a1c26f65b071cd7abb7537fc335e0c*/
 
     /*接口扩展*/
 

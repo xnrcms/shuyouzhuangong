@@ -274,7 +274,7 @@ class Devlist extends Base
     	return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
     }
 
-    /*api:e2261b8f76e5c7c628d25cdccf3890ac*/
+    /*api:41859b72c709045e8aed6e83e4c39ada*/
     /**
      * * 列表模板克隆接口
      * @param  [array] $parame 接口参数
@@ -411,9 +411,9 @@ class Devlist extends Base
         return ['Code' => '200009', 'Msg'=>lang('200009')];
     }
 
-    /*api:e2261b8f76e5c7c628d25cdccf3890ac*/
+    /*api:41859b72c709045e8aed6e83e4c39ada*/
 
-    /*api:f7cbd4d84eec5b63f3edb55034775e00*/
+    /*api:be2090f6ed5ea8eb382c93241a8f12ef*/
     /**
      * * 列表模板发布接口
      * @param  [array] $parame 接口参数
@@ -445,7 +445,7 @@ class Devlist extends Base
 
             if ($releaseCount <= 0) return ['Code' => '200014', 'Msg'=>lang('200014')];
 
-            set_release_data($data,md5(strtolower($info['cname'])),'list');
+            set_release_data($data,$info['cname'],'list');
 
             return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$releaseCount]];
         }
@@ -453,9 +453,9 @@ class Devlist extends Base
         return ['Code' => '200014', 'Msg'=>lang('200014')];
     }
 
-    /*api:f7cbd4d84eec5b63f3edb55034775e00*/
+    /*api:be2090f6ed5ea8eb382c93241a8f12ef*/
 
-    /*api:3fe5b175000c2be3c357b421ec984081*/
+    /*api:44afc1012eeec0faba90927299896f19*/
     /**
      * * 列表模板初始化接口
      * @param  [array] $parame 接口参数
@@ -517,7 +517,7 @@ class Devlist extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>$Data];
     }
 
-    /*api:3fe5b175000c2be3c357b421ec984081*/
+    /*api:44afc1012eeec0faba90927299896f19*/
 
     /*接口扩展*/
 }

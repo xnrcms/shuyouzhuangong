@@ -245,7 +245,7 @@ class Logs extends Base
     	return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
     }
 
-    /*api:269bf6a7f02ce2045af284e9bda57683*/
+    /*api:1c6d967a78ed832677c6ac12b00de3b6*/
     /**
      * * 操作日志清理
      * @param  [array] $parame 接口参数
@@ -263,7 +263,7 @@ class Logs extends Base
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$clearCount]];
     }
 
-    /*api:269bf6a7f02ce2045af284e9bda57683*/
+    /*api:1c6d967a78ed832677c6ac12b00de3b6*/
 
     /*接口扩展*/
 }

@@ -97,7 +97,7 @@ class AdPosition extends Base
         //页面头信息设置
         $pageData['isback']             = 0;
         $pageData['title1']             = '广告位管理';
-        $pageData['title2']             = '广告位列表';
+        $pageData['title2']             = '对广告位进行添加、编辑、删除等操作';
         $pageData['notice']             = ['广告位置在前台模板标签里面调用.','当模板标签调用时程序会自动判断 pid 不存在则自动'];
 
         //渲染数据到页面模板上

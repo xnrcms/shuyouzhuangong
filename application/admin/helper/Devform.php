@@ -497,6 +497,7 @@ class Devform extends Base
             //不存在新增并返回模板ID
             $updata['title']        = $title;
             $updata['pid']          = 0;
+            $updata['status']       = 1;
             $updata['cname']        = implode('/', $cname);
             $updata['config']       = '';
             $updata['create_time']  = time();
@@ -505,6 +506,19 @@ class Devform extends Base
             //入库数据
             $info                   = $dbModel->addData($updata);
             $id                     = isset($info['id']) ? $info['id'] : 0;
+
+            //自动生成一个ID字段
+            $updata                 = [];
+            $updata['title']        = 'ID';
+            $updata['pid']          = $id;
+            $updata['tag']          = 'id';
+            $updata['sort']         = 1000;
+            $updata['status']       = 1;
+            $updata['cname']        = implode('/', $cname) . '_id';
+            $updata['config']       = '{"title":"ID","tag":"id","type":"hidden","group":"","require":2,"add":1,"edit":2,"notice":"","default":"","field_value":"","attr":""}';
+            $updata['create_time']  = time();
+            $updata['update_time']  = time();
+            $dbModel->insert($updata);
 
             $this->releaseData(['id'=>$id]);
         }

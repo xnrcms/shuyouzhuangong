@@ -15,10 +15,10 @@ namespace app\api\helper;
 use app\common\helper\Base;
 use think\facade\Lang;
 
-class AdPosition extends Base
+class Ad extends Base
 {
 	private $dataValidate 		= null;
-    private $mainTable          = 'ad_position';
+    private $mainTable          = 'ad';
 	
 	public function __construct($parame=[],$className='',$methodName='',$modelName='')
     {
@@ -82,7 +82,12 @@ class AdPosition extends Base
 		//定义关联查询表信息，默认是空数组，为空时为单表查询,格式必须为一下格式
 		//Rtype :`INNER`、`LEFT`、`RIGHT`、`FULL`，不区分大小写，默认为`INNER`。
 		$RelationTab				= [];
-		//$RelationTab['member']		= array('Ralias'=>'me','Ron'=>'me.uid=main.uid','Rtype'=>'LEFT','Rfield'=>array('nickname'));
+        $RelationTab['ad_position'] = [
+            'Ralias'=>'adp',
+            'Ron'=>'adp.id=main.pos_id',
+            'Rtype'=>'LEFT',
+            'Rfield'=>['title AS pos_name']
+        ];
 
 		$modelParame['RelationTab']	= $RelationTab;
 
@@ -113,12 +118,11 @@ class AdPosition extends Base
     	if (!empty($data))
         {
             $status                 = ['未知','启用','禁用'];
-            
+
             //自行定义格式化数据输出
     		foreach($data as $k=>$v)
             {
                 $data[$k]['status']         = $status[$v['status']];
-                $data[$k]['create_time']    = date('Y-m-d H:i:s',$v['create_time']);
                 $data[$k]['update_time']    = date('Y-m-d H:i:s',$v['update_time']);
     		}
     	}
@@ -145,7 +149,11 @@ class AdPosition extends Base
         $saveData                   = [];
         $saveData['title']          = isset($parame['title']) ? trim($parame['title']) : '';
         $saveData['description']    = isset($parame['description']) ? trim($parame['description']) : '';
+        $saveData['pos_id']         = isset($parame['pos_id']) ? (int)($parame['pos_id']) : 0;
+        $saveData['imgid']          = isset($parame['imgid']) ? (int)($parame['imgid']) : 0;
         $saveData['status']         = isset($parame['status']) ? (int)($parame['status']) : 2;
+        $saveData['links']          = isset($parame['links']) ? trim($parame['links']) : '';
+        $saveData['sort']           = isset($parame['sort']) ? (int)($parame['sort']) : 1;
         $saveData['updata_time']    = time();
         //$saveData['parame']         = isset($parame['parame']) ? $parame['parame'] : '';
 

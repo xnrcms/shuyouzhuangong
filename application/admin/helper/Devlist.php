@@ -499,6 +499,7 @@ class Devlist extends Base
             //不存在新增并返回模板ID
             $updata['title']        = $title;
             $updata['pid']          = 0;
+            $updata['status']       = 1;
             $updata['cname']        = implode('/', $cname);
             $updata['config']       = '';
             $updata['create_time']  = time();
@@ -507,6 +508,20 @@ class Devlist extends Base
             //入库数据
             $info                   = $dbModel->addData($updata);
             $id                     = isset($info['id']) ? $info['id'] : 0;
+
+            //自动生成一个ID字段
+            $updata                 = [];
+            $updata['title']        = 'ID';
+            $updata['pid']          = $id;
+            $updata['status']       = 1;
+            $updata['sort']         = 1000;
+            $updata['tag']          = 'id';
+            $updata['cname']        = implode('/', $cname) . '_id';
+            $updata['width']        = 2;
+            $updata['config']       = '{"title":"ID","tag":"id","type":"datetime","width":2,"edit":0,"search":0,"default":"","attr":""}';
+            $updata['create_time']  = time();
+            $updata['update_time']  = time();
+            $dbModel->insert($updata);
 
             $this->releaseData(['id'=>$id]);
         }

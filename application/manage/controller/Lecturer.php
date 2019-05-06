@@ -9,15 +9,15 @@
  * 采用TP5助手函数可实现单字母函数M D U等,也可db::name方式,可双向兼容
  * ============================================================================
  * Author: XNRCMS<562909771@qq.com>
- * Date: 2019-04-18
- * Description:课程分类
+ * Date: 2019-05-06
+ * Description:讲师管理
  */
 
 namespace app\manage\controller;
 
 use app\manage\controller\Base;
 
-class CourseCategory extends Base
+class Lecturer extends Base
 {
     private $apiUrl         = [];
     private $tpl            = null;
@@ -27,12 +27,12 @@ class CourseCategory extends Base
         parent::__construct();
 
         $this->tpl                    = new \xnrcms\DevTpl();
-        $this->apiUrl['index']        = 'api/CourseCategory/listData';
-        $this->apiUrl['edit']         = 'api/CourseCategory/detailData';
-        $this->apiUrl['add_save']     = 'api/CourseCategory/saveData';
-        $this->apiUrl['edit_save']    = 'api/CourseCategory/saveData';
-        $this->apiUrl['quickedit']    = 'api/CourseCategory/quickEditData';
-        $this->apiUrl['del']          = 'api/CourseCategory/delData';
+        $this->apiUrl['index']        = 'api/Lecturer/listData';
+        $this->apiUrl['edit']         = 'api/Lecturer/detailData';
+        $this->apiUrl['add_save']     = 'api/Lecturer/saveData';
+        $this->apiUrl['edit_save']    = 'api/Lecturer/saveData';
+        $this->apiUrl['quickedit']    = 'api/Lecturer/quickEditData';
+        $this->apiUrl['del']          = 'api/Lecturer/delData';
     }
 
 	//列表页面
@@ -42,7 +42,7 @@ class CourseCategory extends Base
         $param      = request()->param();
 
         //初始化模板
-        $listNode   = $this->tpl->showListTpl($this->getTplData('','课程分类列表','list'));
+        $listNode   = $this->tpl->showListTpl($this->getTplData('','课程讲师列表','list'));
         $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
         $listTag    = isset($listNode['tags']) ? $listNode['tags'] : '';
 
@@ -50,14 +50,13 @@ class CourseCategory extends Base
         $menuid     = isset($param['menuid']) ? $param['menuid'] : 0;
         $page       = isset($param['page']) ? $param['page'] : 1;
         $search     = $this->getSearchParame($param);
-        $isTree     = 1;
+        $isTree     = 0;
 
         //页面操作功能菜单
         $topMenu    = formatMenuByPidAndPos($menuid,2, $this->menu);
         $rightMenu  = formatMenuByPidAndPos($menuid,3, $this->menu);
 
         //获取列表数据
-        $parame             = [];
         $parame['uid']      = $this->uid;
         $parame['hashid']   = $this->hashid;
         $parame['page']     = $page;
@@ -97,12 +96,9 @@ class CourseCategory extends Base
 
         //页面头信息设置
         $pageData['isback']             = 0;
-        $pageData['title1']             = '课程分类管理';
-        $pageData['title2']             = '对课程分类进行添加、编辑、删除等操作';
-        $pageData['notice']             = [
-            '列表只是展示部分字段信息，详情请点击编辑查看.',
-            '列表上可以对部分字段信息进行快速编辑'
-        ];
+        $pageData['title1']             = '讲师管理';
+        $pageData['title2']             = '对讲师进行添加、编辑、删除等操作';
+        $pageData['notice']             = ['讲师列表只是展示部分字段信息，详情请点击编辑查看.'];
 
         //渲染数据到页面模板上
         $assignData['isTree']           = $isTree;
@@ -140,14 +136,13 @@ class CourseCategory extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','新增/编辑课程分类表单','form'),0);
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','新增/编辑课程讲师','form'),0);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
         $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
         $formList   = isset($formNode['list']) ? $formNode['list'] : [];
 
         //数据详情
         $info                           = $this->getDetail(0);
-        $info['pid']                    = isset($param['pid']) ? (int)$param['pid'] : 0;
 
         //页面头信息设置
         $pageData['isback']             = 0;
@@ -182,7 +177,7 @@ class CourseCategory extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','新增/编辑课程分类表单','form'),1);
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','新增/编辑课程讲师','form'),1);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
         $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
         $formList   = isset($formNode['list']) ? $formNode['list'] : [];
@@ -222,6 +217,7 @@ class CourseCategory extends Base
         $ids     = is_array($ids) ? implode($ids,',') : '';
 
         //请求参数
+        $parame                 = [];
         $parame['uid']          = $this->uid;
         $parame['hashid']       = $this->hashid;
         $parame['id']           = $ids ;
@@ -266,7 +262,7 @@ class CourseCategory extends Base
         if(!$this->tpl->checkFormTpl($postData)) $this->error('表单模板数据不存在');
 
         //接口数据
-        $signData                   = $this->tpl->getFormTplData($tplid,$postData);
+        $signData                   = $this->tpl->getFormTplData($postData);
         $signData['uid']            = $this->uid;
         $signData['hashid']         = $this->hashid;
         
@@ -311,44 +307,9 @@ class CourseCategory extends Base
     //扩展枚举，布尔，单选，复选等数据选项
     protected function getDefaultParameData()
     {
-        $defaultData['getCourseCategoryList']   = $this->getCourseCategoryList();
+        $defaultData['parame']   = [];
+
         return $defaultData;
-    }
-
-    private function getCourseCategoryList()
-    {
-        //获取列表数据
-        $parame             = [];
-        $parame['uid']      = $this->uid;
-        $parame['hashid']   = $this->hashid;
-        $parame['page']     = 1;
-        $parame['search']   = '' ;
-
-        //请求数据
-        $res                = $this->apiData($parame,$this->apiUrl['index']);
-        $data               = $this->getApiData();
-        $listData           = [];
-        $selectData         = [];
-
-        if ($res && isset($data['lists']) && !empty($data['lists']))
-        {
-            $listData      = $data['lists'];
-            $Tree          = new \xnrcms\DataTree($listData);
-            $listData      = $Tree->toFormatTree();
-        }
-
-        if (!empty($listData))
-        {
-            foreach ($listData as $key => $value)
-            {
-                if ($value['status'] === '启用')
-                {
-                    $selectData[$value['id']]   = $value['title_show'];
-                }
-            }
-        }
-
-        return $selectData;
     }
 }
 ?>

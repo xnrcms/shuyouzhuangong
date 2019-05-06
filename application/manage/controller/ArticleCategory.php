@@ -97,7 +97,7 @@ class ArticleCategory extends Base
         //页面头信息设置
         $pageData['isback']             = 0;
         $pageData['title1']             = '文章分类管理';
-        $pageData['title2']             = '文章分类添加、编辑、删除等操作';
+        $pageData['title2']             = '对文章分类进行添加、编辑、删除等操作';
         $pageData['notice']             = [
             '列表只是展示部分字段信息，详情请点击编辑查看.',
             '列表上可以对部分字段信息进行快速编辑'

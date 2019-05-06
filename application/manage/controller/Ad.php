@@ -33,6 +33,7 @@ class Ad extends Base
         $this->apiUrl['edit_save']    = 'api/Ad/saveData';
         $this->apiUrl['quickedit']    = 'api/Ad/quickEditData';
         $this->apiUrl['del']          = 'api/Ad/delData';
+        $this->apiUrl['position']     = 'api/AdPosition/listData';
     }
 
 	//列表页面
@@ -42,7 +43,7 @@ class Ad extends Base
         $param      = request()->param();
 
         //初始化模板
-        $listNode   = $this->tpl->showListTpl($this->getTplData('','','list'));
+        $listNode   = $this->tpl->showListTpl($this->getTplData('','广告图列表','list'));
         $listId     = isset($listNode['info']['id']) ? intval($listNode['info']['id']) : 0;
         $listTag    = isset($listNode['tags']) ? $listNode['tags'] : '';
 
@@ -96,9 +97,9 @@ class Ad extends Base
 
         //页面头信息设置
         $pageData['isback']             = 0;
-        $pageData['title1']             = '';
-        $pageData['title2']             = '';
-        $pageData['notice']             = [];
+        $pageData['title1']             = '广告图管理';
+        $pageData['title2']             = '对广告图进行添加、编辑、删除等操作';
+        $pageData['notice']             = ['列表只是展示部分字段信息，详情请点击编辑查看.'];
 
         //渲染数据到页面模板上
         $assignData['isTree']           = $isTree;
@@ -136,7 +137,7 @@ class Ad extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','','form'),0);
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','新增/编辑广告图表单','form'),0);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
         $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
         $formList   = isset($formNode['list']) ? $formNode['list'] : [];
@@ -177,7 +178,7 @@ class Ad extends Base
         $param      = request()->param();
 
         //初始化表单模板 默认当前路由为唯一标识，自己可以自定义标识
-        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','','form'),1);
+        $formNode   = $this->tpl->showFormTpl($this->getTplData('addedit','新增/编辑广告图表单','form'),1);
         $formId     = isset($formNode['info']['id']) ? intval($formNode['info']['id']) : 0;
         $formTag    = isset($formNode['tags']) ? $formNode['tags'] : '';
         $formList   = isset($formNode['list']) ? $formNode['list'] : [];
@@ -262,10 +263,10 @@ class Ad extends Base
         if(!$this->tpl->checkFormTpl($postData)) $this->error('表单模板数据不存在');
 
         //接口数据
-        $signData                   = $this->tpl->getFormTplData($tplid,$postData);
+        $signData                   = $this->tpl->getFormTplData($postData);
         $signData['uid']            = $this->uid;
         $signData['hashid']         = $this->hashid;
-        
+
         //请求数据
         if (!isset($this->apiUrl[request()->action().'_save'])||empty($this->apiUrl[request()->action().'_save'])) 
         $this->error('未设置接口地址');
@@ -307,9 +308,37 @@ class Ad extends Base
     //扩展枚举，布尔，单选，复选等数据选项
     protected function getDefaultParameData()
     {
-        $defaultData['parame']   = [];
+        $defaultData['getAdPositionName']   = $this->getAdPositionName();
 
         return $defaultData;
+    }
+
+    private function getAdPositionName()
+    {
+        //获取列表数据
+        $parame             = [];
+        $parame['uid']      = $this->uid;
+        $parame['hashid']   = $this->hashid;
+        $parame['page']     = 1;
+        $parame['search']   = '' ;
+
+        //请求数据
+        $res                = $this->apiData($parame,$this->apiUrl['position']);
+        $data               = $this->getApiData();
+        $selectData         = [];
+
+        if ($res && isset($data['lists']) && !empty($data['lists']))
+        {
+            foreach ($data['lists'] as $key => $value)
+            {
+                if ($value['status'] === '启用')
+                {
+                    $selectData[$value['id']]   = $value['title'];
+                }
+            }
+        }
+
+        return $selectData;
     }
 }
 ?>

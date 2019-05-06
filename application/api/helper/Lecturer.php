@@ -15,10 +15,10 @@ namespace app\api\helper;
 use app\common\helper\Base;
 use think\facade\Lang;
 
-class AdPosition extends Base
+class Lecturer extends Base
 {
 	private $dataValidate 		= null;
-    private $mainTable          = 'ad_position';
+    private $mainTable          = 'lecturer';
 	
 	public function __construct($parame=[],$className='',$methodName='',$modelName='')
     {
@@ -113,12 +113,12 @@ class AdPosition extends Base
     	if (!empty($data))
         {
             $status                 = ['未知','启用','禁用'];
-            
+
             //自行定义格式化数据输出
     		foreach($data as $k=>$v)
             {
                 $data[$k]['status']         = $status[$v['status']];
-                $data[$k]['create_time']    = date('Y-m-d H:i:s',$v['create_time']);
+                $data[$k]['create_time']    = date('Y-m-d H:i:s',$v['update_time']);
                 $data[$k]['update_time']    = date('Y-m-d H:i:s',$v['update_time']);
     		}
     	}
@@ -144,9 +144,11 @@ class AdPosition extends Base
         //自行定义入库数据 为了防止参数未定义报错，先采用isset()判断一下
         $saveData                   = [];
         $saveData['title']          = isset($parame['title']) ? trim($parame['title']) : '';
-        $saveData['description']    = isset($parame['description']) ? trim($parame['description']) : '';
+        $saveData['intro']          = isset($parame['intro']) ? trim($parame['intro']) : '';
+        $saveData['imgid']          = isset($parame['imgid']) ? (int)($parame['imgid']) : 0;
         $saveData['status']         = isset($parame['status']) ? (int)($parame['status']) : 2;
-        $saveData['updata_time']    = time();
+        $saveData['sorts']          = isset($parame['sorts']) ? (int)($parame['sorts']) : 1;
+        $saveData['update_time']    = time();
         //$saveData['parame']         = isset($parame['parame']) ? $parame['parame'] : '';
 
         //规避遗漏定义入库数据

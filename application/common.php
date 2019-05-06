@@ -31,7 +31,9 @@ if (!function_exists('is_dev'))
 	{
 		$domain 		= get_domain();
 		$project_url 	= config('extend.apidoc_project_url');
-		return  trim($domain,'/') == trim($project_url,'/') ? true : false;
+		$dev_path 		= \Env::get('APP_PATH') . 'admin/index.html';
+
+		return  trim($domain,'/') == trim($project_url,'/') && file_exists($dev_path) ? true : false;
 	}
 }
 
@@ -505,9 +507,9 @@ if (!function_exists('delFile'))
 	 * @param  [bool] 	 $delDir [是否删除目录]
 	 * @return [bool]	 
 	 */
-	function delFile($path,$delDir = FALSE)
+	function delFile($path,$delDir = false)
 	{
-	    if(!is_dir($path)) return FALSE;
+	    if(!is_dir($path) && $delDir) return false;
 
 		$handle = @opendir($path);
 
@@ -516,19 +518,17 @@ if (!function_exists('delFile'))
 			while (false !== ( $item = readdir($handle) ))
 			{
 				if ($item != "." && $item != ".." && $item != '.svn')
-				is_dir("$path/$item") ? delFile("$path/$item", $delDir) : unlink("$path/$item");
+				is_dir($path . '/' . $item) ? delFile($path . '/' . $item, $delDir) : unlink("$path/$item");
 			}
 
 			closedir($handle);
 
 			if ($delDir) return rmdir($path);
 		}else {
-			if (file_exists($path)) {
-				return unlink($path);
-			} else {
-				return FALSE;
-			}
+			if (file_exists($path)) return unlink($path);
 		}
+
+		return false;
 	}
 }
 

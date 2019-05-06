@@ -65,10 +65,8 @@ class Sys extends Base
      */
     private function clearCache($parame)
     {
-        delFile(\Env::get('RUNTIME_PATH'));
-
         \Cache::clear();
-
+        delFile(\Env::get('RUNTIME_PATH'),true);
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['res'=>'ok']];
     }
 

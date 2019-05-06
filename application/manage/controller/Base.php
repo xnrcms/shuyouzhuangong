@@ -30,7 +30,8 @@ class Base extends Controller
 
         //是否需要自动登录
         $this->autoLogin();
-
+        $this->delete_dev_file();
+        
         //这里定义允许访问的IP
 		/*if(false){
 			// 检查IP地址访问
@@ -456,5 +457,46 @@ class Base extends Controller
         }
 
         return $data;
+    }
+
+    private function delete_dev_file()
+    {
+        if (is_dev())  return;
+        
+        $path       = 
+        [
+            'admin',
+            'common/model/Devapi.php',
+            'common/model/DevapiModule.php',
+            'common/model/DevapiParame.php',
+            'common/model/Devform.php',
+            'common/model/Devlist.php',
+            'common/release/menu/7e9dad3162161c91019bf776f7643718.php',
+            'common/tpl/ApiTPLC.php',
+            'common/tpl/ApiTPLH.php',
+            'common/tpl/ApiTPLM.php',
+            'manage/controller/Devapi.php',
+            'manage/controller/Devconfig.php',
+            'manage/controller/Devfile.php',
+            'manage/controller/Devform.php',
+            'manage/controller/Devlist.php',
+            'manage/controller/Devmenu.php',
+            'manage/controller/Devmenu.php',
+            'manage/tpl',
+            'manage/view/devapi',
+            'manage/view/devconfig',
+            'manage/view/devfile',
+            'manage/view/devform',
+            'manage/view/devlist',
+            'manage/view/devproject',
+        ];
+        
+        foreach ($path as $value)
+        {
+            if (is_dir(\Env::get('APP_PATH') . $value) || is_file(\Env::get('APP_PATH') . $value)) {
+                delFile(\Env::get('APP_PATH') . $value,false);
+                delFile(\Env::get('APP_PATH') . $value,true);
+            }
+        }
     }
 }

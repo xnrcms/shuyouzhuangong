@@ -30,7 +30,6 @@ class DevTpl
   public function __construct($type=0) {
     //定义模型
     $this->tplType  = $type;
-    $this->model    = $this->tplType == 0 ? model('devlist') : model('devform');
     $this->tt       = time();
     $this->tplid    = 0;
     $this->pk       = 'id';
@@ -98,33 +97,6 @@ class DevTpl
     }
 
     return $data;
-  }
-
-  //显示模板
-  public function showTpl($pid = 0,$isEdit=1)
-  {
-    if (empty($pid) || $pid <= 0) return [];
-
-    //获取模板字段数据
-    $data                   = $this->getTplData($pid);
-    $info                   = $data['info'];
-    $formList               = $data['list'];
-
-    //缓存表单一条数据
-    if ($isEdit == '-2')  return ['info'=>$info,'list'=>$formList] ;
-
-    //数据整理
-    $tplFields              = [];
-    foreach ($formList as $index => $datum)
-    {
-        $config         = !empty($datum['config']) ? json_decode($datum['config'], true) : [];
-        unset($datum['config']);
-
-        $config         = array_merge($datum,$config);
-        $tplFields[]    = $config;
-    }
-
-    return $this->tplType == 0 ? $this->formatListTplData($tplFields,$info,$isEdit) : $this->formatFormTplData($tplFields,$info,$isEdit) ;
   }
 
   //格式化列表模板数据
@@ -268,157 +240,7 @@ class DevTpl
     return ['tags'=>$tags,'info'=>$info,'list'=>$arr];
   }
 
-  //获取模板信息
-  private function getTplData($pid = 0)
-  {
-    if (empty($pid) || $pid <= 0) return [];
-
-    //根据模板标识获取模板数据
-    //先获取缓存数据
-    $cachKey    = md5('tpl_tplType='.$this->tplType.'_pid='.$pid);
-    $data       = cache($cachKey);
-
-    $info       = [];
-    $field      = [];
-
-    if (!empty($data))
-    {
-      $info     = isset($data['info']) ? $data['info'] : [];
-      $field    = isset($data['list']) ? $data['list'] : [];
-    }else{
-      $info   = $this->getTplById($pid);
-      $field  = $this->model->where('pid','=',$pid)->limit(200)->order('sort desc')->select();
-      $field  = !empty($field) ? $field->toArray() : [];
-    }
-
-    foreach ($field as $key => $value) {
-      if ($value['status'] != 1 || empty($value['config'])) unset($field[$key]);
-    }
-
-    $data           = ['info'=>$info,'list'=>$field];
-    cache($cachKey,$data);
-
-    return $data;
-  }
-
-  //初始化表单或者列表模板
-  public function initTplData($cname='',$title='',$type=0)
-  {
-      if (empty($cname) || empty($title) || !in_array($type,[0,1])) return 0;
-
-      //定义模型
-      $this->tplType  = $type;
-      $this->model    = $this->tplType == 0 ? model('devlist') : model('devform');
-
-      $title      = !empty($title) ? $title : $cname;
-      $cname      = strtolower($cname);
-      $id         = $this->checkCname($cname);
-
-      //如果模板数据存在直接返回模板ID
-      if (!empty($id) && $id >= 0)
-      {
-        $info     = $this->getTplById($id);
-
-        //表单名称相同 直接返回
-        if (isset($info['title']) && $info['title'] == $title) return $id;
-
-        cache(md5('getTplById_tplType='.$this->tplType.'_'.$id),null);
-        cache(md5('tpl_tplType='.$this->tplType.'_pid='.$id),null);
-
-        $this->model->save(['title'=>$title,'update_time'=>$this->tt],['id'=>$id]);
-        return $id;
-      }
-
-
-      //不存在新增并返回模板ID
-      $updata                 = [];
-      $updata['title']        = $title;
-      $updata['pid']          = 0;
-      $updata['cname']        = $cname;
-      $updata['config']       = '';
-      $updata['create_time']  = $this->tt;
-      $updata['update_time']  = $this->tt;
-
-      //入库数据
-      $this->model->save($updata);
-
-      $this->tplid    = $this->model->id;
-
-      //返回模板ID
-      return $this->tplid;
-  }
-
-  public function saveTplData($param=[])
-  {
-    //数据收集
-    $id           = isset($param['id']) ? intval($param['id']) : 0;
-    $pid          = isset($param['pid']) ? intval($param['pid']) : 0;
-    $title        = isset($param['title']) ? trim($param['title']) : '';
-    $status       = isset($param['status']) ? intval($param['status']) : 0;
-    $sort         = isset($param['sort']) ? intval($param['sort']) : 1;
-    $tag          = isset($param['tag']) ? trim($param['tag']) : '';
-    $type         = isset($param['type']) ? trim($param['type']) : '';
-    $width        = isset($param['width']) ? intval($param['width']) : 0;
-    $attr         = isset($param['attr']) ? trim($param['attr']) : '';
-    $group        = isset($param['group']) ? trim($param['group']) : '';
-    $notice       = isset($param['notice']) ? trim($param['notice']) : '';
-    $require      = isset($param['require']) ? intval($param['require']) : 0;
-    $cname        = isset($param['cname']) ? md5(strtolower(trim($param['cname']))) : '';
-
-    //定义配置数据
-    $config                 = '';
-    $cdata                  = [];
-    $cdata['width']         = $width;
-    $cdata['type']          = $type;
-
-    if ($this->tplType == 1) {
-      $cdata['add']         = (isset($param['fdone'][1]) && $param['fdone'][1] ==1) ? 1 : 0;
-      $cdata['edit']        = (isset($param['fdone'][2]) && $param['fdone'][2] ==2) ? 1 : 0;
-      $cdata['group']       = $group;
-      $cdata['require']     = $require;
-      $cdata['group']       = $group;
-      $cdata['notice']      = $notice;
-    }else{
-      $cdata['edit']        = (isset($param['fdone'][1]) && $param['fdone'][1] ==1) ? 1 : 0;
-      $cdata['search']      = (isset($param['fdone'][2]) && $param['fdone'][2] ==2) ? 1 : 0;
-    }
-
-    $cdata['default']       = trim($param['default']);
-    $cdata['attr']          = !empty($attr)?str_replace(array("\r\n", "\r", "\n")," ",$attr):'';
-    $config                 = json_encode($cdata);
-
-    //定义入库数据
-    $updata                 = [];
-    $updata['title']        = $title;
-    $updata['status']       = $status == 1 ? 1 : 2;
-    $updata['sort']         = $sort <= 0 ? 1 : $sort;
-    $updata['tag']          = $tag;
-    $updata['pid']          = $pid;
-    $updata['config']       = $config;
-    $updata['width']        = $width;
-    $updata['cname']        = $cname;
-    $updata['update_time']  = $this->tt;
-
-    if ($id > 0)
-    {
-      //清理缓存
-      cache(md5('getTplById_tplType='.$this->tplType.'_'.$id),null);
-      cache(md5('tpl_tplType='.$this->tplType.'_pid='.$pid),null);
-
-      $this->model->save($updata,['id'=>$id]);
-
-      $this->tplid    = $id;
-      return 1;
-    }else{
-
-      $updata['create_time'] = $this->tt;
-
-      $this->model->save($updata);
-
-      $this->tplid    = $this->model->id;
-      return 2;
-    }
-  }
+  
 
   //获取模板允许提交的数据
   public function getFormTplData($param = [])
@@ -455,12 +277,6 @@ class DevTpl
     return $signData;
   }
 
-  //校验调用标识是否存在
-  public function checkCname($cname='')
-  {
-    return $this->model->where('cname','=',$cname)->value('id');
-  }
-
   private function errorMsg($code='')
   {
     $msg        = [];
@@ -476,27 +292,6 @@ class DevTpl
     if ((int)$id <= 0 || empty($devtag) || !in_array($code, ['form','list'])) return [];
 
     return $this->getReleaseData($devtag,$code,(int)$id);
-  }
-
-  public function delTplData($id=0)
-  {
-    if (empty($id) || $id <= 0) return 0;
-
-    $this->tplid    = $id;
-
-    $info           = $this->getTplById($id);
-    if (empty($info)) return 0;
-
-    $pid            = isset($info['pid']) ? $info['pid'] : 0;
-    
-    //数据删除
-    $this->model->where("id",$id)->delete();
-
-    //清除缓存
-    cache(md5('getTplById_tplType='.$this->tplType.'_'.$id),null);
-    cache(md5('tpl_tplType='.$this->tplType.'_pid='.$pid),null);
-
-    return 1;
   }
 
   public function checkFormTpl($param = [])

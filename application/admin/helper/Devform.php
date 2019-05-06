@@ -91,7 +91,7 @@ class Devform extends Base
 		$modelParame['whereFun']	= 'formatWhereDefault';
 
 		//排序定义
-		$modelParame['order']		= 'main.sort desc,main.id asc';		
+		$modelParame['order']		= 'main.sort DESC,main.id DESC';		
 		
 		//数据分页步长定义
 		$modelParame['limit']		= $this->apidoc == 2 ? 1 : 1000;

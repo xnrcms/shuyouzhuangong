@@ -6,5 +6,7 @@
 
 return [
     // 系统错误提示
-    '000000'                   => '请求OK',
+    'logs_tips'                   => '提示',
+    'logs_warning'                => '警告',
+    'logs_error'                  => '错误',
 ];

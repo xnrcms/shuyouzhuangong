@@ -159,7 +159,7 @@ class Course extends Base
         $saveData['status']         = isset($parame['status']) ? (int)($parame['status']) : '';
         $saveData['price']          = isset($parame['price']) ? (int)$parame['price'] : 0;
         $saveData['sorts']          = isset($parame['sorts']) ? (int)$parame['sorts'] : 1;
-        $saveData['updata_time']    = time();
+        $saveData['update_time']    = time();
         //$saveData['parame']         = isset($parame['parame']) ? $parame['parame'] : '';
 
         //规避遗漏定义入库数据

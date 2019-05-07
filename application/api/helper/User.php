@@ -272,6 +272,7 @@ class User extends Base
             //根据group_id确定用户是否正确登录
             $login_type     = !empty($parame['login_type']) ? explode(',',$parame['login_type']) :[-1];
             $guid           = model('user_group_access')->getUserGroupAccessListByUid($uid);
+            
             if (empty(array_intersect($login_type, $guid))) return $this->userMessage(-1);
 
             //数据返回
@@ -289,7 +290,12 @@ class User extends Base
             }
 
             //日志
-            model('Logs')->addLog(['uid'=>$data['uid'],'log_type'=>1,'info'=>lang('1')]);
+            model('Logs')->tips([
+                'uid'=>$data['uid'],
+                'm'=>$this->controllerName,
+                'a'=>$this->actionName,
+                'message'=>lang('login_success')
+            ]);
 
             //更新登录信息
             $loginInfo                      = [];

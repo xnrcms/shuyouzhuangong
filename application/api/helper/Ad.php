@@ -154,7 +154,7 @@ class Ad extends Base
         $saveData['status']         = isset($parame['status']) ? (int)($parame['status']) : 2;
         $saveData['links']          = isset($parame['links']) ? trim($parame['links']) : '';
         $saveData['sort']           = isset($parame['sort']) ? (int)($parame['sort']) : 1;
-        $saveData['updata_time']    = time();
+        $saveData['update_time']    = time();
         //$saveData['parame']         = isset($parame['parame']) ? $parame['parame'] : '';
 
         //规避遗漏定义入库数据

@@ -146,7 +146,7 @@ class AdPosition extends Base
         $saveData['title']          = isset($parame['title']) ? trim($parame['title']) : '';
         $saveData['description']    = isset($parame['description']) ? trim($parame['description']) : '';
         $saveData['status']         = isset($parame['status']) ? (int)($parame['status']) : 2;
-        $saveData['updata_time']    = time();
+        $saveData['update_time']    = time();
         //$saveData['parame']         = isset($parame['parame']) ? $parame['parame'] : '';
 
         //规避遗漏定义入库数据

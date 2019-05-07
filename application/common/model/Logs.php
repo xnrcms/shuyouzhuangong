@@ -13,18 +13,18 @@ class Logs extends Base
 	//默认主键为id，如果你没有使用id作为主键名，需要在此设置
 	protected $pk = 'id';
 
-	public function formatWhereDefault($model,$parame){
-		
-		if (isset($parame['search']) && !empty($parame['search'])) {
-
+	public function formatWhereDefault($model,$parame)
+	{	
+		if (isset($parame['search']) && !empty($parame['search']))
+		{
 			$search 		= json_decode($parame['search'],true);
 
-			if (!empty($search)) {
-
-				foreach ($search as $key => $value) {
-
-					if (!empty($value) && (is_string($value) || is_numeric($value)) ) {
-
+			if (!empty($search))
+			{
+				foreach ($search as $key => $value)
+				{
+					if (!empty($value) && (is_string($value) || is_numeric($value)) )
+					{
 						$model->where('main.'.$key,'eq',$value);
 					}
 				}
@@ -34,48 +34,61 @@ class Logs extends Base
         return $model;
     }
 
-	public function addLog($parame){
-
-		if (empty($parame)) return false;
-
-		$uname 		= (isset($parame['uname']) && !empty($parame['uname'])) ? $parame['uname'] : '';
-		$uid 		= isset($parame['uid']) ? intval($parame['uid']) : 0;
-		$log_type 	= isset($parame['log_type']) ? intval($parame['log_type']) : 0;
-
-		if (empty($uname)) {
-
-			 $uname 	= $uid > 0 ? '用户-'.$parame['uid'] : '系统-0';
-		}
-
-		if (isset($parame['info']) && !empty($parame['info'])) {
-			
-			$add['log_time'] 	= time();
-			$add['uname'] 		= $uname;
-		    $add['uid'] 		= $uid;
-		    $add['log_info'] 	= $parame['info'];
-		    $add['log_ip'] 		= request()->ip();
-		    $add['log_url'] 	= request()->baseUrl();
-		    $add['log_type'] 	= $log_type;
-		    $add['ctag'] 		= 'log_type_'.$log_type;
-
-		    $this->addData($add);
-
-		    return true;
-		}
-
-		return false;
-	}
-
-	public function clearData($parame){
-
-		$log_type 	= isset($parame['log_type']) ? intval($parame['log_type']) : 0;
-
-		$count 		= $this->where('log_type','in',[0,$log_type])->count();
+	public function clearData($parame)
+	{
+		$count 		= $this->where('id','egt',0)->count();
 		
-		$this->where('log_type','in',[0,$log_type])->delete();
-		
-		$this->clearCache(['ctag'=>'log_type_'.$log_type]);
+		$this->where('id','egt',0)->delete();
 
 		return $count;
+	}
+
+	public function tips($parame)
+    {
+        return $this->addLog('tips', $parame);
+    }
+
+    public function warning($parame)
+    {
+        return $this->addLog('warning', $parame);
+    }
+
+    public function error($parame)
+    {
+        return $this->addLog('error', $parame);
+    }
+
+	private function addLog($level,$parame)
+	{
+		if (empty($parame)) return false;
+
+		$module 		= (isset($parame['m']) && !empty($parame['m'])) ? $parame['m'] : '';
+		$action 		= (isset($parame['a']) && !empty($parame['a'])) ? $parame['a'] : '';
+		$message 		= (isset($parame['message']) && !empty($parame['message'])) ? $parame['message'] : '';
+		$data 			= (isset($parame['data']) && !empty($parame['data'])) ? $parame['data'] : '';
+		$uid 			= isset($parame['uid']) ? intval($parame['uid']) : 0;
+
+		$DeviceToolkit 	= new \xnrcms\DeviceToolkit();
+		
+		$updata 		= 
+    	[
+            'module' 			=> $module,
+            'action' 			=> $action,
+            'message' 			=> $message,
+            'url'				=> request()->url(true),
+            'data' 				=> empty($data) ? '' : $data,
+            'uid' 				=> $uid,
+            'ip' 				=> request()->ip(),
+            'browser' 			=> $DeviceToolkit->getBrowse(),
+            'operating_system' 	=> $DeviceToolkit->getOperatingSystem(),
+            'device' 			=> $DeviceToolkit->isMobileClient() ? 'mobile' : 'computer',
+            'user_agent' 		=> request()->header()['user-agent'],
+            'create_time' 		=> time(),
+            'level' 			=> $level,
+    	];
+
+	    $this->addData($updata);
+
+	    return true;
 	}
 }

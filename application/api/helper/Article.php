@@ -159,7 +159,7 @@ class Article extends Base
         $saveData['thumb']          = isset($parame['thumb']) ? trim($parame['thumb']) : '';
         $saveData['body']           = isset($parame['body']) ? trim($parame['body']) : '';
         $saveData['status']         = isset($parame['status']) ? (int)($parame['status']) : '';
-        $saveData['updata_time']    = time();
+        $saveData['update_time']    = time();
         //$saveData['parame']         = isset($parame['parame']) ? $parame['parame'] : '';
 
         //规避遗漏定义入库数据

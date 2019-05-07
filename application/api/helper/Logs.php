@@ -80,7 +80,12 @@ class Logs extends Base
 		//定义关联查询表信息，默认是空数组，为空时为单表查询,格式必须为一下格式
 		//Rtype :`INNER`、`LEFT`、`RIGHT`、`FULL`，不区分大小写，默认为`INNER`。
 		$RelationTab				= [];
-		//$RelationTab['member']		= array('Ralias'=>'me','Ron'=>'me.uid=main.uid','Rtype'=>'LEFT','Rfield'=>array('nickname'));
+        $RelationTab['user_detail']      = [
+            'Ralias'=>'ud',
+            'Ron'=>'ud.id=main.uid',
+            'Rtype'=>'LEFT',
+            'Rfield'=>['nickname']
+        ];
 
 		$modelParame['RelationTab']	= $RelationTab;
 
@@ -108,12 +113,15 @@ class Logs extends Base
 		//数据格式化
 		$data 						= (isset($lists['lists']) && !empty($lists['lists'])) ? $lists['lists'] : [];
 
-    	if (!empty($data)) {
+    	if (!empty($data))
+        {
+            $level  = ['tips'=>lang('logs_tips'),'warning'=>lang('logs_warning'),'error'=>lang('logs_error')];
 
             //自行定义格式化数据输出
-    		//foreach($data as $k=>$v){
-
-    		//}
+    		foreach($data as $k=>$v)
+            {
+                $data[$k]['level']  = isset($level[$v['level']]) ? $level[$v['level']] : '';
+    		}
     	}
 
     	$lists['lists'] 			= $data;

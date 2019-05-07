@@ -76,15 +76,7 @@ class Ad extends Base
 
         if ($res)
         {
-            //分页信息
-            $page           = new \xnrcms\Page($data['total'], $data['limit']);
-            if($data['total']>=1)
-            {
-                $page->setConfig('theme','%FIRST% %UP_PAGE% %LINK_PAGE% %DOWN_PAGE% %END% %HEADER%');
-                $page->setConfig('header','');
-            }
-
-            $p 				= trim($page->show());
+            $p              = $this->pageData($data);//分页信息
             $total 			= $data['total'];
             $listData   	= $data['lists'];
         }

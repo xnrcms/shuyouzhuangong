@@ -90,10 +90,9 @@ class Devapi extends Base
         $res2               = $this->apiData($parame,$this->apiUrl['module_index']);
         $data2              = $this->getApiData() ;
 
-        if ($res2) {
-            
+        if ($res2)
+        {    
             $listData2      = $data2['lists'];
-
             $mid            = isset($listData2[0]['id']) ? $listData2[0]['id'] : -1;
             $module_id      = $module_id <= 0 ? $mid : $module_id;
         }
@@ -123,19 +122,11 @@ class Devapi extends Base
         $p 					= '';
         $listData 			= [];
 
-        if ($res){
-
-            //分页信息
-            $page = new \xnrcms\Page($data['total'], $data['limit']);
-            if($data['total']>=1){
-
-                $page->setConfig('theme','%FIRST% %UP_PAGE% %LINK_PAGE% %DOWN_PAGE% %END% %HEADER%');
-                $page->setConfig('header','');
-            }
-
-            $p 				= trim($page->show());
-            $total 			= $data['total'];
-            $listData   	= $data['lists'];
+        if ($res)
+        {
+            $p              = $this->pageData($data);//分页信息
+            $total          = $data['total'];
+            $listData       = $data['lists'];
         }
 
         $project_name           = !empty($this->project_info['title'])?'【<font color="red">'.$this->project_info['title'].'</font>】项目':'';

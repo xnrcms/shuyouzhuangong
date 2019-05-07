@@ -273,6 +273,21 @@ class Base extends Controller
         $this->goLogin();
 	}
 
+    public function pageData($data = [])
+    {
+        if (isset($data['total']) && isset($data['limit']))
+        {
+            $page           = new \xnrcms\Page($data['total'], $data['limit']);
+
+            $page->setConfig('theme','%FIRST% %UP_PAGE% %LINK_PAGE% %DOWN_PAGE% %END% %HEADER%');
+            $page->setConfig('header','');
+
+            return trim($page->show());
+        }
+
+        return '';
+    }
+
     protected function apiData($parame,$apiUrl)
     {
     	$this->setApiData([]);

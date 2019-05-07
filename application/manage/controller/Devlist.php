@@ -76,7 +76,8 @@ class Devlist extends Base
 	        $fieldList 			= (!empty($allDevlist) && isset($allDevlist['lists'])) ? $allDevlist['lists'] : [];
 			$fieldInfo 			= ['id'=>0,'pid'=>$parame['pid'],'require'=>0];
 
-			if (!empty($fieldList)) {
+			if (!empty($fieldList))
+			{
 				$firstid	= $fieldList[0]['id'];
 				$firstpid	= $fieldList[0]['pid'];
 

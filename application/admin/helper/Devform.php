@@ -512,7 +512,7 @@ class Devform extends Base
             $updata['title']        = 'ID';
             $updata['pid']          = $id;
             $updata['tag']          = 'id';
-            $updata['sort']         = 1000;
+            $updata['sort']         = 0;
             $updata['status']       = 1;
             $updata['cname']        = implode('/', $cname) . '_id';
             $updata['config']       = '{"title":"ID","tag":"id","type":"hidden","group":"","require":2,"add":1,"edit":2,"notice":"","default":"","field_value":"","attr":""}';

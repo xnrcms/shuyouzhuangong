@@ -258,7 +258,7 @@ class Course extends Base
         if(!$this->tpl->checkFormTpl($postData)) $this->error('表单模板数据不存在');
 
         //接口数据
-        $signData                   = $this->tpl->getFormTplData($tplid,$postData);
+        $signData                   = $this->tpl->getFormTplData($postData);
         $signData['uid']            = $this->uid;
         $signData['hashid']         = $this->hashid;
         

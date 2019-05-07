@@ -163,7 +163,7 @@ class DevTpl
               $thead[$index]['default']  = $item['default'] ;
 
               //搜索位数据
-              if ($item['search'] ==1)
+              if ($item['search'] === 2)
               {
                   $search[$i]['id']       = $item['id'] ;
                   $search[$i]['title']    = $item['title'] ;

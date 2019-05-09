@@ -723,30 +723,19 @@ $(function() {
 		
 			this.opts = opts, par = window.parent, type = this.opts.type;
 
-			if(type == 'Images'){
-			
+			if(type == 'Image')
+			{
 				this.opts.accept = {
-
-					title : '图片',
-				 
-					extensions : 'gif,jpg,jpeg,bmp,png',
-				 
+					extensions : this.opts.allowType,
 					mimeTypes : 'image/gif,image/jpg,image/jpeg,image/png,image/bmp'
-
 				}
 			
-			}else if(type == 'Flash'){
-
+			}else if(type == 'File')
+			{
 				this.opts.accept = {
-
-					title : '视频',
-				 
-					extensions : 'flash,swf,zip',
-				 
-					mimeTypes : 'image/*'
-
+					extensions : this.opts.allowType,
+					mimeTypes : ''
 				}
-			
 			}else{}
 
 			if(Object.prototype.toString.call(this.opts.formData) != '[object Object]') this.opts.formData = {};
@@ -758,6 +747,7 @@ $(function() {
 			if(this.opts.fileNumLimit == 1){
 				$('#filePicker2').hide();
 			}
+
 			webuploader(opts);
 
 			this.uploader = uploader;

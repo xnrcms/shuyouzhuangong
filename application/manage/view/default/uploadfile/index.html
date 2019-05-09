@@ -1,8 +1,7 @@
-
 <html lang="zh-cn">
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-    <title>文件管理</title>
+    <title>上传管理</title>
     <link rel="stylesheet" type="text/css" href="/3.0/package/webuploader/webuploader.css">
     <link rel="stylesheet" type="text/css" href="/3.0/package/webuploader/css/style.css">
 </head>
@@ -11,7 +10,7 @@
     <ul class="tabs">
         <li class="checked" id="upload_tab">本地上传</li>
         <li id="manage_tab">在线管理</li>
-        <li id="search_tab">文件搜索</li>
+        <li id="search_tab">{$info.title}搜索</li>
     </ul>
     <div class="container">
         <div class="area upload-area area-checked" id="upload_area">
@@ -29,14 +28,14 @@
                 <div class="queueList">
                     <div id="dndArea" class="placeholder">
                         <div id="filePicker"></div>
-                        <p>或将文件拖到这里，本次最多可选{$info['num']}个</p>
+                        <p>或将{$info.title}拖到这里，本次最多可选{$info.num}个</p>
                     </div>
                 </div>
             </div>
         </div>
         <div class="area manage-area" id="manage_area">
             <ul class="choose-btns">
-                <li class="btn sure checked saveBtn">确定</li>
+                <li class="btn sure checked">确定</li>
                 <li class="btn cancel">取消</li>
             </ul>
             <div class="file-list">
@@ -85,32 +84,29 @@
 </div>
 <script type="text/javascript" src="/3.0/package/jquery/jquery.js"></script>
 <script type="text/javascript" src="/3.0/package/webuploader/webuploader.min.js"></script>
-<script type="text/javascript">
-    document.write("<script type='text/javascript' "+ "src='/3.0/package/webuploader/upload.js?" + new Date()+ "'></s" + "cript>") ;
-</script>
+<script type="text/javascript" src="/3.0/package/layer/layer-min.js"></script>
+<script type="text/javascript" src="/3.0/package/webuploader/upload.js"></script>
 <script>
     $(function(){
         moudle = 'manage';
         var config = {
             "swf":"/3.0/package/webuploader/Uploader.swf",
-            "server":"{:U('File/upload')}",
-            "filelistPah":"",
-            "delPath":"",
+            "server":"{$info.upload}",
+            "filelistPah":"{$info.fileList}",
+            "delPath":"{$info.delPath}",
             "chunked":false,
             "chunkSize":524288,
             "fileNumLimit":"{$info.num}",
-            "delFileUrl":"{:url('Uploadfile/delFile')}"
-            "fileSizeLimit":209715200,
-            "fileSingleSizeLimit":2097152,
-            "fileVal":"download",
+            "delFileUrl":"{:url('Uploadfile/delFile')}",
+            "fileSizeLimit":parseInt("{$info.size}") * parseInt("{$info.num}"),
+            "fileSingleSizeLimit":parseInt("{$info.size}"),
+            "fileVal":"{$info.type}[]",
             "auto":true,
             "formData":{},
-            "pick":{"id":"#filePicker","label":"点击选择文件","name":"file"},
-            "thumb":{"width":110,"height":110,"quality":70,"allowMagnify":true,"crop":true,"preserveHeaders":false,"type":"file"},
-            "fun_callback":"{$info.func}",
-            "field_input":"{$info.input}",
+            "pick":{"id":"#filePicker","label":"点击选择{$info.title}","name":"file"}
         };
-        Manager.upload($.extend(config, {type : "File","allowType":"{$info.type}"}));
+        
+        Manager.upload($.extend(config, {type : "{$info.type}","allowType":"{$info.ext}"}));
 
         /*点击保存按钮时
          *判断允许上传数，检测是单一文件上传还是组文件上传
@@ -121,26 +117,22 @@
             var callback = "{$info.func}";
             var input = "{$info.input}" ;
             var num = "{$info.num}";
-            var fileurl_type = [];
-            var fileurl_name = [];
+            var fileurl_tmp = [];
             var fileurl_ids = [] ;
             if(callback != "undefined"){
                 if(num > 1){
+                    $("input[name^='file_tmp']").each(function(index,dom){
+                        fileurl_tmp[index] = dom.value;
+                    });
                     $("input[name^='file_ids']").each(function(index,dom){
                         fileurl_ids[index] = dom.value;
                     });
-                    $("input[name^='file_type']").each(function(index,dom){
-                        fileurl_type[index] = dom.value;
-                    });
-                    $("input[name^='file_name']").each(function(index,dom){
-                        fileurl_name[index] = dom.value;
-                    });
                 }else{
+                    fileurl_tmp = $("input[name^='file_tmp']").val();
                     fileurl_ids = $("input[name^='file_ids']").val();
-                    fileurl_type = $("input[name^='file_type']").val();
-                    fileurl_name = $("input[name^='file_name']").val();
                 }
-                eval('window.parent.'+callback+'(input,fileurl_ids,fileurl_type,fileurl_name)');
+
+                eval('window.parent.'+callback+'(input,fileurl_tmp,fileurl_ids)');
                 window.parent.layer.closeAll();
                 return;
             }

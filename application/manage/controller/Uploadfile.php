@@ -31,7 +31,7 @@ class Uploadfile extends Base
 
         $this->apiUrl['index']                 = 'api/Upload/listData';
         $this->apiUrl['delfile']               = 'api/Upload/delData';
-        $this->apiUrl['uploadimageurl']        = 'api/Upload/uploadImg';
+        $this->apiUrl['uploaddata']            = 'api/Upload/uploadData';
     }
 
     public function index()
@@ -67,37 +67,100 @@ class Uploadfile extends Base
 
     public function uploadImage()
     {
-        $func = input('func');
-        $tags = input('tags','temp');
-        $info = array(
-            'num'       => input('num'),
-            'title'     => '',
-            'upload'    => url('Uploadfile/uploadImageUrl',['fileName'=>'images','tags'=>$tags]),
-            'fileList'  => url('Uploadfile/index',['tags'=>$tags]),
-            'delPath'   => url('Uploadfile/delFile'),
-            'size'      => '4M',
-            'type'      =>'jpg,png,gif,jpeg',
-            'input'     => input('input'),
-            'tags'      => input('tags'),
+        //参数数据接收
+        $param          = request()->param();
+
+        //解析上传参数
+        $uploadParame   = $this->analysisUploadParame(isset($param['uploadParame'])?$param['uploadParame']:'');
+
+        $input          = isset($uploadParame['input']) ? $uploadParame['input'] : '';
+        $func           = isset($uploadParame['func']) ? $uploadParame['func'] : '';
+        $tags           = isset($uploadParame['tags']) ? $uploadParame['tags'] : 'temp';
+        $num            = isset($uploadParame['num']) ? (int)$uploadParame['num'] : 1;
+        $config         = isset($uploadParame['config']) ? explode('|', $uploadParame['config']) : [];
+
+        $ext            = isset($config[0]) ? $config[0] : 'jpg,png,gif,jpeg';
+        $size           = isset($config[1]) ? $config[1] : '2M';
+        $type           = 'Image';
+        $title          = $num <= 1 ? '单个图片' : '多个图片';
+
+        $config         = json_encode(['ext'=>$ext,'size'=>$size,'type'=>$type]);
+        $upload         = url('Uploadfile/uploadData',['fileName'=>$type,'tags'=>$tags,'config'=>$config]);
+        $fileList       = url('Uploadfile/index',['tags'=>$tags]);
+        $delPath        = url('Uploadfile/delFile');
+
+        $info           = [
+            'num'       => $num,
+            'title'     => $title,
+            'upload'    => $upload,
+            'fileList'  => $fileList,
+            'delPath'   => $delPath,
+            'size'      => (intval($size) > 0 ? intval($size) : 2) * pow(1024, 2),
+            'ext'       => $ext,
+            'type'      => $type,
+            'input'     => $input,
             'func'      => $func,
-        );
+        ];
 
-        //渲染数据到页面模板上
-        $assignData['info']         = $info;
-        $this->assignData($assignData);
+        $this->assign('info', $info);
 
-        //加载视图模板
-        return view();
+        return view('index');
     }
 
-    public function uploadImageUrl()
+    public function uploadFile()
     {
+        //参数数据接收
+        $param          = request()->param();
+
+        //解析上传参数
+        $uploadParame   = $this->analysisUploadParame(isset($param['uploadParame'])?$param['uploadParame']:'');
+
+        $input          = isset($uploadParame['input']) ? $uploadParame['input'] : '';
+        $func           = isset($uploadParame['func']) ? $uploadParame['func'] : '';
+        $tags           = isset($uploadParame['tags']) ? $uploadParame['tags'] : 'temp';
+        $num            = isset($uploadParame['num']) ? (int)$uploadParame['num'] : 1;
+        $config         = isset($uploadParame['config']) ? explode('|', $uploadParame['config']) : [];
+
+        $ext            = isset($config[0]) ? $config[0] : 'txt';
+        $size           = isset($config[1]) ? $config[1] : '2M';
+        $type           = 'File';
+        $title          = '文件';
+
+        $config         = json_encode(['ext'=>$ext,'size'=>$size,'type'=>$type]);
+        $upload         = url('Uploadfile/uploadData',['fileName'=>$type,'tags'=>$tags,'config'=>$config]);
+        $fileList       = url('Uploadfile/index',['tags'=>$tags]);
+        $delPath        = url('Uploadfile/delFile');
+
+        $info           = [
+            'num'       => $num,
+            'title'     => $title,
+            'upload'    => $upload,
+            'fileList'  => $fileList,
+            'delPath'   => $delPath,
+            'size'      => (intval($size) > 0 ? intval($size) : 2) * pow(1024, 2),
+            'ext'       => $ext,
+            'type'      => $type,
+            'input'     => $input,
+            'func'      => $func,
+        ];
+
+        $this->assign('info', $info);
+
+        return view('index');
+    }
+
+    public function uploadData()
+    {
+        //参数数据接收
+        $param          = request()->param();
+
         //获取列表数据
         $parame             = [];
         $parame['uid']      = $this->uid;
         $parame['hashid']   = $this->hashid;
-        $parame['fileName'] = input('fileName');
-        $parame['tags']     = input('tags');
+        $parame['fileName'] = isset($param['fileName']) ? $param['fileName'] : '';
+        $parame['tags']     = isset($param['tags']) ? $param['tags'] : 'tags';
+        $parame['config']   = isset($param['config']) ? $param['config'] : json_encode([]);
 
         //请求数据
         if (!isset($this->apiUrl[request()->action()]) || empty($this->apiUrl[request()->action()])) 
@@ -113,25 +176,6 @@ class Uploadfile extends Base
             
             return json(['code'=>0,'msg'=>$this->getApiError()]);
         }
-    }
-
-    public function uploadFile()
-    {
-        $func = input('func');
-        $path = input('path', 'temp');
-        $info = array(
-            'num'       => input('num'),
-            'title'     => '',
-            'upload'    => url('api/Ueditor/imageUp', array('savepath' => $path, 'pictitle' => 'banner', 'dir' => 'images')),
-            'fileList'  => url('api/File/lists', array('path' => $path)),
-            'size'      => '4M',
-            'type'      => 'zip,rar,tar,gz,7z,doc,docx,txt,xml',
-            'input'     => input('input'),
-            'func'      => $func,
-        );
-
-        $this->assign('info', $info);
-        echo $this->fetch();
     }
 
     public function delFile()
@@ -216,6 +260,11 @@ class Uploadfile extends Base
         } else {
             die('{"jsonrpc" : "2.0", "error" : {"code": 100, "message": "un recoginized source"}}');
         }
+    }
+
+    private function analysisUploadParame($parame = '')
+    {
+        return (!empty($parame) && is_string($parame)) ? unserialize(string_encryption_decrypt(urlsafe_b64decode($parame),'DECODE')) : [];
     }
 }
 ?>

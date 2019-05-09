@@ -12,7 +12,7 @@ namespace app\api\controller;
 
 use app\common\controller\Base;
 
-class Upload extends Base
+class CourseClass extends Base
 {
     //接口构造
     public function __construct(){
@@ -75,36 +75,6 @@ class Upload extends Base
         //执行接口调用
         return $this->execApi($parame);
     }
-
-    /*api:f4a1c26f65b071cd7abb7537fc335e0c*/
-    /**
-     * H5单图上传
-     * @access public
-     * @param  [array] $parame 扩展参数
-     * @return [json]          接口数据输出
-    */
-    public function uploadImgForH5($parame = [])
-    {
-        //执行接口调用
-        return $this->execApi($parame);
-    }
-
-    /*api:f4a1c26f65b071cd7abb7537fc335e0c*/
-
-    /*api:51af390161a18f647760fc7e58fbadf7*/
-    /**
-     * 图片上传接口
-     * @access public
-     * @param  [array] $parame 扩展参数
-     * @return [json]          接口数据输出
-    */
-    public function uploadData($parame = [])
-    {
-        //执行接口调用
-        return $this->execApi($parame);
-    }
-
-    /*api:51af390161a18f647760fc7e58fbadf7*/
 
     /*接口扩展*/
 }

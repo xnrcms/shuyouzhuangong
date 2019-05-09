@@ -9,7 +9,7 @@ class DeviceToolkit
      *
      * @return bool
      */
-    public function isMobileClient()
+    public static function isMobileClient()
     {
         // 如果有HTTP_X_WAP_PROFILE则一定是移动设备
         if (isset($_SERVER['HTTP_X_WAP_PROFILE'])) {
@@ -49,7 +49,7 @@ class DeviceToolkit
         return false;
     }
 
-    public function getMobileDeviceType($userAgent)
+    public static function getMobileDeviceType($userAgent)
     {
         $userAgent = strtolower($userAgent);
 
@@ -67,7 +67,7 @@ class DeviceToolkit
         return 'unknown';
     }
 
-    public function getBrowse()
+    public static function getBrowse()
     {
         if (!isset($_SERVER['HTTP_USER_AGENT'])) {
             return '未知浏览器';
@@ -132,7 +132,7 @@ class DeviceToolkit
         return $exp[0].'('.$exp[1].')';
     }
 
-    public function getOperatingSystem()
+    public static function getOperatingSystem()
     {
         if (!isset($_SERVER['HTTP_USER_AGENT'])) {
             return '未知操作系统';

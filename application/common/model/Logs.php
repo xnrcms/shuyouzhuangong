@@ -67,9 +67,6 @@ class Logs extends Base
 		$message 		= (isset($parame['message']) && !empty($parame['message'])) ? $parame['message'] : '';
 		$data 			= (isset($parame['data']) && !empty($parame['data'])) ? $parame['data'] : '';
 		$uid 			= isset($parame['uid']) ? intval($parame['uid']) : 0;
-
-		$DeviceToolkit 	= new \xnrcms\DeviceToolkit();
-		
 		$updata 		= 
     	[
             'module' 			=> $module,
@@ -79,9 +76,9 @@ class Logs extends Base
             'data' 				=> empty($data) ? '' : $data,
             'uid' 				=> $uid,
             'ip' 				=> request()->ip(),
-            'browser' 			=> $DeviceToolkit->getBrowse(),
-            'operating_system' 	=> $DeviceToolkit->getOperatingSystem(),
-            'device' 			=> $DeviceToolkit->isMobileClient() ? 'mobile' : 'computer',
+            'browser' 			=> \xnrcms\DeviceToolkit::getBrowse(),
+            'operating_system' 	=> \xnrcms\DeviceToolkit::getOperatingSystem(),
+            'device' 			=> \xnrcms\DeviceToolkit::isMobileClient() ? 'mobile' : 'computer',
             'user_agent' 		=> request()->header()['user-agent'],
             'create_time' 		=> time(),
             'level' 			=> $level,

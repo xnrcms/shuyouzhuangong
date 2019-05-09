@@ -1,8 +1,8 @@
-function GetUploadify(uploadUrl)
+function GetUploadify(uploadUrl,title)
 {
     layer.open({
         type: 2,
-        title: '上传图片',
+        title: !title ? '上传图片' : title,
         shadeClose: true,
         shade: false,
         maxmin: true, //开启最大化最小化按钮
@@ -10,23 +10,28 @@ function GetUploadify(uploadUrl)
         content: uploadUrl
     });
 }
-function call_img_back(input,fileurl_tmp,fileurl_ids){
 
-	if(typeof fileurl_ids =='object' && typeof fileurl_tmp == 'object'){
-
+function call_img_back(input,fileurl_tmp,fileurl_ids)
+{
+	if(typeof fileurl_ids =='object' && typeof fileurl_tmp == 'object')
+    {
 	    //循环显示图片
 		var imgs = '';
 		var imgids = '' ;
 
-		for (var i=0 ; i< fileurl_tmp.length ; i++){
+		for (var i=0 ; i< fileurl_tmp.length ; i++)
+        {
             imgs += "<div class='c-img-box'>"
             imgs += "<span class='close' data-id="+fileurl_ids[i]+">X</span>"
 			imgs += "<img height='150px' src="+fileurl_tmp[i]+">" ;
             imgs += "</div>"
 		}
-        for (var i=0 ; i< fileurl_ids.length ; i++){
+
+        for (var i=0 ; i< fileurl_ids.length ; i++)
+        {
              imgids += fileurl_ids[i]+',';
         }
+
         imgids = imgids.substr(0,imgids.length-1) ;
 
         $("#image_"+input).parent().append(imgs) ;
@@ -49,22 +54,24 @@ function call_img_back(input,fileurl_tmp,fileurl_ids){
             $("input[name='"+input+"']").val(id) ;
 
         });
+
         var oldimgids = $("input[name='"+input+"']").val() ;
-        if(oldimgids != ''){
+        if(oldimgids != '')
+        {
             imgids=oldimgids+','+imgids ;
 		}
+
         $("input[name='"+input+"']").val(imgids) ;
 	}else{
         $("#image_"+input).attr('src',fileurl_tmp) ;
         $("input[name='"+input+"']").val(fileurl_ids) ;
 	}
-
 }
 
-function call_file_back(input,fileurl_ids,fileurl_type,fileurl_name){
-
-    if(typeof fileurl_ids =='object' && typeof fileurl_tmp == 'object'){
-
+function call_file_back(input,fileurl_ids,fileurl_type,fileurl_name)
+{
+    if(typeof fileurl_ids =='object' && typeof fileurl_tmp == 'object')
+    {
         //循环显示图片
         var imgs = '';
         var imgids = '' ;
@@ -100,10 +107,12 @@ function call_file_back(input,fileurl_ids,fileurl_type,fileurl_name){
             $("input[name='"+input+"']").val(id) ;
 
         });
+
         var oldimgids = $("input[name='"+input+"']").val() ;
         if(oldimgids != ''){
             imgids=oldimgids+','+imgids ;
         }
+
         $("input[name='"+input+"']").val(imgids) ;
     }else{
         $("#image_"+input).attr('src','/3.0/package/webuploader/images/'+fileurl_type+'.png') ;

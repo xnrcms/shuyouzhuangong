@@ -220,6 +220,8 @@ class DevTpl
                     $formFields[$index]['default']['type'] = $default[0];
                     $formFields[$index]['default']['parame'] = count($arr)>1 ? $parame : $default[1];
                 }
+            }else{
+              $formFields[$index]['default']    = isset($default[0]) ? $default[0] : '';
             }
         }
 

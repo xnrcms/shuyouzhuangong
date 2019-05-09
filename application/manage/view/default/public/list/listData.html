@@ -49,6 +49,7 @@ $theadCount  = count($listNode['thead']);
                 {/case}
                 {case select}{/*枚举类型*/}
                     <div>
+                        {if condition="isset($vo['default']['type'])"}
                         <select name="{$vo.tag}" {$vo.attr} onChange="CommonJs.quickEdit(this,'{:url("quickEdit")}','{$vo.tag}','{$list.id}');">
                             {if condition="$vo['default']['type'] eq 'string'"}
                                 {volist name="vo.default.parame" id="pa"}
@@ -60,9 +61,11 @@ $theadCount  = count($listNode['thead']);
                                 {/volist}
                             {/if}
                         </select>
+                        {else /}无枚举选择项{/if}
                     </div>
                 {/case}
                 {case bool}{/*布尔类型*/}
+                    {if condition="isset($vo['default']['parame'][1]) && isset($vo['default']['parame'][2])"}
                     <div data-yes="{$vo['default']['parame'][1]}" data-no="{$vo['default']['parame'][2]}">
                     {if condition='$list[$vo["tag"]] eq $vo["default"]["parame"][1]'}
                       <span class="yes" onClick="CommonJs.quickEdit(this,'{:url("quickEdit")}','{$vo.tag}','{$list.id}');" >
@@ -72,6 +75,7 @@ $theadCount  = count($listNode['thead']);
                       <i class="fa fa-ban"></i>{$vo['default']['parame'][2]}</span>
                     {/if}
                     </div>
+                    {else /}<div>无布尔选择项</div>{/if}
                 {/case}
                 {defalut /}
                 {$list[$vo['tag']]}

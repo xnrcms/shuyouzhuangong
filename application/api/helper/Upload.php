@@ -272,98 +272,13 @@ class Upload extends Base
                 $this->bucket_manager->delete($this->oss_bucket,$finfo['path']);
             }
         }
-        wr($id);
+
         //...
         //执行删除操作
         $delCount               = $dbModel->delData($id);
 
         return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['count'=>$delCount]];
     }
-
-    /*api:ae7ee4e7785682324a198e14887e98f6*/
-    /**
-     * * 图片上传接口
-     * @param  [array] $parame 接口参数
-     * @return [array]         接口输出数据
-     */
-    private function uploadImg($parame)
-    {
-        if(!empty($this->upload_error)) return $this->upload_error;
-        //主表数据库模型
-        $dbModel                = model($this->mainTable);
-
-        //自行书写业务逻辑代码
-        //获取有关图片上传的设置
-        $config             = ['size'=> $this->upload_size*1024*1024,'ext'=>$this->upload_itype] ;
-
-        //获取表单上传的文件
-        $files              = request()->file($parame['fileName']) ;
-        $re                 = [];
-
-        if(empty($files)) return ['Code'=>'200001' , 'Msg' => lang('200001')] ;
-
-        foreach ($files as $file) {
-            //上传文件验证
-            $info               = $file->validate($config)->rule('formatUploadFileName') -> move($this->imgUploadRoot) ;
-
-            if($info === false){
-                return ['Code' =>'200002' , 'Msg' => lang('200002',[$file->getError()])] ;
-            }else{
-
-                $path                  = trim($this->imgUploadRoot,'.') . $info->getSaveName();
-                $url                   = trim($this->imgUploadRoot,'.') . $info->getSaveName();
-
-                if ($this->upload_method == 2 && !empty($this->upload_manager)) 
-                {
-                    $file_path      = '.'.$path;
-                    $cfile          = file_get_contents($file_path);
-                    $res            = $this->upload_manager->putObject($this->oss_bucket, $file_path, $cfile);
-                }
-                else if ($this->upload_method == 3 && !empty($this->upload_manager))
-                {   
-                    $file_name         = 'admin/'.$info->getSaveName() ;
-                    $file_path         = '.'.$path;
-                    $oss_upload_info   = $this->upload_manager->putFile($this->oss_token,$file_name,$file_path);
-                    $url               = $this->oss_endpoint.'/'.$oss_upload_info[0]['key'];
-                    $path              = $oss_upload_info[0]['key'];
-
-                    if (file_exists($file_path)) unlink($file_path);
-                }
-                
-                $finfo                      = $info->getInfo();
-                unset($finfo['tmp_name']);
-                unset($finfo['error']);
-
-                $saveData                   = array() ;
-                $saveData['path']           = $path;
-                $saveData['imgurl']         = $url;
-                $saveData['tags']           = isset($parame['tags']) ? $parame['tags'] : '';
-                $saveData['img_type']       = $this->upload_method;
-                $saveData['infos']          = json_encode($finfo);
-                $saveData['create_time']    = time();
-
-                $Picture                    = model($this->mainTable);
-                $res                        = $Picture->addData($saveData) ;
-
-                $re[]                       = $Picture -> getOneById($Picture->id) -> toArray() ;
-            }
-        }
-
-        $data                               = [];
-        if (!empty($re)) {
-            
-            foreach ($re as $index => $item) {
-                $url       = $item['img_type'] == 1 ? request()->domain().$item['path'] : $item['path'] ;
-                $data['lists'][$index]  = ['id'=>$item['id'],'path'=>$item['path']];
-            }
-        }
-
-        $data['total'] = count($re) ;
-
-        return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['data'=>json_encode($data)]];
-    }
-
-    /*api:ae7ee4e7785682324a198e14887e98f6*/
 
     /*api:f4a1c26f65b071cd7abb7537fc335e0c*/
     /**
@@ -441,6 +356,110 @@ class Upload extends Base
     }
 
     /*api:f4a1c26f65b071cd7abb7537fc335e0c*/
+
+    /*api:51af390161a18f647760fc7e58fbadf7*/
+    /**
+     * * 图片上传接口
+     * @param  [array] $parame 接口参数
+     * @return [array]         接口输出数据
+     */
+    private function uploadData($parame)
+    {
+        set_time_limit(5 * 60);
+        
+        if(!empty($this->upload_error)) return $this->upload_error;
+        //主表数据库模型
+        $dbModel                = model($this->mainTable);
+
+        //读取上传配置，如果有 以传过来的配置为准
+        $config                 = (isset($parame['config']) && !empty($parame['config']) && is_json($parame['config'])) ? json_decode($parame['config'],true) : [];
+
+        $upload_type            = isset($config['type']) ? $config['type'] : '';
+        $upload_size            = isset($config['size']) ? intval($config['size']) : 0;
+        $upload_ext             = isset($config['ext']) ? $config['ext'] : '';
+        
+        if ($upload_type === 'Image')
+        {
+            $upload_ext         = !empty($upload_ext) ? $upload_ext : $this->upload_itype;
+            $upload_size        = $upload_size > 0 ? $upload_size : $this->upload_size;
+        }elseif($upload_type === 'File'){
+            $upload_ext         = !empty($upload_ext) ? $upload_ext : $this->upload_ftype;
+            $upload_size        = $upload_size > 0 ? $upload_size : 2;
+        }
+
+        //自行书写业务逻辑代码
+        //获取有关图片上传的设置
+        $config             = ['size'=> $upload_size * 1024 * 1024,'ext'=>$upload_ext] ;
+        wr($_FILES);
+        //获取表单上传的文件
+        $files              = request()->file($parame['fileName']) ;
+        $re                 = [];
+
+        if(empty($files)) return ['Code'=>'200001' , 'Msg' => lang('200001')] ;
+
+        foreach ($files as $file)
+        {
+            //上传文件验证
+            $info    = $file->validate($config)->rule('formatUploadFileName') -> move($this->imgUploadRoot) ;
+
+            if($info === false){
+                return ['Code' =>'200002' , 'Msg' => lang('200002',[$file->getError()])] ;
+            }else{
+
+                $path                  = trim($this->imgUploadRoot,'.') . $info->getSaveName();
+                $url                   = trim($this->imgUploadRoot,'.') . $info->getSaveName();
+
+                if ($this->upload_method == 2 && !empty($this->upload_manager)) 
+                {
+                    $file_path      = '.'.$path;
+                    $cfile          = file_get_contents($file_path);
+                    $res            = $this->upload_manager->putObject($this->oss_bucket, $file_path, $cfile);
+                }
+                else if ($this->upload_method == 3 && !empty($this->upload_manager))
+                {   
+                    $file_name         = 'admin/'.$info->getSaveName() ;
+                    $file_path         = '.'.$path;
+                    $oss_upload_info   = $this->upload_manager->putFile($this->oss_token,$file_name,$file_path);
+                    $url               = $this->oss_endpoint.'/'.$oss_upload_info[0]['key'];
+                    $path              = $oss_upload_info[0]['key'];
+
+                    if (file_exists($file_path)) unlink($file_path);
+                }
+                
+                $finfo                      = $info->getInfo();
+                unset($finfo['tmp_name']);
+                unset($finfo['error']);
+
+                $saveData                   = array() ;
+                $saveData['path']           = $path;
+                $saveData['imgurl']         = $url;
+                $saveData['tags']           = isset($parame['tags']) ? $parame['tags'] : '';
+                $saveData['img_type']       = $this->upload_method;
+                $saveData['infos']          = json_encode($finfo);
+                $saveData['create_time']    = time();
+
+                $Picture                    = model($this->mainTable);
+                $res                        = $Picture->addData($saveData) ;
+
+                $re[]                       = $Picture -> getOneById($Picture->id) -> toArray() ;
+            }
+        }
+
+        $data                               = [];
+        if (!empty($re)) {
+            
+            foreach ($re as $index => $item) {
+                $url       = $item['img_type'] == 1 ? request()->domain().$item['path'] : $item['path'] ;
+                $data['lists'][$index]  = ['id'=>$item['id'],'path'=>$item['path']];
+            }
+        }
+
+        $data['total'] = count($re) ;
+
+        return ['Code' => '000000', 'Msg'=>lang('000000'),'Data'=>['data'=>json_encode($data)]];
+    }
+
+    /*api:51af390161a18f647760fc7e58fbadf7*/
 
     /*接口扩展*/
 

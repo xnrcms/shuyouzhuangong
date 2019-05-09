@@ -68,14 +68,14 @@ function call_img_back(input,fileurl_tmp,fileurl_ids)
 	}
 }
 
-function call_file_back(input,fileurl_ids,fileurl_type,fileurl_name)
+function call_file_back(input,fileurl_tmp,fileurl_ids)
 {
     if(typeof fileurl_ids =='object' && typeof fileurl_tmp == 'object')
     {
-        //循环显示图片
+        //后期扩展多个文件显示
+        /*//循环显示图片
         var imgs = '';
         var imgids = '' ;
-
         for (var i=0 ; i< fileurl_tmp.length ; i++){
             imgs += "<div class='c-img-box'>"
             imgs += "<span class='close' data-id="+fileurl_ids[i]+">X</span>"
@@ -99,7 +99,6 @@ function call_file_back(input,fileurl_ids,fileurl_type,fileurl_name)
 
             for (var i=0 ; i<imgbox.length ; i++ ){
                 id += imgbox.eq(i).find('span').attr('data-id')+',' ;
-
             }
 
             id = id.substr(0,id.length-1) ;
@@ -113,9 +112,29 @@ function call_file_back(input,fileurl_ids,fileurl_type,fileurl_name)
             imgids=oldimgids+','+imgids ;
         }
 
-        $("input[name='"+input+"']").val(imgids) ;
+        $("input[name='"+input+"']").val(imgids) ;*/
     }else{
-        $("#image_"+input).attr('src','/3.0/package/webuploader/images/'+fileurl_type+'.png') ;
+        var ext             = fileurl_tmp.split('.');
+            ext             = ext[ext.length - 1];
+        var src_path        = '/3.0/package/webuploader/images/'+ext+'.png';
+        if (!CheckImgExists(src_path))
+        {
+            src_path        = '/3.0/package/webuploader/images/def.png';
+        }
+
+        $("#image_"+input).attr("width","150").attr('src',src_path) ;
         $("input[name='"+input+"']").val(fileurl_ids) ;
     }
 }
+
+function CheckImgExists(imgurl) 
+{  
+    var ImgObj = new Image(); //判断图片是否存在  
+    ImgObj.src = imgurl;  
+    //没有图片，则返回-1  
+    if (ImgObj.fileSize > 0 || (ImgObj.width > 0 && ImgObj.height > 0)) {  
+        return true;  
+    } else {  
+        return false;
+    }  
+} 

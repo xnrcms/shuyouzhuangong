@@ -366,7 +366,7 @@ class Upload extends Base
     private function uploadData($parame)
     {
         set_time_limit(5 * 60);
-        
+
         if(!empty($this->upload_error)) return $this->upload_error;
         //主表数据库模型
         $dbModel                = model($this->mainTable);
@@ -390,13 +390,13 @@ class Upload extends Base
         //自行书写业务逻辑代码
         //获取有关图片上传的设置
         $config             = ['size'=> $upload_size * 1024 * 1024,'ext'=>$upload_ext] ;
-        wr($_FILES);
+
         //获取表单上传的文件
         $files              = request()->file($parame['fileName']) ;
         $re                 = [];
-
+        wr([lang('200001')]);
         if(empty($files)) return ['Code'=>'200001' , 'Msg' => lang('200001')] ;
-
+        wr(['sss2']);
         foreach ($files as $file)
         {
             //上传文件验证

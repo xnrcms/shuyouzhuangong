@@ -28,8 +28,8 @@ if(isset($info[$form['tag']]) && !empty($info[$form['tag']]) && is_string($info[
 		{$form.title}
 	</dt>
 	<dd class="opt">
-		<div class="upload-images" onclick="GetUploadify('{$uploadUrl}','单图上传');">
-			<img id="image_{$form.tag}" width="150px" src="{$imagePath}" alt="" >
+		<div class="upload-images">
+			<img id="image_{$form.tag}" width="150px" src="{$imagePath}" alt="单图上传" onclick="GetUploadify('{$uploadUrl}','单图上传');">
 		</div>
 		<input type="hidden" name="{$form.tag}" value="{$imageId}">
 		<p class="notic">{$form.notice|raw}</p>

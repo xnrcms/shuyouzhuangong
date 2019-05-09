@@ -337,13 +337,17 @@ $(function() {
 		});
 
 		uploader.on( 'uploadSuccess', function( file,data) {
-		    $( '#'+file.id ).addClass('upload-state-done');
+			var liObj 		= $( '#'+file.id );
+
+		    liObj.addClass('upload-state-done file');
+
 		    var jsonData 	= data.data;
 			if(data.code == 1 && jsonData.total > 0){
 				var nopic 	= '/3.0/package/webuploader/images/nopic.png';
 				var data 	= jsonData.lists[0] ;
 				var ext 	= data.path.split('.');
 	                ext 	= ext[ext.length - 1];
+
 				var sLi 	= "";
 					sLi += '<li class="img '+file.id+'">';
 					sLi += '<img src="' + data.url + '" width="100" height="100" onerror="this.src='+nopic+'">';
@@ -355,9 +359,10 @@ $(function() {
 					sLi += '</li>';
 
 					$(".fileWarp ul").append(sLi);
-					$('#'+file.id ).append('<div class="file-panel" style="height:0px;"><span class="cancel" data-img="'+data.url+'" onclick="Manager.del(this,'+data.id+');">删除</span></div>');
-					$('#'+file.id ).hover(function(){
-					$('#'+file.id ).find('.file-panel').css('height','30px');
+					liObj.append('<div class="file-panel" style="height:0px;"><span class="cancel" data-img="'+data.path+'" onclick="Manager.del(this,'+data.id+');">删除</span></div>');
+					liObj.append('<div class="img file-global file-'+ext+'" title="'+data.path+'"><span class="icon"></span></div>');
+					liObj.hover(function(){
+							liObj.find('.file-panel').css('height','30px');
 					},function(){
 						$( '#'+file.id ).find('.file-panel').css('height','0px');
 					});

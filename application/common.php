@@ -642,6 +642,28 @@ if (!function_exists('format_imgid'))
 }
 
 /**
+ * 格式文件ID
+ * @param  string  	$value  	需要格式化的数据
+ * @param  array 	$parame  	附属参数
+ * @param  string 	$extends  	扩展参数
+ * @return string             	格式化后的数据
+ */
+if (!function_exists('format_fileid'))
+{
+	function format_fileid($value,$parame=[],$extends='')
+	{
+		$ext 			= trim(strrchr(get_cover($value,'path'),'.'),'.');
+		$file_path 		= '/3.0/package/webuploader/images/' . $ext . '.png';
+
+		if (!file_exists(Env::get('root_path') . 'public/' .$file_path)) {
+			$file_path 	= '/3.0/package/webuploader/images/def.png';
+		}
+		
+		return json_encode([$value,trim(get_domain(),'/') . $file_path]);
+	}
+}
+
+/**
  * 格式空值
  * @param  string  	$value  	需要格式化的数据
  * @param  array 	$parame  	附属参数

@@ -95,7 +95,7 @@
             "filelistPah":"{$info.fileList}",
             "delPath":"{$info.delPath}",
             "chunked":false,
-            "chunkSize":524288,
+            "chunkSize":124288,
             "fileNumLimit":"{$info.num}",
             "delFileUrl":"{:url('Uploadfile/delFile')}",
             "fileSizeLimit":parseInt("{$info.size}") * parseInt("{$info.num}"),
@@ -118,7 +118,7 @@
             var input = "{$info.input}" ;
             var num = "{$info.num}";
             var fileurl_tmp = [];
-            var fileurl_ids = [] ;
+            var fileurl_ids = [];
             if(callback != "undefined"){
                 if(num > 1){
                     $("input[name^='file_tmp']").each(function(index,dom){

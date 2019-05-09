@@ -121,7 +121,6 @@ class CourseClass extends Base
             {
                 $data[$k]['status']         = $status[$v['status']];
                 $data[$k]['types']          = $types[$v['types']];
-                $data[$k]['is_pay']         = $is_pay[$v['is_pay']];
                 $data[$k]['sorts']          = lang('text_class_number',[$v['sorts']]);
                 $data[$k]['create_time']    = date('Y-m-d H:i:s',$v['create_time']);
                 $data[$k]['update_time']    = date('Y-m-d H:i:s',$v['update_time']);
@@ -148,6 +147,14 @@ class CourseClass extends Base
 
         //自行定义入库数据 为了防止参数未定义报错，先采用isset()判断一下
         $saveData                   = [];
+        $saveData['title']          = isset($parame['title']) ? trim($parame['title']) : '';
+        $saveData['types']          = isset($parame['types']) ? (int)($parame['types']) : 0;
+        $saveData['sorts']          = isset($parame['sorts']) ? (int)($parame['sorts']) : 0;
+        $saveData['fileid']         = isset($parame['fileid']) ? (int)($parame['fileid']) : 0;
+        $saveData['status']         = isset($parame['status']) ? (int)($parame['status']) : 2;
+        $saveData['play_time']      = isset($parame['play_time']) ? (int)($parame['play_time']) : 0;
+        $saveData['is_pay']         = isset($parame['is_pay']) ? (int)($parame['is_pay']) : 0;
+        $saveData['update_time']    = time();
         //$saveData['parame']         = isset($parame['parame']) ? $parame['parame'] : '';
 
         //规避遗漏定义入库数据
@@ -159,7 +166,8 @@ class CourseClass extends Base
         //通过ID判断数据是新增还是更新 定义新增条件下数据
     	if ($id <= 0)
         {
-            //$saveData['parame']         = isset($parame['parame']) ? $parame['parame'] : '';
+            $saveData['create_time']        = time();
+            $saveData['course_id']          = isset($parame['course_id']) ? (int)($parame['course_id']) : 0;
     	}
 
     	$info                                       = $dbModel->saveData($id,$saveData);

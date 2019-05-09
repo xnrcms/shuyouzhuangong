@@ -52,6 +52,8 @@ class CourseClass extends Base
         $search     = $this->getSearchParame($param);
         $isTree     = 0;
 
+        $this->extends_param        .= '&course_id=' . $param['id'] . '&';
+        
         //页面操作功能菜单
         $topMenu    = formatMenuByPidAndPos($menuid,2, $this->menu);
         $rightMenu  = formatMenuByPidAndPos($menuid,3, $this->menu);
@@ -135,6 +137,7 @@ class CourseClass extends Base
 
         //数据详情
         $info                           = $this->getDetail(0);
+        $info['course_id']              = isset($info['course_id']) ? $info['course_id'] : $param['course_id'];
 
         //页面头信息设置
         $pageData['isback']             = 0;
@@ -176,6 +179,7 @@ class CourseClass extends Base
 
         //数据详情
         $info                           = $this->getDetail($id);
+        $info['course_id']              = isset($info['course_id']) ? $info['course_id'] : $param['course_id'];
 
         //页面头信息设置
         $pageData['isback']             = 0;

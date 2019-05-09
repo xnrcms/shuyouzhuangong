@@ -18,7 +18,7 @@ if(isset($info[$form['tag']]) && !empty($info[$form['tag']]) && is_string($info[
 {
     $imageStr   = json_decode($info[$form['tag']]);
     $imageId  	= isset($imageStr[0]) ? $imageStr[0] : 0;
-    $imagePath  = isset($imageStr[1]) ? $imageStr[1] : $imagePath;
+    $imagePath  = (isset($imageStr[1]) && !empty($imageStr[1])) ? $imageStr[1] : $imagePath;
 }
 {/php}
 <dl class="row" id="id_{$form.tag}" data-msg="请上传{$form.title}">
@@ -29,9 +29,9 @@ if(isset($info[$form['tag']]) && !empty($info[$form['tag']]) && is_string($info[
 	</dt>
 	<dd class="opt">
 		<div class="upload-images">
-			<img id="image_{$form.tag}" width="150px" src="/3.0/package/webuploader/images/image.png" alt="" onclick="GetUploadify('{$uploadUrl}','文件上传','{$form.default}');">
+			<img id="image_{$form.tag}" width="150px" src="{$imagePath}" alt="文件上传" onclick="GetUploadify('{$uploadUrl}','文件上传','{$form.default}');">
 		</div>
-		<input type="hidden" name="{$form.tag}" value="" {$form.attr|raw}>
+		<input type="hidden" name="{$form.tag}" value="{$imageId}">
 		<p class="notic">{$form.notice|raw}</p>
 	</dd>
 </dl>
